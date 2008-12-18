@@ -1,0 +1,79 @@
+CC=gcc
+CFLAGS=-IC:\MinGW\include -IC:\SDL-1.2.13\include\SDL -Wall
+LLIBS=-LC:\MinGW\lib -LC:\SDL-1.2.13\lib
+LFLAGS=-lmingw32 -lSDLmain -mwindows -lSDL 
+
+# run
+runwindowed: motrs.exe resource/bmp.dat resource/tile.dat resource/map.dat resource/ani.dat resource/char.dat
+	motrs.exe --windowed --testmap test.map
+
+run: motrs.exe resource/bmp.dat resource/tile.dat resource/map.dat resource/ani.dat resource/char.dat
+	motrs.exe
+
+# get ready to run
+playtest: motrs.exe resource/bmp.dat resource/tile.dat resource/map.dat resource/ani.dat resource/char.dat
+
+# link
+motrs.exe: src/motrs.o src/gameplay.o src/resource.o src/debug.o
+	$(CC) $(LLIBS) src/motrs.o src/gameplay.o src/resource.o src/debug.o -o motrs.exe $(LFLAGS) 
+
+# compile
+src/motrs.o: src/motrs.c
+	$(CC) $(CFLAGS) -c src/motrs.c -o src/motrs.o
+
+src/gameplay.o: src/gameplay.c src/gameplay.h
+	$(CC) $(CFLAGS) -c src/gameplay.c -o src/gameplay.o
+
+src/resource.o: src/resource.c src/resource.h
+	$(CC) $(CFLAGS) -c src/resource.c -o src/resource.o
+
+src/debug.o: src/debug.c src/debug.h
+	$(CC) $(CFLAGS) -c src/debug.c -o src/debug.o
+
+
+# resources
+
+resource/bmp.dat: resource/bitmaps/**
+	del resource\bmp.dat
+	tools\sjsresource.exe resource\bitmaps resource\bmp.dat
+
+resource/tile.dat: resource/tiles/**
+	del resource\tile.dat
+	tools/sjsresource.exe resource/tiles resource/tile.dat
+
+resource/map.dat: resource/maps/**
+	del resource\map.dat
+	tools/sjsresource.exe resource/maps resource/map.dat
+
+resource/ani.dat: resource/animations/**
+	del resource\ani.dat
+	tools/sjsresource.exe resource/animations resource/ani.dat
+
+resource/char.dat: resource/characters/**
+	del resource\char.dat
+	tools/sjsresource.exe resource/characters resource/char.dat
+
+
+# compiling text formats to binary formats
+
+resource/animations/**: animations/**
+	perl tools/compile_animations.pl
+
+resource/tiles/**: tiles/**
+	perl tools/compile_props.pl tiles resource/tiles
+
+resource/characters/**: characters/**
+	perl tools/compile_props.pl characters resource/characters
+
+# clean
+
+clean:
+	del motrs.exe
+	del motrs
+	del src\*.o
+	del resource\*.dat
+	del resource\animations\*.ani
+	del resource\tiles\*.tile
+	del resource\characters\*.char
+	
+

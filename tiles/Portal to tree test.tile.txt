@@ -1,0 +1,2 @@
+visible=false
+portal=tree test.map, 13, 5

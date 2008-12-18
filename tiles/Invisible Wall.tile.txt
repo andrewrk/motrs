@@ -1,0 +1,2 @@
+obstacle=true
+visible=false

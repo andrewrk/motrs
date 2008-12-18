@@ -1,0 +1,2 @@
+visible=false
+portal=house1.map, 3, 7

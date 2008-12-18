@@ -1,0 +1,3 @@
+alphacolor=255,0,255
+frames=1
+delay=2

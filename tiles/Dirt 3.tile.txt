@@ -1,0 +1,2 @@
+bitmap=Dirt Tile 3.bmp
+alpha=none

@@ -1,0 +1,9 @@
+# directions: NW, W, SW, N, center, S, NE, E, SE
+walking=sonic_run_nw.ani,sonic_run_west.ani,sonic_run_sw.ani,sonic_run_north.ani,null,sonic_run_south.ani,sonic_run_ne.ani,sonic_run_east.ani,sonic_run_se.ani
+running=sonic_run_nw.ani,sonic_run_west.ani,sonic_run_sw.ani,sonic_run_north.ani,null,sonic_run_south.ani,sonic_run_ne.ani,sonic_run_east.ani,sonic_run_se.ani
+standing=sonic_stand_nw.ani,sonic_stand_west.ani,sonic_stand_sw.ani,sonic_stand_north.ani,null,sonic_stand_south.ani,sonic_stand_ne.ani,sonic_stand_east.ani,sonic_stand_se.ani
+feetoffsetx=4
+feetoffsety=30
+feetwidth=20
+feetheight=10
+speed=8

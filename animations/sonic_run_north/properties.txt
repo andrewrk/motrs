@@ -1,0 +1,3 @@
+alphacolor=9,194,255
+frames=12
+delay=1
