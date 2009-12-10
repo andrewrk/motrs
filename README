@@ -1,0 +1,15 @@
+= Myth of the Ruby Sword Development =
+
+Wiki: http://superjoe.zapto.org:8888/trac/motrs/
+
+
+Installation on Linux 
+
+    mkdir build
+    cd build/
+    cmake ../ 
+
+Cross compilation for Windows
+
+    <TODO>
+
