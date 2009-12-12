@@ -37,13 +37,13 @@ typedef struct {
 	Uint32 colorKey;
 	char useColorKey; //boolean
 	char obstacle; //boolean
-	enum GroundType ground;
+	int ground;
 	mapLink* portal;
 } tile;
 
 typedef struct {
 	animation* curAnimation;
-	enum AnimationDirection facing;
+	int facing;
 	
 	animation** walking;
 	animation** running;
@@ -77,14 +77,19 @@ typedef struct {
 char* readCStr(int* buffer );
 void advanceStrPtr(int** ptr);
 
-char* getBufferFromOpenResourceFile(FILE* rf, char* resourceName, int* filesize);
-char* getBufferFromResource(char* resourceFile, char* resourceName, int* filesize);
+char* getBufferFromOpenResourceFile(FILE* rf, const char* resourceName, int* filesize);
+char* getBufferFromResource(const char* resourceFile, const char* resourceName, int* filesize);
 
-SDL_Surface* loadResBMP(char* filename, char* bmpresfile );
-tile* loadResTile(char* filename, char* tileresfile, char* aniresfile, char* bmpresfile, SDL_Surface* screen);
-map* loadResMap(char* filename, char* mapresfile, char* tileresfile, char* bmpresfile, char* aniresfile, SDL_Surface* screen);
-animation* loadResAnimation(char* filename, char* aniresfile, SDL_Surface* screen);
-character* loadResCharacter(char* filename, char* charresfile, char* aniresfile, SDL_Surface* screen);
+SDL_Surface* loadResBMP(const char* filename, const char* bmpresfile );
+tile* loadResTile(const char* filename, const char* tileresfile,
+    const char* aniresfile, const char* bmpresfile, SDL_Surface* screen);
+map* loadResMap(const char* filename, const char* mapresfile,
+    const char* tileresfile, const char* bmpresfile,
+    const char* aniresfile, SDL_Surface* screen);
+animation* loadResAnimation(const char* filename, const char* aniresfile,
+    SDL_Surface* screen);
+character* loadResCharacter(const char* filename, const char* charresfile,
+    const char* aniresfile, SDL_Surface* screen);
 
 
 void deallocanimation(animation* a);

@@ -253,7 +253,7 @@ void enterSquare(character* ch, Coord* loc){
 			ti = curmap->tiles[*squ];
 			if( ti->portal != NULL ){
 				//when the map gets deallocated, the string that we need for the new map will be erased
-				newMapName = malloc( sizeof(char) * (strlen(ti->portal->mapName)+1) );
+				newMapName = (char *)malloc( sizeof(char) * (strlen(ti->portal->mapName)+1) );
 				crashIf(newMapName == NULL, "Unable to malloc map name", NULL);
 				strcpy(newMapName, ti->portal->mapName);
 				

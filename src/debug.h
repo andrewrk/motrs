@@ -3,6 +3,6 @@
 
 
 
-void crashIf(int value, char* msg, char* param);
+void crashIf(int value, const char* msg, const char* param);
 
 #endif

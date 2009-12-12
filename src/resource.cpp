@@ -8,7 +8,7 @@
 #include "debug.h"
 #include "gameplay.h"
 
-character* loadResCharacter(char* filename, char* charresfile, char* aniresfile, SDL_Surface* screen){
+character* loadResCharacter(const char* filename, const char* charresfile, const char* aniresfile, SDL_Surface* screen){
 	int filesize;
 	character* ret;
 	int* ptr;
@@ -26,7 +26,7 @@ character* loadResCharacter(char* filename, char* charresfile, char* aniresfile,
 	resbuffer = getBufferFromResource( charresfile, filename, &filesize);
 	
 	//allocate the character
-	ret = malloc( sizeof(character) );
+	ret = (character*)malloc( sizeof(character) );
 	crashIf(ret == NULL, "Unable to malloc a character", NULL);
 	
 	/*
@@ -44,9 +44,9 @@ character* loadResCharacter(char* filename, char* charresfile, char* aniresfile,
 	
 	//default property values
 	ret->curAnimation = NULL;
-	ret->walking = malloc(sizeof(animation*) * 9);
-	ret->running = malloc(sizeof(animation*) * 9);
-	ret->standing = malloc(sizeof(animation*) * 9);
+	ret->walking = (animation**) malloc(sizeof(animation*) * 9);
+	ret->running = (animation**) malloc(sizeof(animation*) * 9);
+	ret->standing = (animation**) malloc(sizeof(animation*) * 9);
 	crashIf( ret->walking == NULL || ret->running == NULL || ret->standing == NULL, "Unable to malloc animations for ", filename);
 	
 	for(i=0;i<9;i++){
@@ -68,7 +68,7 @@ character* loadResCharacter(char* filename, char* charresfile, char* aniresfile,
 	numProps = ptr++;
 	//printf("about to load %d properties\n",*numProps);
 	for(i=0;i<*numProps;i++){
-		propname = readCStr((void*) ptr);
+		propname = readCStr(ptr);
 		advanceStrPtr(&ptr);
 		
 		
@@ -116,7 +116,7 @@ character* loadResCharacter(char* filename, char* charresfile, char* aniresfile,
 	return ret;
 }
 
-map* loadResMap(char* filename, char* mapresfile, char* tileresfile, char* bmpresfile, char* aniresfile, SDL_Surface* screen){
+map* loadResMap(const char* filename, const char* mapresfile, const char* tileresfile, const char* bmpresfile, const char* aniresfile, SDL_Surface* screen){
 	//create a map structure from resource file
 	char* resbuffer;
 	int filesize;
@@ -132,7 +132,7 @@ map* loadResMap(char* filename, char* mapresfile, char* tileresfile, char* bmpre
 	resbuffer = getBufferFromResource( mapresfile, filename, &filesize);
 	
 	//allocate the map
-	ret = malloc( sizeof(map) );
+	ret = (map*) malloc( sizeof(map) );
 	crashIf(ret == NULL, "Unable to malloc a map", NULL);
 	
 	/*
@@ -155,13 +155,13 @@ map* loadResMap(char* filename, char* mapresfile, char* tileresfile, char* bmpre
 	
 	ret->numTiles = *(ptr++);
 	
-	ret->tiles = malloc( sizeof(tile) * ret->numTiles);
+	ret->tiles = (tile **) malloc( sizeof(tile) * ret->numTiles);
 	crashIf( ret->tiles == NULL, "Unable to malloc tiles for map",NULL);
 	
 	//printf("about to read tile names. num tiles: %d\n", ret->numTiles );
 	for(i=0;i<ret->numTiles;i++){
 		//get tile name
-		tileName = readCStr((void*) ptr);
+		tileName = readCStr(ptr);
 		advanceStrPtr(&ptr);
 		
 		//printf("tile name: %s\n", tileName);
@@ -180,13 +180,14 @@ map* loadResMap(char* filename, char* mapresfile, char* tileresfile, char* bmpre
 	ret->playerLayer = *(ptr++);
 	
 	//squares
-	ret->squares = malloc( sizeof(int**) * ret->height );
+    // this is dumb
+	ret->squares = (int***) malloc( sizeof(int**) * ret->height );
 	crashIf( ret->squares == NULL, "Unable to allocate column in map", NULL);
 	for(y=0;y<ret->height;y++){
-		ret->squares[y] = malloc( sizeof(int*) * ret->width  );
+		ret->squares[y] = (int**) malloc( sizeof(int*) * ret->width  );
 		crashIf(ret->squares[y] == NULL, "Unable to allocate row in map", NULL);
 		for(x=0;x<ret->width;x++){
-			ret->squares[y][x] = malloc( sizeof(int) * ret->numLayers );
+			ret->squares[y][x] = (int*) malloc( sizeof(int) * ret->numLayers );
 			crashIf(ret->squares[y][x] == NULL, "Unable to allocate map sqare", NULL);
 			for(i=0;i<ret->numLayers;i++){
 				ret->squares[y][x][i] = *(ptr++);
@@ -200,8 +201,7 @@ map* loadResMap(char* filename, char* mapresfile, char* tileresfile, char* bmpre
 char* readCStr(int* buffer ){
 	char* ret;
 	
-	
-	ret = malloc( (*buffer+1) * sizeof(char) );
+	ret = (char*) malloc( (*buffer+1) * sizeof(char) );
 	crashIf( ret == NULL, "Unable to malloc string", NULL);
 	
 	memcpy(ret, buffer+1, *buffer);
@@ -215,7 +215,7 @@ void advanceStrPtr(int** ptr){
 	*ptr = (int*) (((char*) (*ptr+1)) + **ptr); //move to after string
 }
 
-tile* loadResTile(char* filename, char* tileresfile, char* aniresfile, char* bmpresfile, SDL_Surface* screen){
+tile* loadResTile(const char* filename, const char* tileresfile, const char* aniresfile, const char* bmpresfile, SDL_Surface* screen){
 	tile* ret;
 	int filesize;
 	char* resbuffer;
@@ -229,7 +229,7 @@ tile* loadResTile(char* filename, char* tileresfile, char* aniresfile, char* bmp
 	filesize = 0;
 	resbuffer = getBufferFromResource(tileresfile, filename, &filesize);
 	
-	ret = malloc(sizeof(tile));
+	ret = (tile*) malloc(sizeof(tile));
 	crashIf( ret == NULL, "Unable to malloc tile", NULL);
 	
 	/*
@@ -260,7 +260,7 @@ tile* loadResTile(char* filename, char* tileresfile, char* aniresfile, char* bmp
 	//printf("this tile has %d properties\n", *numProps);
 	for(i=0;i<*numProps;i++){
 		//printf("prop name length: %d\n",*ptr);
-		propname = readCStr((void*) ptr);
+		propname = readCStr(ptr);
 		advanceStrPtr(&ptr);
 		//printf("property name: %s\n",propname);
 		
@@ -291,7 +291,7 @@ tile* loadResTile(char* filename, char* tileresfile, char* aniresfile, char* bmp
 			ret->visible = *((char*) ptr);
 		} else if( strcmp(propname, "portal") == 0 ) {
 			
-			ret->portal = malloc(sizeof(mapLink));
+			ret->portal = (mapLink *) malloc(sizeof(mapLink));
 			crashIf(ret->portal == NULL, "Unable to malloc memory for portal", NULL);
 			
 			ret->portal->mapName = readCStr( ptr );
@@ -311,7 +311,7 @@ tile* loadResTile(char* filename, char* tileresfile, char* aniresfile, char* bmp
 	return ret;
 }
 
-animation* loadResAnimation(char* filename, char* aniresfile, SDL_Surface* screen){
+animation* loadResAnimation(const char* filename, const char* aniresfile, SDL_Surface* screen){
 	int filesize;
 	char* resbuffer;
 	animation* ret;
@@ -329,7 +329,7 @@ animation* loadResAnimation(char* filename, char* aniresfile, SDL_Surface* scree
 	resbuffer = getBufferFromResource( aniresfile, filename, &filesize);
 	
 	//allocate the animation
-	ret = malloc(sizeof(animation));
+	ret = (animation*)malloc(sizeof(animation));
 	crashIf( ret == NULL, "couldn't malloc an animation*", NULL);
 	
 	//read the memory as a resource file
@@ -363,7 +363,7 @@ animation* loadResAnimation(char* filename, char* aniresfile, SDL_Surface* scree
 			ret->delay = *( ((int*)(ptr+3)) +1  );
 			
 			
-			ret->frames = malloc( ret->numFrames * sizeof(SDL_Surface *) );
+			ret->frames = (SDL_Surface **) malloc( ret->numFrames * sizeof(SDL_Surface *) );
 			crashIf(ret->frames == NULL, "couldn't malloc a SDL_Surface**", NULL );
 			
 		} else if( i-1 < ret->numFrames) {
@@ -392,7 +392,7 @@ animation* loadResAnimation(char* filename, char* aniresfile, SDL_Surface* scree
 }
 
 
-SDL_Surface* loadResBMP(char* filename, char* bmpresfile ){
+SDL_Surface* loadResBMP(const char* filename, const char* bmpresfile ){
 	//get the bitmap's buffer and size from the resource file
 	int filesize;
 	char* buffer;
@@ -423,7 +423,7 @@ SDL_Surface* loadResBMP(char* filename, char* bmpresfile ){
 	return image;
 }
 
-char* getBufferFromOpenResourceFile(FILE* rf, char* resourceName, int* filesize){
+char* getBufferFromOpenResourceFile(FILE* rf, const char* resourceName, int* filesize){
 	//remember beginning of file
 	long int start;
 	int fail;
@@ -474,7 +474,7 @@ char* getBufferFromOpenResourceFile(FILE* rf, char* resourceName, int* filesize)
 		//compare to resourceName
 		if( strcmp(filename, resourceName) == 0){
 			//get the contents of file
-			buffer = malloc(*filesize);
+			buffer = (char*)malloc(*filesize);
 			crashIf(buffer == NULL, "unable to malloc buffer for reading file", NULL);
 			fail = fail || fread( buffer, 1, *filesize, rf) != *filesize;
 			
@@ -495,7 +495,7 @@ char* getBufferFromOpenResourceFile(FILE* rf, char* resourceName, int* filesize)
 	
 }
 
-char* getBufferFromResource(char* resourceFile, char* resourceName, int* filesize){
+char* getBufferFromResource(const char* resourceFile, const char* resourceName, int* filesize){
 	//try to open the resource file
 	FILE* rf = fopen(resourceFile, "rb");
 	crashIf( rf == NULL, "error opening resourcefile", NULL);
