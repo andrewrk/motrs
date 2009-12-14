@@ -1,2 +1,0 @@
-visible=false
-portal=happy.map, 46, 97

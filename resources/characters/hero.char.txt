@@ -1,9 +1,0 @@
-# directions: NW, W, SW, N, center, S, NE, E, SE
-walking=hero_run_nw.ani,hero_run_west.ani,hero_run_sw.ani,hero_run_north.ani,null,hero_run_south.ani,hero_run_ne.ani,hero_run_east.ani,hero_run_se.ani
-running=hero_run_nw.ani,hero_run_west.ani,hero_run_sw.ani,hero_run_north.ani,null,hero_run_south.ani,hero_run_ne.ani,hero_run_east.ani,hero_run_se.ani
-standing=hero_stand_nw.ani,hero_stand_west.ani,hero_stand_sw.ani,hero_stand_north.ani,null,hero_stand_south.ani,hero_stand_ne.ani,hero_stand_east.ani,hero_stand_se.ani
-feetoffsetx=6
-feetoffsety=30
-feetwidth=21
-feetheight=18
-speed=4

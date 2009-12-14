@@ -1,6 +1,0 @@
-#ADD_SUBDIRECTORY(bitmaps)
-#ADD_SUBDIRECTORY(tiles)
-#ADD_SUBDIRECTORY(maps)
-#ADD_SUBDIRECTORY(animations)
-#ADD_SUBDIRECTORY(characters)
-

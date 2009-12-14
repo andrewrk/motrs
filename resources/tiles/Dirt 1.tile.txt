@@ -1,2 +1,0 @@
-bitmap=Dirt Tile 1.bmp
-alpha=none

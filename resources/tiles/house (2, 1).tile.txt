@@ -1,3 +1,0 @@
-bitmap=house (2, 1).bmp
-alpha=255, 0, 255
-obstacle=true

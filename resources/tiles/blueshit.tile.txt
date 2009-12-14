@@ -1,3 +1,0 @@
-bitmap=blueshit.bmp
-alpha=none
-obstacle=false

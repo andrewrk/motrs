@@ -1,2 +1,0 @@
-bitmap=Grass Tile 2.bmp
-alpha=none

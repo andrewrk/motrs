@@ -1,0 +1,4 @@
+visible=bool=false
+portal_map=string=happy.map
+portal_x=int=46
+portal_y=int=97

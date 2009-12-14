@@ -6,7 +6,6 @@ CMAKE_POLICY(SET CMP0004 OLD)
 
 SET(MINGW_PATH "/usr/i586-mingw32msvc")
 SET(MINGW_DLL_PATH "${MINGW_PATH}/dll")
-SET(RESOURCES_FILE "${CMAKE_BINARY_DIR}/resources.dat")
 
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
@@ -32,31 +31,43 @@ SET(DLL_FILES "")
 
 # check for SDL
 FIND_PACKAGE(SDL)
+SET(SDL_DLL "${MINGW_DLL_PATH}/SDL.dll")
 IF(SDL_FOUND)
     MESSAGE("Found SDL")
 
-    SET(HAVE_SDL TRUE)
-    SET(STATUS_SDL "OK")
-    SET(DEP_INCLUDES "${DEP_INCLUDES} ${SDL_INCLUDE_DIR}")
-    SET(DEP_LIBS "${DEP_LIBS} ${SDL_LIBRARY}")
-    SET(SDL_DLL "${MINGW_DLL_PATH}/SDL.dll")
-
-    IF(EXISTS ${SDL_DLL})
+    IF(NOT WIN32 OR EXISTS ${SDL_DLL})
         SET(DLL_FILES "${DLL_FILES} ${SDL_DLL}")
-    ELSE(EXISTS ${SDL_DLL})
+        SET(HAVE_SDL TRUE)
+        SET(STATUS_SDL "OK")
+        SET(DEP_INCLUDES "${DEP_INCLUDES} ${SDL_INCLUDE_DIR}")
+        SET(DEP_LIBS "${DEP_LIBS} ${SDL_LIBRARY}")
+    ELSE(NOT WIN32 OR EXISTS ${SDL_DLL})
+        SET(STATUS_SDL "MISSING DLL")
         MESSAGE("...but missing ${SDL_DLL} for Windows build.")
-    ENDIF(EXISTS ${SDL_DLL})
-        
+    ENDIF(NOT WIN32 OR EXISTS ${SDL_DLL})
 ELSE(SDL_FOUND)
     SET(STATUS_SDL "not found")
     MESSAGE("Could not find SDL")
 ENDIF(SDL_FOUND)
 ################################################################
 
+# compile resource compiling tools
+SET(RESOURCES_FILE "${CMAKE_BINARY_DIR}/resources.dat")
+SET(TOOLS_OUT_DIR "${CMAKE_BINARY_DIR}/tools")
+SET(RESOURCE_TOOL "${TOOLS_OUT_DIR}/resource-edit")
+SET(RESOURCE_TOOL_SRC "${CMAKE_SOURCE_DIR}/tools/resource-edit/main.cpp")
+ADD_CUSTOM_COMMAND(
+    OUTPUT ${RESOURCE_TOOL}
+    COMMAND mkdir -p ${TOOLS_OUT_DIR}
+    COMMAND g++ -o ${RESOURCE_TOOL} -I${CMAKE_SOURCE_DIR}/src ${RESOURCE_TOOL_SRC} 
+    DEPENDS ${RESOURCE_TOOL_SRC})
 
+# compile resources with custom tool
+ADD_CUSTOM_TARGET("resources.dat"
+    COMMAND ${CMAKE_SOURCE_DIR}/tools/compile-resources ${RESOURCES_FILE} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
+    DEPENDS ${RESOURCE_TOOL})
 
-# compile 
-
+# compile main game
 SET(CMAKE_CXX_FLAGS "-ggdb -Wall")
 FILE(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 FILE(GLOB_RECURSE INCLUDES ${CMAKE_SOURCE_DIR}/src/*.h)
@@ -66,9 +77,9 @@ LINK_LIBRARIES(${DEP_LIBS})
 
 ADD_EXECUTABLE(${PROGRAM_NAME} ${SOURCES})
 
-ADD_DEPENDENCIES(${PROGRAM_NAME} ${RESOURCES_FILE})
+ADD_DEPENDENCIES(${PROGRAM_NAME} "resources.dat")
 
-# set folders to install to
+# install 
 IF(WIN32)
     SET(DATA_DIR .)
     INSTALL(TARGETS ${PROGRAM_NAME} RUNTIME DESTINATION .)
@@ -78,11 +89,10 @@ ELSE(WIN32)
     INSTALL(TARGETS ${PROGRAM_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 ENDIF(WIN32)
 
+INSTALL(FILES ${RESOURCES_FILE} DESTINATION ${DATA_DIR})
+
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/include/resources.h.in
     ${OUT_INCLUDE_PATH}/resources.h)
-
-# make sub directories
-ADD_SUBDIRECTORY("resources")
 
 MESSAGE("\n"
 "Installation Summary\n"

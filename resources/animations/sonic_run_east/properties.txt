@@ -1,3 +1,3 @@
-alphacolor=255,0,255
-frames=8
-delay=1
+alphacolor=color=255,0,255
+frames=int=8
+delay=int=1

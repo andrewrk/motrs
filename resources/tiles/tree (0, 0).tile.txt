@@ -1,3 +1,0 @@
-bitmap=tree (0, 0).bmp
-alpha=255, 0, 255
-obstacle=false

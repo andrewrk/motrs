@@ -1,0 +1,117 @@
+#!/usr/bin/env python
+
+import os,sys,re
+from struct import pack, unpack
+
+def update_folder(in_folder, datfile):
+    """
+    make sure the resources.dat file has every file in in_folder
+    and it is updated
+    """
+    for root, dirs, files in os.walk(in_folder):
+        update_files([os.path.join(root, x) for x in files], datfile)
+        break
+
+def update_files(files, datfile):
+    """
+    make sure the resources.dat file has every file in files and it
+    is updated.
+    """
+    for f in files:
+        result = os.system("%s update %s \"%s\"" % (resource_tool, datfile, f))
+        if result:
+            sys.exit(result)
+
+def compile_folder(in_folder, out_folder):
+    """
+    make sure every file in in_folder is compiled and up to date in 
+    out_folder
+    """
+    for root, dirs, files in os.walk(in_folder):
+        for f in files:
+            compile_file(os.path.join(root, f), out_folder + "/" + f)
+        break
+
+def store_string(string, out_handle):
+    out_handle.write(pack( "i" , len(string) ))
+    for char in string:
+        out_handle.write(pack("c" , char ))
+
+def compile_file(in_file, out_file):
+    """
+    compile from text format into binary format
+    """
+
+    props = [[y.strip() for y in x.split("=")] for x in open(in_file, "r").read().split("\n") if x.find('=') >= 0]
+
+    # make sure path exists TODO: this is pretty sloppy
+    os.system("mkdir -p %s" % os.path.split(out_file)[0])
+
+    out = open(out_file, "wb")
+
+    out.write(pack("i", 1)) #version
+    out.write(pack("i", len(props) )) # number properties
+
+    color_re = re.compile('^\s*(\d+)\s*\,\s*(\d+)\s*\,\s*(\d+)\s*$')
+    for propName,typeName,value in props:
+        store_string(propName, out)
+        if typeName == 'string':
+            store_string(value, out)
+        elif typeName == 'color':
+            if not (value.lower() in ("none", "false", "null", "0", "no")):
+                matches = color_re.match(value)
+                if matches == None:
+                    sys.stderr.write("Error in %s, the property %s has an invalid value: %s\n" % (in_file, propName, value))
+                    sys.exit(1)
+                
+                out.write(pack("i", 3)) # takes 3 bytes to store color
+                out.write(pack("BBB", int(matches.group(1)), int(matches.group(2)), int(matches.group(3))))
+        elif typeName == 'int':
+            out.write(pack("i", 4)) # takes 4 bytes to store int
+            out.write(pack("i", int(value)))
+        elif typeName == 'float':
+            out.write(pack("i", 4)) # takes 4 bytes to store float
+            out.write(pack("f", float(value)))
+        elif typeName == 'bool':
+            out.write(pack("i", 1)) #takes 1 byte to store boolean
+            outval = 0
+            if value.lower() in ("true", "1", "yes", "y", "t"):
+                outval = 1
+            out.write(pack("b", outval))
+        else:
+            sys.stderr.write("ERROR: Unsupported property type: %s\n" % typeName)
+            sys.exit(1)
+    out.close()
+
+
+
+command, datfile, in_dir, out_dir = sys.argv
+resource_tool = out_dir + "/tools/resource-edit"
+
+in_resources, out_resources = [x + "/resources" for x in (in_dir, out_dir)]
+compile_animations = in_dir + "/tools/compile-animations"
+compile_props = in_dir + "/tools/compile-props"
+
+# compile animations
+print("TODO Compiling animations...")
+
+# compile bitmaps
+print("Compiling bitmaps...")
+update_folder(in_resources + "/bitmaps", datfile)
+
+# compile characters
+print("Compiling characters...")
+in_chars, out_chars = (in_resources + "/characters", out_resources + "/characters")
+compile_folder(in_chars, out_chars)
+update_folder(out_chars, datfile)
+
+# compile maps
+print("Compiling maps...")
+update_folder(in_resources + "/maps", datfile)
+
+# compile tiles
+print("Compiling tiles...")
+in_tiles, out_tiles = (in_resources + "/tiles", out_resources + "/tiles")
+compile_folder(in_tiles, out_tiles)
+update_folder(out_tiles, datfile)
+

@@ -1,2 +1,0 @@
-bitmap=Sand Tile 4.bmp
-alpha=none

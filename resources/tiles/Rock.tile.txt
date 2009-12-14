@@ -1,3 +1,0 @@
-bitmap=rock.bmp
-alpha=255,0,255
-obstacle=true
