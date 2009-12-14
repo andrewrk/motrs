@@ -18,9 +18,8 @@ def update_files(files, datfile):
     is updated.
     """
     for f in files:
-        result = os.system("%s update %s \"%s\"" % (resource_tool, datfile, f))
-        if result:
-            sys.exit(result)
+        if os.system("%s update %s \"%s\"" % (resource_tool, datfile, f)):
+            sys.exit(1)
 
 def compile_folder(in_folder, out_folder):
     """
