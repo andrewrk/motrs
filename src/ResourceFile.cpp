@@ -37,48 +37,58 @@ void ResourceFile::open(std::string fileName)
     close();
     m_fileName = fileName;
 
-    m_file.open(m_fileName.c_str(), std::fstream::in | std::fstream::out);
-    if( ! m_file.is_open() ) {
+    m_file.open(m_fileName.c_str(),
+        std::fstream::in | std::fstream::out | std::fstream::binary);
+    if( ! m_file.good() ) {
         m_state = StateError;
         return;
     }
 
     // header
     m_file.read((char*)&m_header, sizeof(m_header));
+
+    m_state = StateReady;
 }
 
 void ResourceFile::createNew(std::string fileName)
 {
     close();
     m_fileName = fileName;
+
+    // create the file
+    m_file.open(m_fileName.c_str(),
+        std::fstream::out | std::fstream::binary | std::fstream::trunc);
+    m_file.close();
     
-    m_file.open(m_fileName.c_str(), std::fstream::in | std::fstream::out);
+    m_file.open(m_fileName.c_str(),
+        std::fstream::in | std::fstream::out | std::fstream::binary);
     
-    if( ! m_file.is_open() ){
+    if( ! m_file.good() ){
         m_state = StateError;
         return;
     }
     
     // write the initial resource table
     // leave room for extra resource names
-    ResourceHeader header;
-    header.dataStart = recordLocation(initialMaxResources+1);
-    header.resourceCount = 0;
-    m_file.write((char *)&header, sizeof(header));
+    m_header.dataStart = recordLocation(initialMaxResources+1);
+    m_header.resourceCount = 0;
+    m_file.write((char *)&m_header, sizeof(m_header));
     
     // write all that padding until data start
-    unsigned long int paddingSize = header.dataStart - sizeof(header);
+    unsigned long int paddingSize = m_header.dataStart - sizeof(m_header);
     char * padding = new char[paddingSize];
     m_file.write(padding, paddingSize);
     delete[] padding;
+
+    m_state = StateReady;
 }
 
 void ResourceFile::close()
 {
     if( m_state == StateReady ) {
         m_file.close();
-        m_state = StateUninitialized;
     }
+    m_state = StateUninitialized;
 }
 
 // return the resource index of the string
@@ -86,12 +96,12 @@ int ResourceFile::findResourceRecord(std::string resourceName)
 {
     // use the binary search algorithm to find the location
     int left = 0;
-    int middle;
-    int right = m_header.resourceCount;
+    int middle = -1;
+    int right = m_header.resourceCount-1;
     ResourceRecord record;
     int cmp;
 
-    while(true) {
+    while(right-left >= 0) {
         middle = (right + left) / 2; 
         
         // get the string at this location
@@ -101,25 +111,16 @@ int ResourceFile::findResourceRecord(std::string resourceName)
         cmp = resourceName.compare(record.name);
 
         if( cmp > 0 ) {
-            if( left == middle )
-                left = right;
-            else if( left == right )
-                return -1;
-            else
-                left = middle;
+            left = middle+1;
         } else if( cmp < 0 ) {
-            if( right == middle )
-                right = left;
-            else if( left == right )
-                return -1;
-            else
-                right = middle;
+            right = middle-1;
         } else {
             // found it!
-            break;
+            return middle;
         }
     }
-    return middle;
+    // can't find it
+    return -1;
 }
 
 time_t ResourceFile::getResourceTime(std::string resourceName)

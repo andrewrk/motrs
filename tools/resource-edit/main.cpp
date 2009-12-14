@@ -5,6 +5,7 @@
 #include <ctime>
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 using namespace std;
 
 #include <sys/stat.h>
@@ -45,6 +46,14 @@ int main(int argc, char * argv[])
     
     // get the modification date of the resource in the resource file
     ResourceFile dat(datfile);
+    if( ! dat.isOpen() ) {
+        // try creating the file
+        dat.createNew(datfile);
+        if( ! dat.isOpen() ) {
+            cerr << "Error opening " << datfile << endl;
+            exit(1);
+        }
+    }
     string infileTitle = fileTitle(infile);
     time_t resourceModified = dat.getResourceTime(infileTitle);
 
