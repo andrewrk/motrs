@@ -4,6 +4,7 @@
 #include <cstring>
 
 const unsigned long int ResourceFile::initialMaxResources = 100;
+const unsigned long int ResourceFile::extraBufferSpace = 4*1024;
 
 ResourceFile::ResourceFile() :
     m_state(StateUninitialized),
@@ -80,20 +81,21 @@ void ResourceFile::close()
     }
 }
 
-char * ResourceFile::getResource(std::string resourceName)
+// return the resource index of the string
+int ResourceFile::findResourceRecord(std::string resourceName)
 {
     // use the binary search algorithm to find the location
     int left = 0;
     int middle;
-    int right = recordLocation(m_header.resourceCount);
+    int right = m_header.resourceCount;
     ResourceRecord record;
     int cmp;
 
     while(true) {
-        middle = recordLocation(m_header.resourceCount / 2);
+        middle = (right + left) / 2; 
         
         // get the string at this location
-        m_file.seekg(recordLocation(middle), std::ios_base::beg);
+        m_file.seekg(recordLocation(middle), std::ios::beg);
         m_file.read((char*)&record, sizeof(record));
         
         cmp = resourceName.compare(record.name);
@@ -102,14 +104,14 @@ char * ResourceFile::getResource(std::string resourceName)
             if( left == middle )
                 left = right;
             else if( left == right )
-                return NULL;
+                return -1;
             else
                 left = middle;
         } else if( cmp < 0 ) {
             if( right == middle )
                 right = left;
             else if( left == right )
-                return NULL;
+                return -1;
             else
                 right = middle;
         } else {
@@ -117,8 +119,31 @@ char * ResourceFile::getResource(std::string resourceName)
             break;
         }
     }
+    return middle;
+}
 
-    m_file.seekg(record.offset, std::ios_base::beg);
+time_t ResourceFile::getResourceTime(std::string resourceName)
+{
+    int index = findResourceRecord(resourceName);
+    if( index == -1 )
+        return -1;
+    ResourceRecord record;
+    m_file.seekg(recordLocation(index), std::ios::beg);
+    m_file.read((char*)&record, sizeof(record));
+    
+    return record.dateModified;
+}
+
+char * ResourceFile::getResource(std::string resourceName)
+{
+    int index = findResourceRecord(resourceName);
+    if( index == -1 )
+        return NULL;
+    ResourceRecord record;
+    m_file.seekg(recordLocation(index), std::ios::beg);
+    m_file.read((char*)&record, sizeof(record));
+
+    m_file.seekg(record.offset, std::ios::beg);
     char * buffer = new char[record.size];
     m_file.read(buffer, record.size);
 
@@ -136,8 +161,40 @@ bool ResourceFile::recordSortPredicate(const ResourceRecord &r1,
     return std::strcmp(r1.name, r2.name) < 0;
 }
 
-void ResourceFile::addResource(std::string resourceName, char * data,
-    unsigned long int dataSize)
+void ResourceFile::updateResource(std::string resourceName, const char * data,
+    unsigned long int dataSize, time_t dateModified)
+{
+    // find the resource
+    int recordIndex = findResourceRecord(resourceName);
+    if( recordIndex == -1 ) {
+        // add instead
+        addResource(resourceName, data, dataSize, dateModified);
+        return;
+    }
+
+    ResourceRecord record;
+    m_file.seekg(recordLocation(recordIndex), std::ios::beg);
+    m_file.read((char*)&record, sizeof(record));
+
+    // if we have enough room to replace the data, do it
+    if( record.bufferSize >= dataSize ) {
+        m_file.seekp(record.offset, std::ios::beg);
+        m_file.write(data, dataSize);
+
+        // write the new data size and modified
+        record.size = dataSize;
+        record.dateModified = dateModified;
+        m_file.seekp(recordLocation(recordIndex), std::ios::beg);
+        m_file.write((char*)&record, sizeof(record));
+    } else {
+        // not enough room, simply delete the resource and add the new one
+        deleteResource(resourceName);
+        addResource(resourceName, data, dataSize, dateModified);
+    }
+}
+
+void ResourceFile::addResource(std::string resourceName, const char * data,
+    unsigned long int dataSize, time_t dateModified)
 {
     // load the string table into a vector
     std::vector<ResourceRecord> table;
@@ -149,12 +206,19 @@ void ResourceFile::addResource(std::string resourceName, char * data,
     ResourceRecord record;
     std::strcpy(record.name, resourceName.c_str());
     record.size = dataSize;
+    record.dateModified = dateModified;
+    record.bufferSize = dataSize + extraBufferSpace;
     record.offset = m_file.tellp();
 
     table.push_back(record);
 
     // write the resource to the end of the file
     m_file.write(data, dataSize);
+
+    // write the extra buffer space
+    char * trash = new char[record.bufferSize-dataSize];
+    m_file.write(trash, record.bufferSize-dataSize);
+    delete[] trash;
     
     // sort the table
     std::sort(table.begin(), table.end(), recordSortPredicate);
@@ -172,14 +236,23 @@ bool ResourceFile::deleteResource(std::string resourceName)
 
     // delete the element
     bool found = false;
+    std::vector<ResourceRecord>::iterator prev;
+    bool first = true;
     for( std::vector<ResourceRecord>::iterator it=table.begin();
         it < table.end(); ++it)
     {
         if( resourceName.compare((*it).name) == 0 ){
+            // give the buffer space to the resource before this one
+            if( ! first )
+                (*prev).bufferSize += (*it).bufferSize;
+
+            // erase this one
             table.erase(it);
             found = true;
             break;
         }
+        prev = it;
+        first = false;
     }
     if( ! found)
         return false;
@@ -190,13 +263,18 @@ bool ResourceFile::deleteResource(std::string resourceName)
     return true;
 }
 
+void ResourceFile::clean()
+{
+    throw "TODO: get rid of extra buffer space";
+}
+
 void ResourceFile::loadRecordTable(std::vector<ResourceRecord> & v)
 {
     ResourceRecord record;
 
     v.clear();
     for(unsigned int i = 0; i < m_header.resourceCount; ++i ) {
-        m_file.seekg(recordLocation(i), std::ios_base::beg);
+        m_file.seekg(recordLocation(i), std::ios::beg);
         m_file.read((char*)&record, sizeof(record));
         v.push_back(record);
     }
@@ -245,7 +323,7 @@ void ResourceFile::saveRecordTable(std::vector<ResourceRecord> & v)
     // write resource table
     ResourceRecord record;
     for(unsigned int i = 0; i < m_header.resourceCount; ++i ) {
-        m_file.seekp(recordLocation(i), std::ios_base::beg);
+        m_file.seekp(recordLocation(i), std::ios::beg);
         record = v.at(i);
         m_file.write((char*)&record, sizeof(record));
     }

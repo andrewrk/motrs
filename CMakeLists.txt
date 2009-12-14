@@ -59,7 +59,7 @@ SET(RESOURCE_TOOL_SRC "${CMAKE_SOURCE_DIR}/tools/resource-edit/main.cpp")
 ADD_CUSTOM_COMMAND(
     OUTPUT ${RESOURCE_TOOL}
     COMMAND mkdir -p ${TOOLS_OUT_DIR}
-    COMMAND g++ -o ${RESOURCE_TOOL} -I${CMAKE_SOURCE_DIR}/src ${RESOURCE_TOOL_SRC} 
+    COMMAND g++ -ggdb -Wall -o ${RESOURCE_TOOL} -I${CMAKE_SOURCE_DIR}/src ${RESOURCE_TOOL_SRC} ${CMAKE_SOURCE_DIR}/src/ResourceFile.cpp
     DEPENDS ${RESOURCE_TOOL_SRC})
 
 # compile resources with custom tool

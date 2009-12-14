@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <ctime>
 
 // load and save resources from a file
 class ResourceFile
@@ -32,14 +33,27 @@ class ResourceFile
         char * getResource(std::string resourceName);
 
         // add a resource to the file
-        void addResource(std::string resourceName, char * data,
-            unsigned long dataSize);
+        void addResource(std::string resourceName, const char * data,
+            unsigned long dataSize, time_t dateModified = -1);
+
+        // update a resource with new data. if the resource
+        // does not exist, it simply adds it.
+        void updateResource(std::string resourceName, const char * data,
+            unsigned long dataSize, time_t dateModified = -1);
 
         // delete a resource from a file
         bool deleteResource(std::string resourceName);
 
+        // check the date of a resource - seconds since
+        // 00:00 hours, Jan 1, 1970 UTC
+        time_t getResourceTime(std::string resourceName);
+
+        // get rid of extra buffer space
+        void clean();
+
     private:
         static const unsigned long int initialMaxResources;
+        static const unsigned long int extraBufferSpace;
 
         enum States {
             StateUninitialized,
@@ -48,9 +62,13 @@ class ResourceFile
         };
 
         typedef struct {
-            char name[128]; // 128 bytes
+            char name[128]; // 4 bytes. null terminated string.
             unsigned long int offset; // 4 bytes, where the resource is
-            unsigned long int size; // 4 bytes
+            unsigned long int size; // 4 bytes unsigned
+            time_t dateModified; // 4 bytes signed
+            // 4 bytes unsigned, total space allocated for data,
+            // including extra space
+            unsigned long int bufferSize; 
         } ResourceRecord;
 
         typedef struct {
@@ -70,6 +88,7 @@ class ResourceFile
         unsigned long int fileSize();
         static bool recordSortPredicate(const ResourceRecord &r1,
             const ResourceRecord &r2);
+        int findResourceRecord(std::string resourceName);
 };
 
 #endif
