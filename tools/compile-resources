@@ -38,8 +38,14 @@ def store_string(string, out_handle):
 
 def compile_file(in_file, out_file):
     """
-    compile from text format into binary format
+    compile from text format into binary format but only if in_file's
+    date modified is >= out_file's
     """
+    in_file_modified = os.path.getmtime(in_file)
+    out_file_modified = os.path.getmtime(out_file)
+    if in_file_modified < out_file_modified:
+        return
+    print("Compiling %s..." % in_file)
 
     props = [[y.strip() for y in x.split("=")] for x in open(in_file, "r").read().split("\n") if x.find('=') >= 0]
 
@@ -95,21 +101,21 @@ compile_props = in_dir + "/tools/compile-props"
 print("TODO Compiling animations...")
 
 # compile bitmaps
-print("Compiling bitmaps...")
+print("Checking bitmaps...")
 update_folder(in_resources + "/bitmaps", datfile)
 
 # compile characters
-print("Compiling characters...")
+print("Checking characters...")
 in_chars, out_chars = (in_resources + "/characters", out_resources + "/characters")
 compile_folder(in_chars, out_chars)
 update_folder(out_chars, datfile)
 
 # compile maps
-print("Compiling maps...")
+print("Checking maps...")
 update_folder(in_resources + "/maps", datfile)
 
 # compile tiles
-print("Compiling tiles...")
+print("Checking tiles...")
 in_tiles, out_tiles = (in_resources + "/tiles", out_resources + "/tiles")
 compile_folder(in_tiles, out_tiles)
 update_folder(out_tiles, datfile)
