@@ -29,6 +29,12 @@ class Animation
 
     private:
         typedef struct {
+            Uint8 r;
+            Uint8 g;
+            Uint8 b;
+        } RGB;
+
+        typedef struct {
             RGB colorKey;
             Uint32 frameCount;
             Uint32 framesPerSecond;
@@ -36,12 +42,6 @@ class Animation
             Uint32 frameHeight;
             Uint32 bitmapSize; // size in bytes of the following .bmp file
         } Header;
-
-        typedef struct {
-            Uint8 r;
-            Uint8 g;
-            Uint8 b;
-        } RGB;
 
         SDL_Surface * m_spriteSheet;
         int m_frameCount;
