@@ -68,6 +68,7 @@ def write_properties(text, out_handle):
     color_re = re.compile('^\s*(\d+)\s*\,\s*(\d+)\s*\,\s*(\d+)\s*$')
     for propName,typeName,value in props:
         store_string(propName, out_handle)
+        store_string(typeName, out_handle)
         if typeName == 'string':
             store_string(value, out_handle)
         elif typeName == 'color':
@@ -77,16 +78,12 @@ def write_properties(text, out_handle):
                     sys.stderr.write("Error in %s, the property %s has an invalid value: %s\n" % (in_file, propName, value))
                     sys.exit(1)
                 
-                out_handle.write(pack("i", 3)) # takes 3 bytes to store color
                 out_handle.write(pack("BBB", int(matches.group(1)), int(matches.group(2)), int(matches.group(3))))
         elif typeName == 'int':
-            out_handle.write(pack("i", 4)) # takes 4 bytes to store int
             out_handle.write(pack("i", int(value)))
         elif typeName == 'float':
-            out_handle.write(pack("i", 4)) # takes 4 bytes to store float
             out_handle.write(pack("f", float(value)))
         elif typeName == 'bool':
-            out_handle.write(pack("i", 1)) #takes 1 byte to store boolean
             out_handleval = 0
             if value.lower() in ("true", "1", "yes", "y", "t"):
                 out_handleval = 1
