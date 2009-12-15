@@ -51,6 +51,7 @@ def compile_file(in_file, out_file):
     """
     compile file from text format into binary format 
     """
+    build_path(out_file)
     out_handle = open(out_file, "wb")
     write_properties(open(in_file,"r").read(), out_handle)
     out_handle.close()
@@ -60,9 +61,6 @@ def write_properties(text, out_handle):
     compile from text format into binary format 
     """
     props = [[y.strip() for y in x.split("=")] for x in text.split("\n") if x.find('=') >= 0]
-
-    # make sure path exists
-    build_path(out_handle_file)
 
     out_handle.write(pack("i", 1)) #version
     out_handle.write(pack("i", len(props) )) # number properties
