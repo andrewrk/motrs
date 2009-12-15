@@ -1,3 +1,2 @@
 alphacolor=color=9,194,255
-frames=1int=2
-delay=int=1
+fps=int=48

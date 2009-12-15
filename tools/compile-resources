@@ -2,6 +2,7 @@
 
 import os,sys,re
 from struct import pack, unpack
+from PIL import Image
 
 def update_folder(in_folder, datfile):
     """
@@ -21,14 +22,24 @@ def update_files(files, datfile):
         if os.system("%s update %s \"%s\"" % (resource_tool, datfile, f)):
             sys.exit(1)
 
-def compile_folder(in_folder, out_folder):
+def compile_folder(in_folder, out_folder, compile_func):
     """
     make sure every file in in_folder is compiled and up to date in 
     out_folder
     """
     for root, dirs, files in os.walk(in_folder):
         for f in files:
-            compile_file(os.path.join(root, f), out_folder + "/" + f)
+            in_file = os.path.join(root, f)
+            out_file = os.path.join(out_folder, f)
+
+            in_file_modified = os.path.getmtime(in_file)
+            out_file_modified = -1
+            if os.path.exists(out_file):
+                out_file_modified = os.path.getmtime(out_file)
+
+            if in_file_modified > out_file_modified:
+                print("Compiling %s..." % in_file)
+                compile_func(in_file, out_file)
         break
 
 def store_string(string, out_handle):
@@ -38,34 +49,29 @@ def store_string(string, out_handle):
 
 def compile_file(in_file, out_file):
     """
-    compile from text format into binary format but only if in_file's
-    date modified is >= out_file's
+    compile file from text format into binary format 
     """
-    in_file_modified = os.path.getmtime(in_file)
-    if os.path.exists(out_file):
-        out_file_modified = os.path.getmtime(out_file)
-    else:
-        out_file_modified = -1
+    out_handle = open(out_file, "wb")
+    write_properties(open(in_file,"r").read(), out_handle)
+    out_handle.close()
 
-    if in_file_modified < out_file_modified:
-        return
-    print("Compiling %s..." % in_file)
+def write_properties(text, out_handle):
+    """
+    compile from text format into binary format 
+    """
+    props = [[y.strip() for y in x.split("=")] for x in text.split("\n") if x.find('=') >= 0]
 
-    props = [[y.strip() for y in x.split("=")] for x in open(in_file, "r").read().split("\n") if x.find('=') >= 0]
+    # make sure path exists
+    build_path(out_handle_file)
 
-    # make sure path exists TODO: this is pretty sloppy
-    os.system("mkdir -p %s" % os.path.split(out_file)[0])
-
-    out = open(out_file, "wb")
-
-    out.write(pack("i", 1)) #version
-    out.write(pack("i", len(props) )) # number properties
+    out_handle.write(pack("i", 1)) #version
+    out_handle.write(pack("i", len(props) )) # number properties
 
     color_re = re.compile('^\s*(\d+)\s*\,\s*(\d+)\s*\,\s*(\d+)\s*$')
     for propName,typeName,value in props:
-        store_string(propName, out)
+        store_string(propName, out_handle)
         if typeName == 'string':
-            store_string(value, out)
+            store_string(value, out_handle)
         elif typeName == 'color':
             if not (value.lower() in ("none", "false", "null", "0", "no")):
                 matches = color_re.match(value)
@@ -73,26 +79,121 @@ def compile_file(in_file, out_file):
                     sys.stderr.write("Error in %s, the property %s has an invalid value: %s\n" % (in_file, propName, value))
                     sys.exit(1)
                 
-                out.write(pack("i", 3)) # takes 3 bytes to store color
-                out.write(pack("BBB", int(matches.group(1)), int(matches.group(2)), int(matches.group(3))))
+                out_handle.write(pack("i", 3)) # takes 3 bytes to store color
+                out_handle.write(pack("BBB", int(matches.group(1)), int(matches.group(2)), int(matches.group(3))))
         elif typeName == 'int':
-            out.write(pack("i", 4)) # takes 4 bytes to store int
-            out.write(pack("i", int(value)))
+            out_handle.write(pack("i", 4)) # takes 4 bytes to store int
+            out_handle.write(pack("i", int(value)))
         elif typeName == 'float':
-            out.write(pack("i", 4)) # takes 4 bytes to store float
-            out.write(pack("f", float(value)))
+            out_handle.write(pack("i", 4)) # takes 4 bytes to store float
+            out_handle.write(pack("f", float(value)))
         elif typeName == 'bool':
-            out.write(pack("i", 1)) #takes 1 byte to store boolean
-            outval = 0
+            out_handle.write(pack("i", 1)) #takes 1 byte to store boolean
+            out_handleval = 0
             if value.lower() in ("true", "1", "yes", "y", "t"):
-                outval = 1
-            out.write(pack("b", outval))
+                out_handleval = 1
+            out_handle.write(pack("b", out_handleval))
         else:
             sys.stderr.write("ERROR: Unsupported property type: %s\n" % typeName)
             sys.exit(1)
+
+
+def compile_animation_folder(in_folder, out_folder):
+    for root, dirs, files in os.walk(in_folder):
+        for d in dirs:
+            in_dir = os.path.join(root, d)
+            out_file = os.path.join(out_folder, d)
+
+            out_file_modified = -1
+            if os.path.exists(out_file):
+                out_file_modified = os.path.getmtime(out_file)
+
+            # if any file in in_dir is later than out_file_modified
+            for ani_root, ani_dirs, ani_files in os.walk(in_dir):
+                for f in ani_files:
+                    if os.path.getmtime(os.path.join(ani_root, f)) > out_file_modified:
+                        print("Compiling %s..." % in_dir)
+                        compile_animation(in_dir, out_file)
+                        break
+                    
+                break
+
+        break
+
+def compile_animation(in_dir, out_file):
+    # get a list of all the bitmaps
+    bitmaps = []
+    prop_file = None
+    for root, dirs, files in os.walk(in_dir):
+        for f in files:
+            if f == "properties.txt":
+                prop_file = os.path.join(root, f)
+            else:
+                bitmaps.append(os.path.join(root, f))
+        break
+    
+    if prop_file == None:
+        sys.stderr.write("Error: %s does not have a properties.txt\n" % in_dir)
+        sys.exit(1)
+
+    # sort the list of bitmaps
+    bitmaps.sort()
+
+    if len(bitmaps) == 0:
+        sys.stderr.write("Error: Animation %s does not have any frames." % in_dir)
+        sys.exit(1)
+
+    # create a sprite sheet out of the bitmaps
+    # open the first file to determine width and height
+    first_image = Image.open(bitmaps[0])
+    frame_width, frame_height = first_image.size
+    sheet_width = frame_width * len(bitmaps)
+
+    spritesheet = Image.new("RGB", (sheet_width, frame_height))
+    x = 0
+    for bmp_file in bitmaps:
+        bmp_image = Image.open(bmp_file)
+        spritesheet.paste(bmp_image, (x, 0))
+        x += frame_width
+
+    # read the properties
+    props = {}
+    for name, propType, value in [[y.strip() for y in x.split("=")] for x in open(os.path.join(in_dir, "properties.txt")).read().split("\n") if x.find('=') >= 0]:
+        props[name] = value
+
+    # write the header to out_file
+    build_path(out_file)
+    out = open(out_file, "wb")
+
+    r,g,b = [int(x.strip()) for x in props['alphacolor'].split(',')]
+
+    #RGB colorKey;
+    out.write(pack("BBB", r, g, b))
+    #Uint32 frameCount;
+    out.write(pack("i", len(bitmaps)))
+    #Uint32 framesPerSecond;
+    out.write(pack("i", int(props['fps'])))
+    #Uint32 frameWidth;
+    out.write(pack("i", frame_width))
+    #Uint32 frameHeight;
+    out.write(pack("i", frame_height))
+    #Uint32 bitmapSize; // size in bytes of the following .bmp file
+    # come back to this one later
+    out_bitmapSize_pos = out.tell()
+    # write the spritesheet bitmap
+    spritesheet.save(out, "BMP")
+    bitmap_size_bytes = out.tell() - out_bitmapSize_pos
+    out.seek(out_bitmapSize_pos)
+    out.write(pack("i", bitmap_size_bytes))
+
     out.close()
 
-
+def build_path(file_path):
+    """
+    ensure that folders exist so that this file_path can be written to
+    """
+    # TODO: this is pretty sloppy
+    os.system("mkdir -p %s" % os.path.split(file_path)[0])
 
 command, datfile, in_dir, out_dir = sys.argv
 resource_tool = out_dir + "/tools/resource-edit"
@@ -102,7 +203,10 @@ compile_animations = in_dir + "/tools/compile-animations"
 compile_props = in_dir + "/tools/compile-props"
 
 # compile animations
-print("TODO Compiling animations...")
+print("Checking animations...")
+in_ani, out_ani = (in_resources + "/animations", out_resources + "/animations")
+compile_animation_folder(in_ani, out_ani)
+update_folder(out_ani, datfile)
 
 # compile bitmaps
 print("Checking bitmaps...")
@@ -111,7 +215,7 @@ update_folder(in_resources + "/bitmaps", datfile)
 # compile characters
 print("Checking characters...")
 in_chars, out_chars = (in_resources + "/characters", out_resources + "/characters")
-compile_folder(in_chars, out_chars)
+compile_folder(in_chars, out_chars, compile_file)
 update_folder(out_chars, datfile)
 
 # compile maps
@@ -121,6 +225,6 @@ update_folder(in_resources + "/maps", datfile)
 # compile tiles
 print("Checking tiles...")
 in_tiles, out_tiles = (in_resources + "/tiles", out_resources + "/tiles")
-compile_folder(in_tiles, out_tiles)
+compile_folder(in_tiles, out_tiles, compile_file)
 update_folder(out_tiles, datfile)
 
