@@ -62,18 +62,18 @@ class ResourceFile
         };
 
         typedef struct {
-            Sint8 name[128]; // 4 bytes. null terminated string.
-            Uint32 offset; // 4 bytes, where the resource is
-            Uint32 size; // 4 bytes unsigned
-            Sint32 dateModified; // 4 bytes signed
+            char name[128]; // 4 bytes. null terminated string.
+            unsigned int offset; // 4 bytes, where the resource is
+            unsigned int size; // 4 bytes unsigned
+            time_t dateModified; // 4 bytes signed
             // 4 bytes unsigned, total space allocated for data,
             // including extra space
-            Uint32 bufferSize; 
+            unsigned int bufferSize; 
         } ResourceRecord;
 
         typedef struct {
-            Uint32 dataStart; // 4 bytes unsigned
-            Uint32 resourceCount; // 4 bytes unsigned
+            unsigned int dataStart; // 4 bytes unsigned
+            unsigned int resourceCount; // 4 bytes unsigned
         } ResourceHeader;
 
         int m_state;
