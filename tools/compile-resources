@@ -42,7 +42,11 @@ def compile_file(in_file, out_file):
     date modified is >= out_file's
     """
     in_file_modified = os.path.getmtime(in_file)
-    out_file_modified = os.path.getmtime(out_file)
+    if os.path.exists(out_file):
+        out_file_modified = os.path.getmtime(out_file)
+    else:
+        out_file_modified = -1
+
     if in_file_modified < out_file_modified:
         return
     print("Compiling %s..." % in_file)
