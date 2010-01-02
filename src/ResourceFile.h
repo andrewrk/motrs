@@ -49,7 +49,7 @@ class ResourceFile
         time_t getResourceTime(std::string resourceName);
 
         // get rid of extra buffer space
-        void clean();
+        void squeeze();
 
     private:
         static const unsigned long int initialMaxResources;

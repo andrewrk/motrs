@@ -264,7 +264,7 @@ bool ResourceFile::deleteResource(std::string resourceName)
     return true;
 }
 
-void ResourceFile::clean()
+void ResourceFile::squeeze()
 {
     throw "TODO: get rid of extra buffer space";
 }
