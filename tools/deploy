@@ -1,0 +1,50 @@
+#!/bin/bash
+
+set -e
+
+SOURCE=$(pwd)
+
+# get the version number
+MAJOR=$(awk '/^SET\(VERSION_MAJOR [0-9]+\)$/ {print $2}' <CMakeLists.txt | sed 's/[^0-9]*//g')
+MINOR=$(awk '/^SET\(VERSION_MINOR [0-9]+\)$/ {print $2}' <CMakeLists.txt | sed 's/[^0-9]*//g')
+PATCH=$(awk '/^SET\(VERSION_PATCH [0-9]+\)$/ {print $2}' <CMakeLists.txt | sed 's/[^0-9]*//g')
+REVISION=$(awk '/^SET\(VERSION_REVISION [0-9]+\)$/ {print $2}' <CMakeLists.txt | sed 's/[^0-9]*//g')
+
+# increment the revision number
+REVISION=$(expr $REVISION + 1)
+VERSION="$MAJOR.$MINOR.$PATCH-$REVISION"
+
+# update the CMakeLists.txt file
+TMP=$(mktemp)
+sed "s/^SET(VERSION_REVISION [0-9][0-9]*)\$/SET(VERSION_REVISION $REVISION)/" <CMakeLists.txt >$TMP
+cp $TMP CMakeLists.txt
+rm -f $TMP
+
+# commit the revision increment to git
+git add CMakeLists.txt
+git commit -m "deploying project version $VERSION"
+
+# build for windows
+BUILD=$(mktemp -d)
+RELEASE=$BUILD/motrs-$VERSION
+cd $BUILD
+cmake $SOURCE -DCMAKE_TOOLCHAIN_FILE=$SOURCE/cmake/win32-toolchain.cmake -DCMAKE_INSTALL_PREFIX=$RELEASE
+make
+make install
+
+# pack into a zip
+zip -r motrs-$VERSION.zip $RELEASE/
+
+# upload to superjoesoftware.com
+scp motrs-$VERSION.zip web:www/motrs/release/
+
+echo "<html><head><title>motrs download</title></head><body>" >download.html
+echo "<a href='release/motrs-$VERSION.zip'>motrs-$VERSION.zip</a></body></html>" >>download.html
+echo "motrs-$VERSION.zip" >latest_version.txt
+
+scp download.html web:www/motrs/
+scp latest_version.txt web:www/motrs/
+
+# clean up
+rm -rf $BUILD
+cd $SOURCE
