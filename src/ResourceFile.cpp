@@ -9,7 +9,8 @@ const unsigned long int ResourceFile::extraBufferSpace = 4*1024;
 ResourceFile::ResourceFile() :
     m_state(StateUninitialized),
     m_fileName(),
-    m_file()
+    m_file(),
+    m_records()
 {
 
 }
@@ -17,7 +18,8 @@ ResourceFile::ResourceFile() :
 ResourceFile::ResourceFile(std::string fileName) :
     m_state(StateUninitialized),
     m_fileName(),
-    m_file()
+    m_file(),
+    m_records()
 {
     open(fileName);
 }
@@ -48,6 +50,8 @@ void ResourceFile::open(std::string fileName)
     m_file.read((char*)&m_header, sizeof(m_header));
 
     m_state = StateReady;
+
+    updateRecordCache();
 }
 
 void ResourceFile::createNew(std::string fileName)
@@ -91,62 +95,46 @@ void ResourceFile::close()
     m_state = StateUninitialized;
 }
 
-// return the resource index of the string
-int ResourceFile::findResourceRecord(std::string resourceName)
+// return a pointer to the ResourceRecord, or NULL if it can't find it
+ResourceFile::ResourceRecord * ResourceFile::getResourceRecord(
+    std::string & resourceName)
 {
-    // use the binary search algorithm to find the location
-    int left = 0;
-    int middle = -1;
-    int right = m_header.resourceCount-1;
-    ResourceRecord record;
-    int cmp;
+    return &getCacheEntry(resourceName)->record;
+}
 
-    while(right-left >= 0) {
-        middle = (right + left) / 2; 
-        
-        // get the string at this location
-        m_file.seekg(recordLocation(middle), std::ios::beg);
-        m_file.read((char*)&record, sizeof(record));
-        
-        cmp = resourceName.compare(record.name);
-
-        if( cmp > 0 ) {
-            left = middle+1;
-        } else if( cmp < 0 ) {
-            right = middle-1;
-        } else {
-            // found it!
-            return middle;
-        }
-    }
-    // can't find it
-    return -1;
+// return a pointer to the CacheEntry, or NULL if it can't find it
+ResourceFile::CacheEntry * ResourceFile::getCacheEntry(
+    std::string & resourceName)
+{
+    std::map<std::string, CacheEntry>::iterator it =
+        m_records.find(resourceName);
+    
+    if( it == m_records.end())
+        return NULL;
+    
+    return &it->second;
 }
 
 time_t ResourceFile::getResourceTime(std::string resourceName)
 {
-    int index = findResourceRecord(resourceName);
-    if( index == -1 )
+    ResourceRecord * record = getResourceRecord(resourceName);
+
+    if( record == NULL )
         return -1;
-    ResourceRecord record;
-    m_file.seekg(recordLocation(index), std::ios::beg);
-    m_file.read((char*)&record, sizeof(record));
     
-    return record.dateModified;
+    return record->dateModified;
 }
 
 char * ResourceFile::getResource(std::string resourceName)
 {
-    int index = findResourceRecord(resourceName);
-    if( index == -1 )
-        return NULL;
-    ResourceRecord record;
-    m_file.seekg(recordLocation(index), std::ios::beg);
-    m_file.read((char*)&record, sizeof(record));
+    ResourceRecord * record = getResourceRecord(resourceName);
 
-    m_file.seekg(record.offset, std::ios::beg);
-    char * buffer = new char[record.size];
-    m_file.read(buffer, record.size);
+    if( ! record )
+        return NULL;
+
+    m_file.seekg(record->offset, std::ios::beg);
+    char * buffer = new char[record->size];
+    m_file.read(buffer, record->size);
 
     return buffer;
 }
@@ -166,26 +154,24 @@ void ResourceFile::updateResource(std::string resourceName, const char * data,
     unsigned long int dataSize, time_t dateModified)
 {
     // find the resource
-    int recordIndex = findResourceRecord(resourceName);
-    if( recordIndex == -1 ) {
-        // add instead
+    CacheEntry * entry = getCacheEntry(resourceName);
+    ResourceRecord * record = &entry->record;
+    
+    if( record == NULL ) {
+        // add the resource instead
         addResource(resourceName, data, dataSize, dateModified);
         return;
     }
 
-    ResourceRecord record;
-    m_file.seekg(recordLocation(recordIndex), std::ios::beg);
-    m_file.read((char*)&record, sizeof(record));
-
     // if we have enough room to replace the data, do it
-    if( record.bufferSize >= dataSize ) {
-        m_file.seekp(record.offset, std::ios::beg);
+    if( record->bufferSize >= dataSize ) {
+        m_file.seekp(record->offset, std::ios::beg);
         m_file.write(data, dataSize);
 
         // write the new data size and modified
-        record.size = dataSize;
-        record.dateModified = dateModified;
-        m_file.seekp(recordLocation(recordIndex), std::ios::beg);
+        record->size = dataSize;
+        record->dateModified = dateModified;
+        m_file.seekp(entry->offset, std::ios::beg);
         m_file.write((char*)&record, sizeof(record));
     } else {
         // not enough room, simply delete the resource and add the new one
@@ -328,5 +314,23 @@ void ResourceFile::saveRecordTable(std::vector<ResourceRecord> & v)
         record = v.at(i);
         m_file.write((char*)&record, sizeof(record));
     }
+
+    updateRecordCache();
 }
+
+void ResourceFile::updateRecordCache()
+{
+    CacheEntry entry;
+    m_records.clear();
+
+    for(unsigned int i = 0; i < m_header.resourceCount; ++i ) {
+        entry.offset = recordLocation(i);
+
+        m_file.seekg(entry.offset, std::ios::beg);
+        m_file.read((char*)&entry.record, sizeof(entry.record));
+
+        m_records[std::string(entry.record.name)] = entry;
+    }
+}
+
 

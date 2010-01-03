@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <ctime>
+#include <map>
 
 // load and save resources from a file
 class ResourceFile
@@ -46,6 +47,7 @@ class ResourceFile
 
         // check the date of a resource - seconds since
         // 00:00 hours, Jan 1, 1970 UTC
+        // -1 if resource does not exist
         time_t getResourceTime(std::string resourceName);
 
         // get rid of extra buffer space
@@ -72,6 +74,11 @@ class ResourceFile
         } ResourceRecord;
 
         typedef struct {
+            ResourceRecord record;
+            unsigned int offset; // 4 bytes unsigned - where the record is
+        } CacheEntry;
+
+        typedef struct {
             unsigned int dataStart; // 4 bytes unsigned
             unsigned int resourceCount; // 4 bytes unsigned
         } ResourceHeader;
@@ -82,13 +89,18 @@ class ResourceFile
 
         ResourceHeader m_header;
 
+        // keeps an updated cache of the record table
+        std::map<std::string, CacheEntry> m_records;
+
         unsigned long int recordLocation(unsigned long int resourceIndex);
         void loadRecordTable(std::vector<ResourceRecord> & v);
         void saveRecordTable(std::vector<ResourceRecord> & v);
         unsigned long int fileSize();
         static bool recordSortPredicate(const ResourceRecord &r1,
             const ResourceRecord &r2);
-        int findResourceRecord(std::string resourceName);
+        ResourceRecord * getResourceRecord(std::string & resourceName);
+        CacheEntry * getCacheEntry(std::string & resourceName);
+        void updateRecordCache();
 };
 
 #endif
