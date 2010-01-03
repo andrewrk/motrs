@@ -1,6 +1,0 @@
-bitmap=picture.bmp
-alpha=255, 0, 255
-obstacle=false
-visible=true
-portal=none
-ground=normal

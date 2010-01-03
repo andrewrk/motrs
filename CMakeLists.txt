@@ -27,6 +27,8 @@ MESSAGE("Compiling version ${VERSION}")
 ####################### Dependencies #######################
 SET(DEP_INCLUDES "")
 SET(DEP_LIBS "")
+SET(EDITOR_DEP_INCLUDES "")
+SET(EDITOR_DEP_LIBS "")
 SET(DLL_FILES "")
 
 # check for SDL
@@ -49,6 +51,30 @@ ELSE(SDL_FOUND)
     SET(STATUS_SDL "not found")
     MESSAGE("Could not find SDL")
 ENDIF(SDL_FOUND)
+
+# check for Qt4
+SET(QT_MIN_VERSION "4.4.0")
+FIND_PACKAGE(Qt4 4.4.3 COMPONENTS QtCore QtGui)
+SET(QT_DLL1 ${MINGW_DLL_PATH}/QtCore4.dll)
+SET(QT_DLL2 ${MINGW_DLL_PATH}/QtGui4.dll)
+IF(QT_FOUND)
+    MESSAGE("Found Qt")
+
+    INCLUDE(${QT_USE_FILE})
+
+    IF(NOT WIN32 OR (EXISTS ${QT_DLL1} AND EXISTS ${QT_DLL2}))
+        SET(DLL_FILES "${DLL_FILES} ${QT_DLL1} ${QT_DLL2}")
+        SET(HAVE_QT TRUE)
+        SET(STATUS_QT "OK")
+        SET(EDITOR_DEP_LIBS "${EDITOR_DEP_LIBS} ${QT_LIBRARIES}")
+    ELSE(NOT WIN32 OR (EXISTS ${QT_DLL1} AND EXISTS ${QT_DLL2}))
+        SET(STATUS_QT "missing dll")
+        MESSAGE("...but missing ${QT_DLL1} and ${QT_DLL2} for Windows build.")
+    ENDIF(NOT WIN32 OR (EXISTS ${QT_DLL1} AND EXISTS ${QT_DLL2}))
+ELSE(QT_FOUND)
+    SET(STATUS_QT "not found")
+    MESSAGE("Could not find Qt4")
+ENDIF(QT_FOUND)
 ################################################################
 
 # compile resource compiling tools
@@ -72,12 +98,27 @@ SET(CMAKE_CXX_FLAGS "-ggdb -Wall")
 FILE(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 FILE(GLOB_RECURSE INCLUDES ${CMAKE_SOURCE_DIR}/src/*.h)
 
-INCLUDE_DIRECTORIES(${OUT_INCLUDE_PATH} ${DEP_INCLUDES})
-LINK_LIBRARIES(${DEP_LIBS})
-
 ADD_EXECUTABLE(${PROGRAM_NAME} ${SOURCES})
+INCLUDE_DIRECTORIES(${OUT_INCLUDE_PATH} ${DEP_INCLUDES})
+TARGET_LINK_LIBRARIES(${PROGRAM_NAME} ${DEP_LIBS})
 
+# compile world editor
+SET(EDITOR_NAME "world-editor")
+
+FILE(GLOB_RECURSE EDITOR_UI_FILES ${CMAKE_SOURCE_DIR}/tools/world-editor/*.ui)
+FILE(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_SOURCE_DIR}/tools/world-editor/*.cpp)
+FILE(GLOB_RECURSE EDITOR_INCLUDES ${CMAKE_SOURCE_DIR}/tools/world-editor/*.h)
+
+QT4_AUTOMOC(${EDITOR_SOURCES})
+QT4_WRAP_UI(EDITOR_UI_OUT ${EDITOR_UI_FILES})
+
+ADD_EXECUTABLE(${EDITOR_NAME} ${EDITOR_SOURCES} ${EDITOR_UI_OUT})
+INCLUDE_DIRECTORIES(${EDITOR_DEP_INCLUDES} ${CMAKE_BINARY_DIR} ${OUT_INCLUDE_PATH})
+TARGET_LINK_LIBRARIES(${EDITOR_NAME} ${EDITOR_DEP_LIBS})
+
+# dependencies
 ADD_DEPENDENCIES(${PROGRAM_NAME} "resources.dat")
+ADD_DEPENDENCIES(${PROGRAM_NAME} ${EDITOR_NAME})
 
 # install 
 IF(WIN32)
@@ -103,7 +144,8 @@ MESSAGE("\n"
 MESSAGE(
 "Required Libraries\n"
 "------------------\n"
-"* SDL                       : ${STATUS_SDL}\n"
+"* SDL                          : ${STATUS_SDL}\n"
+"* Qt4                          : ${STATUS_QT}\n"
 )
 
 MESSAGE(
