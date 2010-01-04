@@ -19,7 +19,8 @@ def update_files(files, datfile):
     is updated.
     """
     for f in files:
-        if os.system("%s update %s \"%s\"" % (resource_tool, datfile, f)):
+        command = "%s update %s \"%s\"" % (os.path.abspath(resource_tool), os.path.abspath(datfile), os.path.abspath(f))
+        if os.system(command):
             sys.exit(1)
 
 def compile_folder(in_folder, out_folder, compile_func):
@@ -187,39 +188,40 @@ def build_path(file_path):
     """
     ensure that folders exist so that this file_path can be written to
     """
-    # TODO: this is pretty sloppy
-    os.system("mkdir -p %s" % os.path.split(file_path)[0])
+    d = os.path.dirname(file_path)
+    if not os.path.exists(d):
+        os.makedirs(d)
 
 command, datfile, in_dir, out_dir = sys.argv
-resource_tool = out_dir + "/resource-edit"
+resource_tool = os.path.join(out_dir, "resource-edit")
 
-in_resources, out_resources = [x + "/resources" for x in (in_dir, out_dir)]
-compile_animations = in_dir + "/tools/compile-animations"
-compile_props = in_dir + "/tools/compile-props"
+in_resources, out_resources = [os.path.join(x, "resources") for x in (in_dir, out_dir)]
+compile_animations = os.path.join(in_dir, "tools", "compile-animations")
+compile_props = os.path.join(in_dir, "tools", "compile-props")
 
 # compile animations
 print("Checking animations...")
-in_ani, out_ani = (in_resources + "/animations", out_resources + "/animations")
+in_ani, out_ani = (os.path.join(in_resources, "animations"), os.path.join(out_resources, "animations"))
 compile_animation_folder(in_ani, out_ani)
 update_folder(out_ani, datfile)
 
 # compile bitmaps
 print("Checking bitmaps...")
-update_folder(in_resources + "/bitmaps", datfile)
+update_folder(os.path.join(in_resources, "bitmaps"), datfile)
 
 # compile characters
 print("Checking characters...")
-in_chars, out_chars = (in_resources + "/characters", out_resources + "/characters")
+in_chars, out_chars = (os.path.join(in_resources, "characters"), os.path.join(out_resources, "characters"))
 compile_folder(in_chars, out_chars, compile_file)
 update_folder(out_chars, datfile)
 
 # compile maps
 print("Checking maps...")
-update_folder(in_resources + "/maps", datfile)
+update_folder(os.path.join(in_resources, "maps"), datfile)
 
 # compile tiles
 print("Checking tiles...")
-in_tiles, out_tiles = (in_resources + "/tiles", out_resources + "/tiles")
+in_tiles, out_tiles = (os.path.join(in_resources, "tiles"), os.path.join(out_resources, "tiles"))
 compile_folder(in_tiles, out_tiles, compile_file)
 update_folder(out_tiles, datfile)
 
