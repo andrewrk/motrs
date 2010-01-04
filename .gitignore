@@ -1,3 +1,5 @@
 *.swp
 build/
 tags
+qtcreator-build/
+CMakeLists.txt.user
