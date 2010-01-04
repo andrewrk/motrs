@@ -191,7 +191,7 @@ def build_path(file_path):
     os.system("mkdir -p %s" % os.path.split(file_path)[0])
 
 command, datfile, in_dir, out_dir = sys.argv
-resource_tool = out_dir + "/tools/resource-edit"
+resource_tool = out_dir + "/resource-edit"
 
 in_resources, out_resources = [x + "/resources" for x in (in_dir, out_dir)]
 compile_animations = in_dir + "/tools/compile-animations"

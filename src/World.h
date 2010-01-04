@@ -1,11 +1,15 @@
 #ifndef _WORLD_H_
 #define _WORLD_H_
 
+#include <vector>
+#include "Map.h"
+
 class World
 {
     public:
         // create a world from data in memory
         World(const char * buffer);
+        World();
         ~World();
 
         // did the world load ok?

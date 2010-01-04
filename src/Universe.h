@@ -1,6 +1,7 @@
 #ifndef _UNIVERSE_H_
 #define _UNIVERSE_H_
 
+#include "World.h"
 #include <vector>
 
 /* Universe - a list of all worlds.
