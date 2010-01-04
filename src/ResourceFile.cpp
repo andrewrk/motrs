@@ -89,9 +89,9 @@ void ResourceFile::createNew(std::string fileName)
 
 void ResourceFile::close()
 {
-    if( m_state == StateReady ) {
+    if( m_file.is_open() )
         m_file.close();
-    }
+    m_file.clear();
     m_state = StateUninitialized;
 }
 

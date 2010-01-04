@@ -20,10 +20,6 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/include/version.h.in
 MESSAGE("Compiling version ${VERSION}")
 
 ####################### Dependencies #######################
-SET(DEP_INCLUDES "")
-SET(DEP_LIBS "")
-SET(EDITOR_DEP_INCLUDES "")
-SET(EDITOR_DEP_LIBS "")
 
 # check for SDL
 FIND_PACKAGE(SDL)
@@ -31,12 +27,12 @@ SET(SDL_DLL "${MINGW_DLL_PATH}/SDL.dll")
 IF(SDL_FOUND)
     MESSAGE("Found SDL")
 
+    SET(DEP_INCLUDES ${DEP_INCLUDES} ${SDL_INCLUDE_DIR})
+    SET(DEP_LIBS ${DEP_LIBS} ${SDL_LIBRARY})
     IF(NOT WIN32 OR EXISTS ${SDL_DLL})
         SET(DLL_FILES ${DLL_FILES} ${SDL_DLL})
         SET(HAVE_SDL TRUE)
         SET(STATUS_SDL "OK")
-        SET(DEP_INCLUDES "${DEP_INCLUDES} ${SDL_INCLUDE_DIR}")
-        SET(DEP_LIBS "${DEP_LIBS} ${SDL_LIBRARY}")
     ELSE(NOT WIN32 OR EXISTS ${SDL_DLL})
         SET(STATUS_SDL "MISSING DLL")
         MESSAGE("...but missing ${SDL_DLL} for Windows build.")
@@ -56,13 +52,13 @@ IF(QT_FOUND)
     MESSAGE("Found Qt")
 
     INCLUDE(${QT_USE_FILE})
+    SET(EDITOR_DEP_LIBS "${EDITOR_DEP_LIBS} ${QT_LIBRARIES}")
 
     IF(NOT WIN32 OR (EXISTS ${QT_DLL1} AND EXISTS ${QT_DLL2}
     AND EXISTS ${QT_DLL3}))
         SET(EDITOR_DLL_FILES ${EDITOR_DLL_FILES} ${QT_DLL1} ${QT_DLL2} ${QT_DLL3})
         SET(HAVE_QT TRUE)
         SET(STATUS_QT "OK")
-        SET(EDITOR_DEP_LIBS "${EDITOR_DEP_LIBS} ${QT_LIBRARIES}")
     ELSE()
         SET(STATUS_QT "missing dll")
         MESSAGE("...but missing one of ${QT_DLL1}, ${QT_DLL2}, or ${QT_DLL3} for Windows build.")
