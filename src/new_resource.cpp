@@ -1,5 +1,6 @@
 
 #include "new_resource.h"
+#include <cstdlib>
 
 float ZoomRegion::zoomFor(int x, int y) {
     if (orientation == zroSolid)
