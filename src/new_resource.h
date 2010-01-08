@@ -31,7 +31,7 @@ enum SurfaceType {
     stNormal,
     stWater,
     stIce,
-    2tQuickSand,
+    stQuickSand,
 };
 
 
