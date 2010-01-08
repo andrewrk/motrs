@@ -15,20 +15,23 @@ private:
 };
 
 enum PhysicalPresence {
-    ppHole, ppFloor, ppWall
+    ppHole, ppFloor, ppGuardRail, ppEmbrasure, ppWall
 };
 
 enum TileShape {
     tsSolidHole, tsSolidFloor, tsSolidWall,
-    // tsDiag(pp1)(pp2)(where-pp1-is)
-    tsDiagWallFloorNW, tsDiagWallFloorNE, tsDiagWallFloorSE, tsDiagWallFloorSW,
+    // floor + wall diagonals. tsDiag(pp1)(pp2)(where-pp2-is)
+    tsDiagFloorWallNW, tsDiagFloorWallNE, tsDiagFloorWallSE, tsDiagFloorWallSW,
+    // floor + rail orientations
+    tsFloorRailN, tsFloorRailE, tsFloorRailS, tsFloorRailW,
+    tsFloorRailNE, tsFloorRailSE, tsFloorRailSW, tsFloorRailNW,
 };
 
 enum SurfaceType {
     stNormal,
     stWater,
     stIce,
-    stQuickSand,
+    2tQuickSand,
 };
 
 
