@@ -19,7 +19,6 @@ def update_files(files, datfile):
     is updated.
     """
 
-    datfile_time = os.path.getmtime(datfile)
 
     for f in files:
         if os.path.getmtime(f) > datfile_time:
@@ -198,6 +197,7 @@ def build_path(file_path):
 
 command, datfile, in_dir, out_dir = sys.argv
 resource_tool = os.path.join(out_dir, "resource-edit")
+datfile_time = os.path.getmtime(datfile)
 
 in_resources, out_resources = [os.path.join(x, "resources") for x in (in_dir, out_dir)]
 compile_animations = os.path.join(in_dir, "tools", "compile-animations")
