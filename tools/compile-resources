@@ -73,7 +73,7 @@ def compile_world(in_file, out_file):
     for line in lines:
         line = line.strip()
         (x, y, z, id) = line.split()
-        out_handle.write(pack("iii", (int(x), int(y), int(z))))
+        out_handle.write(pack("iii", int(x), int(y), int(z)))
         store_string(id, out_handle)
     out_handle.close()
 
