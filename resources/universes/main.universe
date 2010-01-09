@@ -1,0 +1,4 @@
+worlds=array_string=overworld.world
+start_world=int=0
+start_x=int=0
+start_y=int=0

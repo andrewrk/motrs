@@ -18,13 +18,14 @@ def update_files(files, datfile):
     make sure the resources.dat file has every file in files and it
     is updated.
     """
-
-
     for f in files:
-        if os.path.getmtime(f) > datfile_time:
-            command = "%s update %s \"%s\"" % (os.path.abspath(resource_tool), os.path.abspath(datfile), os.path.abspath(f))
-            if os.system(command):
-                sys.exit(1)
+        update_file(f, datfile)
+
+def update_file(f, datfile):
+    if os.path.getmtime(f) > datfile_time:
+        command = "%s update %s \"%s\"" % (os.path.abspath(resource_tool), os.path.abspath(datfile), os.path.abspath(f))
+        if os.system(command):
+            sys.exit(1)
 
 def compile_folder(in_folder, out_folder, compile_func):
     """
@@ -88,10 +89,17 @@ def write_properties(text, out_handle):
         elif typeName == 'float':
             out_handle.write(pack("f", float(value)))
         elif typeName == 'bool':
-            out_handleval = 0
+            out_val = 0
             if value.lower() in ("true", "1", "yes", "y", "t"):
-                out_handleval = 1
-            out_handle.write(pack("b", out_handleval))
+                out_val = 1
+            out_handle.write(pack("b", out_val))
+        elif typeName == 'array_string':
+            strings = [x.strip() for x in value.split(",")]
+            count = len(strings)
+            # array length
+            out_handle.write(pack("i", int(count)))
+            for string in strings:
+                store_string(string, out_handle)
         else:
             sys.stderr.write("ERROR: Unsupported property type: %s\n" % typeName)
             sys.exit(1)
@@ -195,6 +203,21 @@ def build_path(file_path):
     if not os.path.exists(d):
         os.makedirs(d)
 
+
+# things that just need to be copied
+static_resources = (
+    "bitmaps",
+    "maps",
+    "worlds",
+)
+
+# things that simply need to be hashmap-compiled
+hashmap_resources = (
+    "tiles",
+    "universes",
+    "characters",
+)
+
 command, datfile, in_dir, out_dir = sys.argv
 resource_tool = os.path.join(out_dir, "resource-edit")
 datfile_time = os.path.getmtime(datfile)
@@ -203,29 +226,20 @@ in_resources, out_resources = [os.path.join(x, "resources") for x in (in_dir, ou
 compile_animations = os.path.join(in_dir, "tools", "compile-animations")
 compile_props = os.path.join(in_dir, "tools", "compile-props")
 
+# compile static resources
+for item in static_resources:
+    print("Checking %s..." % item)
+    update_folder(os.path.join(in_resources, item), datfile)
+
+# compile hashmap resources
+for item in hashmap_resources:
+    print("Checking %s..." % item)
+    in_files, out_files = (os.path.join(in_resources, item), os.path.join(out_resources, item))
+    compile_folder(in_files, out_files, compile_file)
+    update_folder(out_files, datfile)
+
 # compile animations
 print("Checking animations...")
 in_ani, out_ani = (os.path.join(in_resources, "animations"), os.path.join(out_resources, "animations"))
 compile_animation_folder(in_ani, out_ani)
 update_folder(out_ani, datfile)
-
-# compile bitmaps
-print("Checking bitmaps...")
-update_folder(os.path.join(in_resources, "bitmaps"), datfile)
-
-# compile characters
-print("Checking characters...")
-in_chars, out_chars = (os.path.join(in_resources, "characters"), os.path.join(out_resources, "characters"))
-compile_folder(in_chars, out_chars, compile_file)
-update_folder(out_chars, datfile)
-
-# compile maps
-print("Checking maps...")
-update_folder(os.path.join(in_resources, "maps"), datfile)
-
-# compile tiles
-print("Checking tiles...")
-in_tiles, out_tiles = (os.path.join(in_resources, "tiles"), os.path.join(out_resources, "tiles"))
-compile_folder(in_tiles, out_tiles, compile_file)
-update_folder(out_tiles, datfile)
-
