@@ -1,29 +1,51 @@
 #ifndef _INPUT_H_
 #define _INPUT_H_
 
-#include <string>
-
 #include "SDL.h"
 
+
+/** no mouse support yet. */
 class Input {
 public:
     enum Key {
-        // movement
+        // Movement
         Up, Right, Down, Left,
-        // Actions
-        Attack1, Attack2, Jump, ToggleRun,
+        Jump,
+        ActivateDash,
+        ToggleRun,
+
+        // Fighting
+        Attack_1, Attack_2,
+        Weapon_1,
+        Weapon_2,
+        Weapon_3,
+        Weapon_4,
+        Weapon_5,
+        Weapon_6,
+        Weapon_7,
+        Weapon_8,
+        Weapon_9,
+        Weapon_0,
+
+        // Misc
+        Interact,
+        TogglePause,
 
         Key_size
     };
 
-    static bool boolState(Key key);
+    /** whether a key is depressed currently. */
+    static bool state(Key key);
+    /** whether a key has just been pressed (like a key-down event). */
+    static bool justPressed(Key key);
 
+    /** call this at the start of each frame. */
     static void refresh();
 
-    static const std::string description(Key key);
 private:
-    static bool m_boolState[Key_size];
-    static SDLKey m_boolMap[Key_size];
+    static bool m_state[Key_size];
+    static bool m_lastState[Key_size];
+    static SDLKey m_map[Key_size];
 };
 
 #endif
