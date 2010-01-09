@@ -2,7 +2,7 @@
 
 int Utils::stringToInt(std::string value)
 {
-    std::sstream ss;
+    std::stringstream ss;
     ss << value;
     int out;
     ss >> out;
@@ -11,7 +11,7 @@ int Utils::stringToInt(std::string value)
 
 std::string Utils::intToString(int value)
 {
-    std::sstream ss;
+    std::stringstream ss;
     ss << value;
     return ss.str();
 }

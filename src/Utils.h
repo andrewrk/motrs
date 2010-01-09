@@ -6,13 +6,13 @@
 
 namespace Utils
 {
-    template T
+    template <class T>
     T min(T x, T y)
     {
         return (x > y) ? y : x;
     }
 
-    template T
+    template <class T>
     T max(T x, T y)
     {
         return (x > y) ? x : y;
@@ -20,6 +20,6 @@ namespace Utils
 
     int stringToInt(std::string value);
     std::string intToString(int value);
-};
+}
 
 #endif
