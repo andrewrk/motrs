@@ -9,9 +9,6 @@
 
 
 int main(int argc, char* argv[]) {
-
-
-
     const Uint32 interval = 1000 / FPS; //frames per second -> miliseconds
 
     //grab parameters
