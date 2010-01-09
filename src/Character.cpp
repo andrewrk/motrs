@@ -1,6 +1,6 @@
 #include "Character.h"
 
-Character::Character()
+Character::Character(ResourceFile * resourceFile, std::string resourceName)
 {
 
 }

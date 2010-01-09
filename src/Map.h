@@ -2,6 +2,7 @@
 #define _MAP_H_
 
 #include "Array3.h"
+#include "ResourceFile.h"
 #include "Tile.h"
 
 #include <vector>
@@ -9,7 +10,7 @@
 class Map
 {
 public:
-    Map(const char * buffer);
+    Map(ResourceFile * resourceFile, std::string resourceName);
     ~Map();
 
     bool isGood();

@@ -1,10 +1,12 @@
 #ifndef _CHARACTER_H_
 #define _CHARACTER_H_
 
+#include "Animation.h"
+
 class Character 
 {
 public:
-    Character(const char * buffer);
+    Character(ResourceFile * resourceFile, std::string resourceName);
     ~Character();
 
     enum Direction {

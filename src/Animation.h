@@ -2,7 +2,7 @@
 #define _ANIMATION_H_
 
 #include "SDL.h"
-
+#include "ResourceFile.h"
 #include <vector>
 
 class Animation

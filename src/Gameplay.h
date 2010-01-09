@@ -2,7 +2,7 @@
 #define _GAMEPLAY_H_
 
 #include "SDL.h"
-#include "Map.h"
+#include "Universe.h"
 #include "Character.h"
 #include "ResourceFile.h"
 

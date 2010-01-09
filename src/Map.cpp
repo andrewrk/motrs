@@ -1,6 +1,7 @@
 #include "Map.h"
 
-Map::Map(const char * buffer)
+Map::Map(ResourceFile * resourceFile, std::string resourceName)
+    : m_tiles(1, 1, 1)
 {
 
 }

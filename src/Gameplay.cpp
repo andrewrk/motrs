@@ -1,5 +1,7 @@
-#include "Tile.h"
 #include "Gameplay.h"
+
+#include "Input.h"
+#include "Tile.h"
 #include "Debug.h"
 #include "os_config.h"
 
@@ -14,13 +16,16 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     m_interval(1000/fps), //frames per second -> miliseconds
     m_resourceFile(new ResourceFile(ResourceFilePath))
 {
+    Universe * universe = new Universe(m_resourceFile->getResource("main.universe"));
+    Debug::assert(universe->isGood(), "universe load");
+    World * world = new World(m_resourceFile, universe->property("tmp.world").stringValue);
 
 }
 
 void Gameplay::mainLoop()
 {
     Uint32 next_time = 0;
-    while (1) {
+    while (true) {
         processEvents(); //input
 
         //set up an interval
@@ -38,23 +43,25 @@ void Gameplay::mainLoop()
 }
 
 void Gameplay::processEvents() {
-	//handle all events
-	SDL_Event event;
-	while(SDL_PollEvent(&event)){
-		switch(event.type){
-			case SDL_KEYDOWN:
-				switch( event.key.keysym.sym ){
-					case SDLK_ESCAPE:
-						exit(0);
-					default:
-						//do nothing
-						break;
-				}
-				break;
-			case SDL_QUIT:
-				exit(0);
-		}
-	}
+    Input::refresh();
+
+//	// handle all events
+//	SDL_Event event;
+//	while(SDL_PollEvent(&event)){
+//		switch(event.type){
+//			case SDL_KEYDOWN:
+//				switch( event.key.keysym.sym ){
+//					case SDLK_ESCAPE:
+//						exit(0);
+//					default:
+//						//do nothing
+//						break;
+//				}
+//				break;
+//			case SDL_QUIT:
+//				exit(0);
+//		}
+//	}
 }
 
 
@@ -142,35 +149,35 @@ void Gameplay::nextFrame () {
 
 
 
-void Gameplay::enterMap(char* mapFile, int startX, int startY){
-	//load map
-        curmap = new Map(m_resourceFile->getResource("test.map"));
-	
-        if( startX == -1 ) startX = (int)(curmap->width() / 2);
-        if( startY == -1 ) startY = curmap->height()-1;
-	setCharFeet(hero, startX * Tile::size+1, startY * Tile::size+1);
-	hero->velX = 0;
-	hero->velY = 0;	
-	
-	//compute some map info
-        mapWidthPix = curmap->width() * Tile::size;
-        mapHeightPix= curmap->height() * Tile::size;
-	prevHeroLoc = charCoord(hero);
-}
+//void Gameplay::enterMap(char* mapFile, int startX, int startY){
+//	//load map
+//        curmap = new Map(m_resourceFile->getResource("test.map"));
+//
+//        if( startX == -1 ) startX = (int)(curmap->width() / 2);
+//        if( startY == -1 ) startY = curmap->height()-1;
+//	setCharFeet(hero, startX * Tile::size+1, startY * Tile::size+1);
+//	hero->velX = 0;
+//	hero->velY = 0;
+//
+//	//compute some map info
+//        mapWidthPix = curmap->width() * Tile::size;
+//        mapHeightPix= curmap->height() * Tile::size;
+//	prevHeroLoc = charCoord(hero);
+//}
 
 void Gameplay::initMapTest(SDL_Surface* playScreen, char* mapToTest, int startX, int startY, char* charToTest) {
-	//remember screen we're playing on
-	m_screen = playScreen;
-	curmap = NULL;
-	
-	//load hero
-        hero = new Character(m_resourceFile->getResource("hero.char"));
-
-	//init variables
-        hero->facing = Character::South;
-	hero->curAnimation = hero->standing[hero->facing];
-	
-	enterMap(mapToTest, startX, startY);
+//	//remember screen we're playing on
+//	m_screen = playScreen;
+//	curmap = NULL;
+//
+//	//load hero
+//        hero = new Character(m_resourceFile->getResource("hero.char"));
+//
+//	//init variables
+//        hero->facing = Character::South;
+//	hero->curAnimation = hero->standing[hero->facing];
+//
+//	enterMap(mapToTest, startX, startY);
 }
 
 void Gameplay::updateDisplay() {
@@ -224,121 +231,121 @@ void Gameplay::updateDisplay() {
 //    }
 
 }
-
-int Gameplay::screenX(int absX){
-	return absX-offsetX;
-}
-
-int Gameplay::screenY(int absY){
-	return absY-offsetY;
-}
-
-int Gameplay::absX(int screenX){
-	return screenX+offsetX;
-}
-
-int Gameplay::absY(int screenY){
-	return screenY+offsetY;
-}
-
-
-
-float Gameplay::feetTop(character* ch){
-	return ch->y + ch->feetOffsetY;
-}
-
-float Gameplay::feetLeft(character* ch){
-	return ch->x + ch->feetOffsetX;
-}
-
-float Gameplay::feetRight(character* ch){
-	return ch->x + ch->feetOffsetX + ch->feetWidth;
-}
-
-float Gameplay::feetBottom(character* ch){
-	return ch->y + ch->feetOffsetY + ch->feetHeight;
-}
-
-float Gameplay::feetCenterX(character* ch){
-	return feetLeft(ch) + ch->feetWidth / 2;
-}
-
-float Gameplay::feetCenterY(character* ch){
-	return feetTop(ch) + ch->feetHeight / 2;
-}
-
-void Gameplay::setCharFeet(character* ch, float newX, float newY){
-	setCharFeetX(ch, newX);
-	setCharFeetY(ch, newY);
-}
-
-void Gameplay::setCharFeetX(character* ch, float newX){
-	ch->x = newX - ch->feetOffsetX;
-}
-
-void Gameplay::setCharFeetY(character* ch, float newY){
-	ch->y = newY - ch->feetOffsetY;
-}
-
-Coord Gameplay::charCoord(character* ch){
-	Coord ret;
-	
-	ret.x = (int) floor(feetCenterX(ch) / Tile::size);
-	ret.y = (int) floor(feetCenterY(ch) / Tile::size);
-	
-	return ret;
-}
-
-int Gameplay::isValidMove(character* ch, float offX, float offY){
-	int x,y;
-	Coord ft = charCoord(ch);
-	
-	//check the rectangle that is the character's feet with nearby obstacles
-	//how about a radius of 1 square.
-	
-	for(x=ft.x-1;x<=ft.x+1;x++){
-		for(y=ft.y-1;y<=ft.y+1;y++){
-			if( isObstacle(x,y) && collision( rect(feetLeft(ch)+offX, feetTop(ch)+offY, ch->feetWidth, ch->feetHeight) , rect(x*Tile::size, y*Tile::size, Tile::size, Tile::size) )  )
-				return 0;
-		}
-	}
-	
-	return 1;
-}
-
-SDL_Rect Gameplay::rect(int x, int y, int w, int h){
-	SDL_Rect ret;
-	
-	ret.x = x;
-	ret.y = y;
-	ret.w = w;
-	ret.h = h;
-	
-	return ret;
-}
-
-int Gameplay::collision(SDL_Rect r1, SDL_Rect r2){
-	return ! (r1.x + r1.w < r2.x || r1.x > r2.x + r2.w) && ! (r1.y + r1.h < r2.y || r1.y > r2.y + r2.h);
-}
-
-int Gameplay::isObstacle(int x, int y){
-	int i;
-
-	//out of bounds
-	if( x >= curmap->width || y >= curmap->height || x < 0 || y < 0 ) return 1;
-	
-	//check each layer for obstacle tiles
-	for(i=0;i<curmap->numLayers;i++){
-		if(curmap->squares[y][x][i] != -1 && curmap->tiles[curmap->squares[y][x][i]]->obstacle ) return 1;
-	}
-	return 0;
-}
-
-int Gameplay::ptInSquare(int x, int y, int squX, int squY){
-	return x > squX * Tile::size && x < (squX+1) * Tile::size && y > squY * Tile::size && y < (squY+1) * Tile::size;
-}
-
-int Gameplay::keyPressed(SDLKey key){
-	Uint8* keystate = SDL_GetKeyState(NULL);
-	return (int) keystate[key];
-}
+//
+//int Gameplay::screenX(int absX){
+//	return absX-offsetX;
+//}
+//
+//int Gameplay::screenY(int absY){
+//	return absY-offsetY;
+//}
+//
+//int Gameplay::absX(int screenX){
+//	return screenX+offsetX;
+//}
+//
+//int Gameplay::absY(int screenY){
+//	return screenY+offsetY;
+//}
+//
+//
+//
+//float Gameplay::feetTop(character* ch){
+//	return ch->y + ch->feetOffsetY;
+//}
+//
+//float Gameplay::feetLeft(character* ch){
+//	return ch->x + ch->feetOffsetX;
+//}
+//
+//float Gameplay::feetRight(character* ch){
+//	return ch->x + ch->feetOffsetX + ch->feetWidth;
+//}
+//
+//float Gameplay::feetBottom(character* ch){
+//	return ch->y + ch->feetOffsetY + ch->feetHeight;
+//}
+//
+//float Gameplay::feetCenterX(character* ch){
+//	return feetLeft(ch) + ch->feetWidth / 2;
+//}
+//
+//float Gameplay::feetCenterY(character* ch){
+//	return feetTop(ch) + ch->feetHeight / 2;
+//}
+//
+//void Gameplay::setCharFeet(character* ch, float newX, float newY){
+//	setCharFeetX(ch, newX);
+//	setCharFeetY(ch, newY);
+//}
+//
+//void Gameplay::setCharFeetX(character* ch, float newX){
+//	ch->x = newX - ch->feetOffsetX;
+//}
+//
+//void Gameplay::setCharFeetY(character* ch, float newY){
+//	ch->y = newY - ch->feetOffsetY;
+//}
+//
+//Coord Gameplay::charCoord(character* ch){
+//	Coord ret;
+//
+//	ret.x = (int) floor(feetCenterX(ch) / Tile::size);
+//	ret.y = (int) floor(feetCenterY(ch) / Tile::size);
+//
+//	return ret;
+//}
+//
+//int Gameplay::isValidMove(character* ch, float offX, float offY){
+//	int x,y;
+//	Coord ft = charCoord(ch);
+//
+//	//check the rectangle that is the character's feet with nearby obstacles
+//	//how about a radius of 1 square.
+//
+//	for(x=ft.x-1;x<=ft.x+1;x++){
+//		for(y=ft.y-1;y<=ft.y+1;y++){
+//			if( isObstacle(x,y) && collision( rect(feetLeft(ch)+offX, feetTop(ch)+offY, ch->feetWidth, ch->feetHeight) , rect(x*Tile::size, y*Tile::size, Tile::size, Tile::size) )  )
+//				return 0;
+//		}
+//	}
+//
+//	return 1;
+//}
+//
+//SDL_Rect Gameplay::rect(int x, int y, int w, int h){
+//	SDL_Rect ret;
+//
+//	ret.x = x;
+//	ret.y = y;
+//	ret.w = w;
+//	ret.h = h;
+//
+//	return ret;
+//}
+//
+//int Gameplay::collision(SDL_Rect r1, SDL_Rect r2){
+//	return ! (r1.x + r1.w < r2.x || r1.x > r2.x + r2.w) && ! (r1.y + r1.h < r2.y || r1.y > r2.y + r2.h);
+//}
+//
+//int Gameplay::isObstacle(int x, int y){
+//	int i;
+//
+//	//out of bounds
+//	if( x >= curmap->width || y >= curmap->height || x < 0 || y < 0 ) return 1;
+//
+//	//check each layer for obstacle tiles
+//	for(i=0;i<curmap->numLayers;i++){
+//		if(curmap->squares[y][x][i] != -1 && curmap->tiles[curmap->squares[y][x][i]]->obstacle ) return 1;
+//	}
+//	return 0;
+//}
+//
+//int Gameplay::ptInSquare(int x, int y, int squX, int squY){
+//	return x > squX * Tile::size && x < (squX+1) * Tile::size && y > squY * Tile::size && y < (squY+1) * Tile::size;
+//}
+//
+//int Gameplay::keyPressed(SDLKey key){
+//	Uint8* keystate = SDL_GetKeyState(NULL);
+//	return (int) keystate[key];
+//}

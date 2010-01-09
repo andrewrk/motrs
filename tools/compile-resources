@@ -69,7 +69,7 @@ def compile_world(in_file, out_file):
     out_handle = open(out_file, "wb")
     lines = open(in_file, "rU").read().split("\n")
     lines = [line for line in lines if line != ""]
-    out_handle.write(path("i", len(lines)))
+    out_handle.write(pack("i", len(lines)))
     for line in lines:
         line = line.strip()
         (x, y, z, id) = line.split()
