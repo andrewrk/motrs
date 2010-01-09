@@ -21,8 +21,8 @@ namespace Utils
     int stringToInt(std::string value);
     std::string intToString(int value);
 
-    std::string readString(const char ** cursor);
-    int readInt(const char ** cursor);
+    std::string readString(char ** cursor);
+    int readInt(char ** cursor);
 }
 
 #endif

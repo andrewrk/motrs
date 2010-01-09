@@ -8,22 +8,24 @@
 #include <cmath>
 
 
-const char * ResourceFilePath = RESOURCE_DIR "/resources.dat";
+const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
 
 Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     m_screen(screen),
     m_fps(fps),
     m_interval(1000/fps), //frames per second -> miliseconds
-    m_resourceFile(new ResourceFile(ResourceFilePath))
+    m_resourceFile(new ResourceFile(ResourceFilePath)),
+    m_universe(new Universe(m_resourceFile, "main.universe"))
 {
-    Universe * universe = new Universe(m_resourceFile->getResource("main.universe"));
-    Debug::assert(universe->isGood(), "universe load");
-    World * world = new World(m_resourceFile, universe->property("tmp.world").stringValue);
-
+    Debug::assert(m_universe->isGood(), "universe load");
+    World * world = m_universe->firstWorld();
 }
 
-void Gameplay::mainLoop()
-{
+Gameplay::~Gameplay() {
+    delete m_universe;
+}
+
+void Gameplay::mainLoop() {
     Uint32 next_time = 0;
     while (true) {
         processEvents(); //input
@@ -66,85 +68,85 @@ void Gameplay::processEvents() {
 
 
 void Gameplay::nextFrame () {
-	//which keys are down
-	Uint8* keystate;
-	int dirX, dirY;
-	float angle;
-	Coord heroLoc;
-	int i;
-	int slow;
-	
-	keystate = SDL_GetKeyState(NULL);
-	
-	//physics
-	
-	//which direction to go
-	dirX = 0;
-	dirY = 0;
-	if( keystate[SDLK_LEFT]  || keystate[SDLK_a] ) dirX--;
-	if( keystate[SDLK_RIGHT] || keystate[SDLK_d] ) dirX++;
-	if( keystate[SDLK_UP]    || keystate[SDLK_w] ) dirY--;
-	if( keystate[SDLK_DOWN]  || keystate[SDLK_s] ) dirY++;
-	
-	if( dirX == 0 && dirY == 0){
-		//stand still
-		hero->velX = 0;
-		hero->velY = 0;
-		
-		hero->curAnimation = hero->standing[hero->facing];
-	} else {
-		//run in a direction
-		angle = std::atan2(dirY,dirX);
-		hero->velX = hero->speed * cos(angle);
-		hero->velY = hero->speed * sin(angle);
-		
-		hero->facing = (dirX+1)*3 + (dirY+1);
-		hero->curAnimation = hero->running[hero->facing];
-	}
-	
-	//step to next frame in animation
-    hero->nextFrame();
-	
-	//momentum	
-	if( isValidMove( hero, hero->velX, 0 )  )
-		hero->x += hero->velX;
-	else {
-		slow = hero->velX / abs(hero->velX);
-		for(i=1;i<=abs(hero->velX) && isValidMove( hero, slow, 0 );i++)
-			hero->x += slow;
-	}
-
-	if( isValidMove( hero, 0, hero->velY )  )
-		hero->y += hero->velY;
-	else {
-		slow = hero->velY / abs(hero->velY);
-		for(i=1;i<=abs(hero->velY) && isValidMove( hero, 0, slow );i++)
-			hero->y += slow;
-	}
-	
-	//special tiles
-	heroLoc = charCoord(hero);
-	
-//	if( heroLoc.x != prevHeroLoc.x || heroLoc.y != prevHeroLoc.y  )
-//		enterSquare(hero, &heroLoc);
-	
-	
-	//calculate screen offset
-	if( curmap->width() * Tile::size <= m_screen->w ) {
-		offsetX =  -m_screen->w / 2 + curmap->width() * Tile::size / 2;
-	} else {
-		offsetX = feetCenterX(hero) - (m_screen->w / 2);
-		if( offsetX < 0 ) offsetX = 0;
-		if( offsetX > mapWidthPix - m_screen->w ) offsetX = mapWidthPix-m_screen->w;
-	}
-	
-	if( curmap->height() * Tile::size <= m_screen->h ){
-		offsetY = -m_screen->h / 2 + curmap->height() * Tile::size / 2;
-	} else {
-		offsetY = feetCenterY(hero) - (m_screen->h / 2);
-		if( offsetY < 0 ) offsetY = 0;
-		if( offsetY > mapHeightPix - m_screen->h  ) offsetY = mapHeightPix-m_screen->h;
-	}
+//	//which keys are down
+//	Uint8* keystate;
+//	int dirX, dirY;
+//	float angle;
+//	Coord heroLoc;
+//	int i;
+//	int slow;
+//
+//	keystate = SDL_GetKeyState(NULL);
+//
+//	//physics
+//
+//	//which direction to go
+//	dirX = 0;
+//	dirY = 0;
+//	if( keystate[SDLK_LEFT]  || keystate[SDLK_a] ) dirX--;
+//	if( keystate[SDLK_RIGHT] || keystate[SDLK_d] ) dirX++;
+//	if( keystate[SDLK_UP]    || keystate[SDLK_w] ) dirY--;
+//	if( keystate[SDLK_DOWN]  || keystate[SDLK_s] ) dirY++;
+//
+//	if( dirX == 0 && dirY == 0){
+//		//stand still
+//		hero->velX = 0;
+//		hero->velY = 0;
+//
+//		hero->curAnimation = hero->standing[hero->facing];
+//	} else {
+//		//run in a direction
+//		angle = std::atan2(dirY,dirX);
+//		hero->velX = hero->speed * cos(angle);
+//		hero->velY = hero->speed * sin(angle);
+//
+//		hero->facing = (dirX+1)*3 + (dirY+1);
+//		hero->curAnimation = hero->running[hero->facing];
+//	}
+//
+//	//step to next frame in animation
+//    hero->nextFrame();
+//
+//	//momentum
+//	if( isValidMove( hero, hero->velX, 0 )  )
+//		hero->x += hero->velX;
+//	else {
+//		slow = hero->velX / abs(hero->velX);
+//		for(i=1;i<=abs(hero->velX) && isValidMove( hero, slow, 0 );i++)
+//			hero->x += slow;
+//	}
+//
+//	if( isValidMove( hero, 0, hero->velY )  )
+//		hero->y += hero->velY;
+//	else {
+//		slow = hero->velY / abs(hero->velY);
+//		for(i=1;i<=abs(hero->velY) && isValidMove( hero, 0, slow );i++)
+//			hero->y += slow;
+//	}
+//
+//	//special tiles
+//	heroLoc = charCoord(hero);
+//
+////	if( heroLoc.x != prevHeroLoc.x || heroLoc.y != prevHeroLoc.y  )
+////		enterSquare(hero, &heroLoc);
+//
+//
+//	//calculate screen offset
+//	if( curmap->width() * Tile::size <= m_screen->w ) {
+//		offsetX =  -m_screen->w / 2 + curmap->width() * Tile::size / 2;
+//	} else {
+//		offsetX = feetCenterX(hero) - (m_screen->w / 2);
+//		if( offsetX < 0 ) offsetX = 0;
+//		if( offsetX > mapWidthPix - m_screen->w ) offsetX = mapWidthPix-m_screen->w;
+//	}
+//
+//	if( curmap->height() * Tile::size <= m_screen->h ){
+//		offsetY = -m_screen->h / 2 + curmap->height() * Tile::size / 2;
+//	} else {
+//		offsetY = feetCenterY(hero) - (m_screen->h / 2);
+//		if( offsetY < 0 ) offsetY = 0;
+//		if( offsetY > mapHeightPix - m_screen->h  ) offsetY = mapHeightPix-m_screen->h;
+//	}
 }
 
 
@@ -190,16 +192,16 @@ void Gameplay::updateDisplay() {
     SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, 0,0,0));
 
     //blit the map
-    int startX = (int)(absX(0) / Tile::size);
-    int startY = (int)(absY(0) / Tile::size);
-    int endX = (int)(absX(m_screen->w) / Tile::size);
-    int endY = (int)(absY(m_screen->h) / Tile::size);
-
-
-    if( startX < 0) startX = 0;
-    if( startY < 0) startY = 0;
-    if( endX >= curmap->width() ) endX = curmap->width()-1;
-    if( endY >= curmap->height() ) endY = curmap->height()-1;
+//    int startX = (int)(absX(0) / Tile::size);
+//    int startY = (int)(absY(0) / Tile::size);
+//    int endX = (int)(absX(m_screen->w) / Tile::size);
+//    int endY = (int)(absY(m_screen->h) / Tile::size);
+//
+//
+//    if( startX < 0) startX = 0;
+//    if( startY < 0) startY = 0;
+//    if( endX >= curmap->width() ) endX = curmap->width()-1;
+//    if( endY >= curmap->height() ) endY = curmap->height()-1;
    
     // TODO: loop through tiles and paint them
 //    for(i=0;i<curmap->layerCount();i++){

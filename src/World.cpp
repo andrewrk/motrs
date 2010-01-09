@@ -5,11 +5,10 @@
 World::World(ResourceFile* resourceFile, std::string resourceName)
     : m_good(false)
 {
-    const char * buffer = resourceFile->getResource(resourceName);
-    int* count = (int*)buffer;
-    const char * cursor = buffer + sizeof(int);
+    char * cursor = resourceFile->getResource(resourceName);
+    int count = Utils::readInt(&cursor);
     m_storyCount = 0;
-    for (int i = 0; i < *count; i++) {
+    for (int i = 0; i < count; i++) {
         int x = Utils::readInt(&cursor);
         int y = Utils::readInt(&cursor);
         int z = Utils::readInt(&cursor);

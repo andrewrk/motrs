@@ -15,3 +15,19 @@ std::string Utils::intToString(int value)
     ss << value;
     return ss.str();
 }
+
+std::string Utils::readString(char ** cursor) {
+    int length = readInt(cursor);
+    char* buffer = new char[length];
+    for (int i = 0; i < length; i++)
+        buffer[i] = *(*cursor)++;
+    std::string returnValue = buffer;
+    delete buffer;
+    return returnValue;
+}
+
+int Utils::readInt(char ** cursor) {
+    int value = *(int*)*cursor;
+    *cursor += sizeof(int);
+    return value;
+}
