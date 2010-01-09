@@ -10,16 +10,10 @@ def update_folder(in_folder, datfile):
     and it is updated
     """
     for root, dirs, files in os.walk(in_folder):
-        update_files([os.path.join(root, x) for x in files], datfile)
+        if root.startswith("."): continue
+        for f in (os.path.join(root, x) for x in files):
+            update_file(f, datfile)
         break
-
-def update_files(files, datfile):
-    """
-    make sure the resources.dat file has every file in files and it
-    is updated.
-    """
-    for f in files:
-        update_file(f, datfile)
 
 def update_file(f, datfile):
     if os.path.getmtime(f) > datfile_time:
