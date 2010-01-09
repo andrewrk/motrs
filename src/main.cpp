@@ -11,7 +11,7 @@ const int fps = 48;
 int main(int argc, char* argv[]) {
 
     //grab parameters
-    int windowMode = 0;
+    bool windowMode = 0;
     for (int i = 1; i < argc; i++)
         windowMode |= std::string(argv[i]).compare("--windowed") == 0;
 
@@ -24,6 +24,8 @@ int main(int argc, char* argv[]) {
 
     // create screen
     Uint32 vmflags = SDL_HWSURFACE|SDL_DOUBLEBUF;
+    // TODO tmp
+    windowMode = true;
     if (! windowMode)
         vmflags |= SDL_FULLSCREEN;
 

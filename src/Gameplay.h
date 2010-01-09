@@ -15,12 +15,12 @@ public:
     void mainLoop();
 private:
     static const char * ResourceFilePath;
-    Universe * m_universe;
     SDL_Surface * m_screen;
     int m_fps;
     int m_interval;
 
     ResourceFile * m_resourceFile;
+    Universe * m_universe;
 
     // crappity crap below
     typedef struct {

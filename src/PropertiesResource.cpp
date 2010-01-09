@@ -5,11 +5,37 @@
 
 std::map<std::string, int> PropertiesResource::s_types;
 
-PropertiesResource::PropertiesResource(const char * buffer) :
+PropertiesResource::PropertiesResource(ResourceFile * resourceFile, std::string resourceName) :
     m_properties(),
-    m_error(false)
+    m_good(true)
 {
-    // initialize map between type strings and enum values
+    ensureTypesLoaded();
+    const char * buffer = resourceFile->getResource(resourceName);
+
+    // read properties from buffer
+    Header * header = (Header*) buffer;
+
+    if (header->version != 1) {
+        std::cerr << "PropertiesResource: found a file with version "
+            << header->version << ", can only read up to version 1.\n";
+        m_good = false;
+    }
+    if (m_good) {
+        const char * ptr = buffer + sizeof(Header);
+        for(unsigned int i=0; i<header->propertyCount; ++i) {
+            // read the property
+            std::string name = readString(&ptr);
+            std::string type = readString(&ptr);
+            Variant val = readValue(s_types[type], &ptr);
+
+            // add to map
+            m_properties.insert(std::pair<std::string, Variant>(name, val));
+        }
+    }
+    delete[] buffer;
+}
+
+void PropertiesResource::ensureTypesLoaded() {
     if( s_types.size() == 0 ) {
         s_types.insert(
             std::pair<std::string, int>("string", Variant::TypeString) );
@@ -21,27 +47,6 @@ PropertiesResource::PropertiesResource(const char * buffer) :
             std::pair<std::string, int>("float", Variant::TypeFloat) );
         s_types.insert(
             std::pair<std::string, int>("bool", Variant::TypeBool) );
-    }
-
-    // read properties from buffer
-    Header * header = (Header*) buffer;
-
-    if( header->version != 1 ) {
-        std::cerr << "PropertiesResource: found a file with version "
-            << header->version << ", can only read up to version 1.\n";
-        m_error = true;
-        return;
-    }
-
-    const char * ptr = buffer + sizeof(Header);
-    for(unsigned int i=0; i<header->propertyCount; ++i) {
-        // read the property 
-        std::string name = readString(&ptr);
-        std::string type = readString(&ptr);
-        Variant val = readValue(s_types[type], &ptr);
-
-        // add to map
-        m_properties.insert(std::pair<std::string, Variant>(name, val));
     }
 }
 
@@ -62,12 +67,13 @@ PropertiesResource::Variant PropertiesResource::readValue(int type, const char *
             val.setValue( *((Variant::RGB *) (*ptr)) );
         default:
             std::cerr << "PropertiesResource: unrecognized type\n";
-            m_error = true;
+            m_good = false;
     }
     return val;
 }
 
 // return a string and advance the read pointer
+// TODO replace Util::readString with this function
 std::string PropertiesResource::readString(const char ** readPtr)
 {
     int * size = (int*)(*readPtr);
@@ -87,7 +93,7 @@ PropertiesResource::~PropertiesResource()
 
 bool PropertiesResource::isGood()
 {
-    return ! m_error;
+    return m_good;
 }
 
 // get the value of a property

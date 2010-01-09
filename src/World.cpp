@@ -3,22 +3,23 @@
 #include "Utils.h"
 
 World::World(ResourceFile* resourceFile, std::string resourceName)
-    : m_good(false)
 {
-    char * cursor = resourceFile->getResource(resourceName);
+    char * buffer = resourceFile->getResource(resourceName);
+    char * cursor = buffer;
     int count = Utils::readInt(&cursor);
-    m_storyCount = 0;
+    m_good = true;
     for (int i = 0; i < count; i++) {
         int x = Utils::readInt(&cursor);
         int y = Utils::readInt(&cursor);
         int z = Utils::readInt(&cursor);
         Map * map = new Map(resourceFile, Utils::readString(&cursor));
-        if (!map->isGood())
-            return;
+        if (!map->isGood()) {
+            m_good = false;
+            break;
+        }
         m_maps.push_back(WorldMap(x, y, z, map));
-        m_storyCount = Utils::max(m_storyCount, z);
     }
-    m_good = true;
+    delete[] buffer;
 }
 
 bool World::isGood() {

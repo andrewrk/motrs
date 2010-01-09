@@ -25,7 +25,6 @@ private:
     };
 
     bool m_good;
-    int m_storyCount;
     std::vector<WorldMap> m_maps;
 };
 

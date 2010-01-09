@@ -34,6 +34,7 @@ def compile_folder(in_folder, out_folder, compile_func):
     """
     for root, dirs, files in os.walk(in_folder):
         for f in files:
+            if f.startswith("."): continue
             in_file = os.path.join(root, f)
             out_file = os.path.join(out_folder, f)
 

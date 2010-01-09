@@ -1,6 +1,8 @@
 #ifndef _PROPERTIES_RESOURCE_H_
 #define _PROPERTIES_RESOURCE_H_
 
+#include "ResourceFile.h"
+
 #include <map>
 #include <string>
 
@@ -49,7 +51,7 @@ public:
     };
 
     // load object from memory
-    PropertiesResource(const char * buffer);
+    PropertiesResource(ResourceFile * resourceFile, std::string resourceName);
     ~PropertiesResource();
 
     // tell whether this object is in a successful state or not
@@ -59,7 +61,9 @@ public:
     Variant property(std::string propName);
 
 private:
+    // map between type strings and enum values
     static std::map<std::string, int> s_types;
+    static void ensureTypesLoaded();
 
     typedef struct {
         unsigned int version; // Uint32, file version
@@ -68,7 +72,7 @@ private:
 
     std::map<std::string, Variant> m_properties;
 
-    bool m_error; // always false if things are good
+    bool m_good; // always true if things are good
 
     std::string readString(const char ** ptr);
     Variant readValue(int type, const char ** ptr);

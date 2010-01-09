@@ -19,6 +19,7 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
 {
     Debug::assert(m_universe->isGood(), "universe load");
     World * world = m_universe->firstWorld();
+
 }
 
 Gameplay::~Gameplay() {
