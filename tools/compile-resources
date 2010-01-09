@@ -18,10 +18,14 @@ def update_files(files, datfile):
     make sure the resources.dat file has every file in files and it
     is updated.
     """
+
+    datfile_time = os.path.getmtime(datfile)
+
     for f in files:
-        command = "%s update %s \"%s\"" % (os.path.abspath(resource_tool), os.path.abspath(datfile), os.path.abspath(f))
-        if os.system(command):
-            sys.exit(1)
+        if os.path.getmtime(f) > datfile_time:
+            command = "%s update %s \"%s\"" % (os.path.abspath(resource_tool), os.path.abspath(datfile), os.path.abspath(f))
+            if os.system(command):
+                sys.exit(1)
 
 def compile_folder(in_folder, out_folder, compile_func):
     """
