@@ -1,6 +1,8 @@
 #ifndef _UNIVERSE_H_
 #define _UNIVERSE_H_
 
+#include "PropertiesResource.h"
+
 #include "World.h"
 #include <vector>
 
@@ -8,7 +10,7 @@
  *
  */
 
-class Universe
+class Universe : public PropertiesResource
 {
     public:
         Universe(const char * buffer);
