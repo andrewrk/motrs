@@ -17,7 +17,7 @@ Animation::Animation(const char * buffer, int hostFps) :
     m_fps = header->framesPerSecond;
     
     // sprite sheet
-	SDL_RWops* rw = SDL_RWFromConstMem(buffer+sizeof(Header), header->bitmapSize);
+    SDL_RWops* rw = SDL_RWFromConstMem(buffer+sizeof(Header), header->bitmapSize);
     SDL_Surface * temp = SDL_LoadBMP_RW(rw, 1);
 
     if( ! temp ) 
