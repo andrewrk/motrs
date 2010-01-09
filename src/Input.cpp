@@ -33,4 +33,6 @@ void Input::refresh() {
     Uint8 * keystate = SDL_GetKeyState(NULL);
     for (int k = 0; k < Key_size; k++)
         m_boolState[k] = keystate[m_boolMap[k]];
+    // if SDL_GetKeyState doesn't work without SDL_PumpEvents, use this for debugging:
+    // m_boolState[Right] = true;
 }
