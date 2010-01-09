@@ -1,6 +1,17 @@
 #include "Map.h"
 
-Map::Map()
-    : m_tiles(1, 1, 1)
+Map::Map(const char * buffer)
 {
+
 }
+
+Map::~Map()
+{
+
+}
+
+bool Map::isGood()
+{
+
+}
+

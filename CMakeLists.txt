@@ -136,8 +136,8 @@ ENDIF(WIN32)
 
 INSTALL(FILES ${RESOURCES_FILE} DESTINATION ${DATA_DIR})
 
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/include/resources.h.in
-    ${OUT_INCLUDE_PATH}/resources.h)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/include/os_config.h.in
+    ${OUT_INCLUDE_PATH}/os_config.h)
 
 MESSAGE("\n"
 "Installation Summary\n"
