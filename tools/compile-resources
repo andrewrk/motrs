@@ -52,13 +52,29 @@ def store_string(string, out_handle):
     for char in string:
         out_handle.write(pack("c" , char ))
 
-def compile_file(in_file, out_file):
+def compile_hashmap(in_file, out_file):
     """
     compile file from text format into binary format 
     """
     build_path(out_file)
     out_handle = open(out_file, "wb")
     write_properties(open(in_file,"r").read(), out_handle)
+    out_handle.close()
+
+def compile_world(in_file, out_file):
+    """
+    compile a world. blah
+    """
+    build_path(out_file)
+    out_handle = open(out_file, "wb")
+    lines = open(in_file, "rU").read().split("\n")
+    lines = [line for line in lines if line != ""]
+    out_handle.write(path("i", len(lines)))
+    for line in lines:
+        line = line.strip()
+        (x, y, z, id) = line.split()
+        out_handle.write(pack("iii", (int(x), int(y), int(z))))
+        store_string(id, out_handle)
     out_handle.close()
 
 def write_properties(text, out_handle):
@@ -212,10 +228,11 @@ static_resources = (
 )
 
 # things that simply need to be hashmap-compiled
-hashmap_resources = (
-    "tiles",
-    "universes",
-    "characters",
+compiled_resources = (
+    ("tiles", compile_hashmap),
+    ("universes", compile_hashmap),
+    ("characters", compile_hashmap),
+    ("worlds", compile_world),
 )
 
 command, datfile, in_dir, out_dir = sys.argv
@@ -232,10 +249,10 @@ for item in static_resources:
     update_folder(os.path.join(in_resources, item), datfile)
 
 # compile hashmap resources
-for item in hashmap_resources:
+for (item, func) in compiled_resources:
     print("Checking %s..." % item)
     in_files, out_files = (os.path.join(in_resources, item), os.path.join(out_resources, item))
-    compile_folder(in_files, out_files, compile_file)
+    compile_folder(in_files, out_files, func)
     update_folder(out_files, datfile)
 
 # compile animations
