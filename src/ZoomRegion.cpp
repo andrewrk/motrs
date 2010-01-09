@@ -1,5 +1,5 @@
+#include "ZoomRegion.h"
 
-#include "new_resource.h"
 #include <cstdlib>
 
 float ZoomRegion::zoomFor(int x, int y) {
@@ -14,7 +14,7 @@ float ZoomRegion::zoomFor(int x, int y) {
     case zroForwardDiagonal:  s = (u + v) / 2;     break;
     case zroBackwardDiagonal: s = (u + 1 - v) / 2; break;
     default:
-        exit(1);
+        exit(1); // TODO: crash
     }
     switch (orientation) {
     case zroVertical:
@@ -26,7 +26,7 @@ float ZoomRegion::zoomFor(int x, int y) {
                 ((1.0f - 2.0f * s) * a + 2.0f * s * b) :
                 ((2.0f - 2.0f * s) * b + (2.0f * s - 1.0f) * c);
     default:
-        exit(1);
+        exit(1); // TODO: crash
         return 0.0f;
     }
 }

@@ -1,21 +1,8 @@
-#ifndef NEW_RESOURCE_H
-#define NEW_RESOURCE_H
-
-enum ZoomRegionOrientaiton {
-    zroSolid, zroVertical, zroHorizontal, zroForwardDiagonal, zroBackwardDiagonal
-};
-
-class ZoomRegion {
-public:
-    float zoomFor(int x, int y);
-private:
-    int x, y, w, h;
-    ZoomRegionOrientaiton orientation;
-    float a, b, c; // range [0.0f, 1.0f] when applicable
-};
+#ifndef _NEW_RESOURCE_H_
+#define _NEW_RESOURCE_H_
 
 enum PhysicalPresence {
-    ppHole, ppFloor, ppGuardRail, ppEmbrasure, ppWall
+    ppHole, ppFloor, ppRail, ppEmbrasure, ppWall
 };
 
 enum TileShape {
@@ -34,5 +21,10 @@ enum SurfaceType {
     stQuickSand,
 };
 
+typedef struct {
+    TileShape shape;
+    SurfaceType surfaceType;
+} Tile;
 
-#endif // NEW_RESOURCE_H
+
+#endif
