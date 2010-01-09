@@ -29,7 +29,7 @@ public:
         stQuickSand,
     };
 
-    Tile();
+    Tile(ResourceFile * resourceFile, std::string resourceName);
     ~Tile();
 
     

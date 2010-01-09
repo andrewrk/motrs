@@ -23,6 +23,13 @@ namespace Utils
 
     std::string readString(char ** cursor);
     int readInt(char ** cursor);
+
+    template <class T>
+    T* readStruct(char** cursor) {
+        T* value = (T*)cursor;
+        *cursor += sizeof(T);
+        return value;
+    }
 }
 
 #endif

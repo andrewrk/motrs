@@ -11,6 +11,11 @@ PropertiesResource::PropertiesResource(ResourceFile * resourceFile, std::string 
 {
     ensureTypesLoaded();
     const char * buffer = resourceFile->getResource(resourceName);
+    if (buffer == NULL) {
+        std::cerr << "unable to load Properties Resouce: " << resourceName << std::endl;
+        m_good = false;
+        return;
+    }
 
     // read properties from buffer
     Header * header = (Header*) buffer;

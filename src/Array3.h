@@ -4,7 +4,6 @@
 #define RANGE_CHECK 1
 
 #include <iostream>
-using namespace std;
 
 template <class T>
 class Array3 {
@@ -66,7 +65,7 @@ int Array3<T>::getLinearIndex(int x, int y, int z) const {
         if (!(0 <= x && x < sizeX &&
               0 <= y && y < sizeY &&
               0 <= z && z < sizeZ))
-            cerr << "range fail: " << x << "," << y << "," << z << " : " << sizeX << "," << sizeY << "," << sizeZ << endl;
+            std::cerr << "range fail: " << x << "," << y << "," << z << " : " << sizeX << "," << sizeY << "," << sizeZ << std::endl;
     }
 #endif
 

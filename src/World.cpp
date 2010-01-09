@@ -5,6 +5,11 @@
 World::World(ResourceFile* resourceFile, std::string resourceName)
 {
     char * buffer = resourceFile->getResource(resourceName);
+    if (buffer == NULL) {
+        std::cerr << "unable to load World: " << resourceName << std::endl;
+        m_good = false;
+        return;
+    }
     char * cursor = buffer;
     int count = Utils::readInt(&cursor);
     m_good = true;

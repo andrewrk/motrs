@@ -37,7 +37,8 @@ int main(int argc, char* argv[]) {
     }
 
     Gameplay * gameplay = new Gameplay(screen, fps);
-    gameplay->mainLoop();
+    if (gameplay->isGood())
+        gameplay->mainLoop();
 
     delete gameplay;
     return 0;

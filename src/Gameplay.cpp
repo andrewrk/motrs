@@ -11,15 +11,21 @@
 const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
 
 Gameplay::Gameplay(SDL_Surface * screen, int fps) :
+    m_good(true),
     m_screen(screen),
     m_fps(fps),
     m_interval(1000/fps), //frames per second -> miliseconds
     m_resourceFile(new ResourceFile(ResourceFilePath)),
-    m_universe(new Universe(m_resourceFile, "main.universe"))
+    m_universe(new Universe(m_resourceFile, "main.universe")),
+    m_currentWorld(NULL)
 {
-    Debug::assert(m_universe->isGood(), "universe load");
-    World * world = m_universe->firstWorld();
-
+    m_good = m_universe->isGood();
+    if (!m_good) {
+        std::cerr << "failed to load universe" << std::endl;
+        return;
+    }
+    m_currentWorld = m_universe->firstWorld();
+    // TODO more here
 }
 
 Gameplay::~Gameplay() {
@@ -45,26 +51,12 @@ void Gameplay::mainLoop() {
     }
 }
 
+bool Gameplay::isGood() {
+    return m_good;
+}
+
 void Gameplay::processEvents() {
     Input::refresh();
-
-//	// handle all events
-//	SDL_Event event;
-//	while(SDL_PollEvent(&event)){
-//		switch(event.type){
-//			case SDL_KEYDOWN:
-//				switch( event.key.keysym.sym ){
-//					case SDLK_ESCAPE:
-//						exit(0);
-//					default:
-//						//do nothing
-//						break;
-//				}
-//				break;
-//			case SDL_QUIT:
-//				exit(0);
-//		}
-//	}
 }
 
 
@@ -150,44 +142,9 @@ void Gameplay::nextFrame () {
 //	}
 }
 
-
-
-//void Gameplay::enterMap(char* mapFile, int startX, int startY){
-//	//load map
-//        curmap = new Map(m_resourceFile->getResource("test.map"));
-//
-//        if( startX == -1 ) startX = (int)(curmap->width() / 2);
-//        if( startY == -1 ) startY = curmap->height()-1;
-//	setCharFeet(hero, startX * Tile::size+1, startY * Tile::size+1);
-//	hero->velX = 0;
-//	hero->velY = 0;
-//
-//	//compute some map info
-//        mapWidthPix = curmap->width() * Tile::size;
-//        mapHeightPix= curmap->height() * Tile::size;
-//	prevHeroLoc = charCoord(hero);
-//}
-
-void Gameplay::initMapTest(SDL_Surface* playScreen, char* mapToTest, int startX, int startY, char* charToTest) {
-//	//remember screen we're playing on
-//	m_screen = playScreen;
-//	curmap = NULL;
-//
-//	//load hero
-//        hero = new Character(m_resourceFile->getResource("hero.char"));
-//
-//	//init variables
-//        hero->facing = Character::South;
-//	hero->curAnimation = hero->standing[hero->facing];
-//
-//	enterMap(mapToTest, startX, startY);
-}
-
 void Gameplay::updateDisplay() {
-    int x,y,i;
-    SDL_Rect destRect;
-    //Uint32 lineColor;
-    //SDL_Rect line;
+//    int x,y,i;
+//    SDL_Rect destRect;
 
     //generic background color (delete this crap)
     SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, 0,0,0));
