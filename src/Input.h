@@ -4,7 +4,7 @@
 #include "SDL.h"
 
 
-/** no mouse support yet. */
+/** No mouse support yet. If you want to type your name, too bad. */
 class Input {
 public:
     enum Key {
