@@ -4,6 +4,7 @@
 #define RANGE_CHECK 1
 
 #include <iostream>
+#include <cstring>
 
 template <class T>
 class Array3 {
@@ -16,6 +17,7 @@ public:
     T get(int x, int y, int z) const;
     void set(int x, int y, int z, T value);
 
+    void clear();
 private:
     T * arr;
 
@@ -52,6 +54,11 @@ void Array3<T>::set(int x, int y, int z, T value) {
     rangeCheck(x, y, z);
 #endif
     arr[getLinearIndex(x, y, z)] = value;
+}
+
+template <class T>
+void Array3<T>::clear() {
+    std::memset(arr, 0, sizeX * sizeY * sizeZ * sizeof(T));
 }
 
 template <class T>

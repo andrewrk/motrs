@@ -1,2 +1,4 @@
 size=2,2
-layer=0,0,0,0
+tile=0x1,0,{img=Sand Tile 1.bmp}
+layer=1,1,1,1
+

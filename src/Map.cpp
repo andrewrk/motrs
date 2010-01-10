@@ -41,9 +41,7 @@ Map::Map(ResourceFile * resourceFile, std::string resourceName) :
                         m_tiles->set(x, y, z, Utils::readInt(&cursor));
                 break;
             case ltSparse: {
-                for (int y = 0; y < header->sizeY; y++)
-                    for (int x = 0; x < header->sizeX; x++)
-                        m_tiles->set(x, y, z, 0);
+                m_tiles->clear();
                 int tileCount = Utils::readInt(&cursor);
                 for (int i = 0; i < tileCount; i++) {
                     SparseTile * sparseTile = Utils::readStruct<SparseTile>(&cursor);

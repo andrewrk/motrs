@@ -47,6 +47,9 @@ def write_string(string, out_handle):
     for char in string:
         out_handle.write(pack("c" , char ))
 
+def encode_string(s):
+    return pack("i", len(s)) + s
+
 def compile_hashmap(in_file, out_file):
     """
     compile file from text format into binary format 
@@ -71,7 +74,14 @@ def compile_world(in_file, out_file):
     out_handle.close()
 
 def compile_map(in_file, out_file):
-    def compress_layer(values, size_x, size_y):
+    def encode_tile(value):
+        shape_str, surface_str, props_str = [x.strip() for x in value.split(",", 2)]
+        assert shape_str.startswith("0x")
+        shape = int(shape_str[2:], 16)
+        surface = int(surface_str)
+        return pack("ii", shape, surface) + encode_inline_props(props_str)
+    def encode_layer(value, size_x, size_y):
+        values = [int(v) for v in value.split(",")]
         assert len(values) == size_x * size_y
         FMT_FULL = 1
         FMT_SPARSE = 2
@@ -101,10 +111,9 @@ def compile_map(in_file, out_file):
             (x, y) = value.split(",")
             size = (int(x), int(y))
         elif kind == "tile":
-            raise "TODO: support tile"
+            pallet.append(encode_tile(value))
         elif kind == "layer":
-            values = value.split(",")
-            layers.append(compress_layer([int(v) for v in values], size[0], size[1]))
+            layers.append(encode_layer(value, size[0], size[1]))
         elif kind == "submap":
             raise "TODO: support submap"
         elif kind == "trigger":
@@ -114,22 +123,21 @@ def compile_map(in_file, out_file):
         else:
             raise "unknown kind: " + kind
 
-
     out_handle = open_output(out_file)
     # header
     out_handle.write(pack("i" * 7, len(pallet), size[0], size[1], 
             len(layers), len(submaps), len(triggers), len(entities)))
     # pallet
     for tile in pallet:
-        raise "TODO: support tile"
+        out_handle.write(tile)
     for layer in layers:
         out_handle.write(layer)
     for submap in submaps:
-        raise "TODO: support submap"
+        out_handle.write(submap)
     for trigger in triggers:
-        raise "TODO: support trigger"
+        out_handle.write(trigger)
     for entity in entities:
-        raise "TODO: support entity"
+        out_handle.write(entity)
     out_handle.close()
 
 def read_lines(in_file):
@@ -145,6 +153,15 @@ def read_lines(in_file):
 def open_output(out_file):
     build_path(out_file)
     return open(out_file, "wb")
+
+def encode_inline_props(props_str):
+    """
+    props = "{ key = value , key = value , ... }"
+    props must be stripped before being passed to this function
+    """
+    assert props_str.startswith("{") and props_str.endswith("}")
+    props = [[x.strip() for x in item.split("=")] for item in props_str[1:-1].split(",")]
+    return pack("i", len(props)) + "".join(encode_string(k) + encode_string(v) for (k, v) in props)
 
 def write_properties(text, out_handle):
     """
