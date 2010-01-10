@@ -13,6 +13,7 @@ Map::Map(ResourceFile * resourceFile, std::string resourceName) :
 {
     char * buffer = resourceFile->getResource(resourceName);
     if (buffer == NULL) {
+        resourceFile->printNames();
         std::cerr << "unable to load Map: " << resourceName << std::endl;
         m_good = false;
         return;
@@ -55,16 +56,13 @@ Map::Map(ResourceFile * resourceFile, std::string resourceName) :
     }
 
     // submaps
-    int submapCount = Utils::readInt(&cursor);
-    Debug::assert(submapCount == 0, "TODO support submaps");
+    Debug::assert(header->submapCount == 0, "TODO support submaps");
 
     // triggers
-    int triggerCount = Utils::readInt(&cursor);
-    Debug::assert(triggerCount == 0, "TODO support triggers");
+    Debug::assert(header->triggerCount == 0, "TODO support triggers");
 
     // entities
-    int entityCount = Utils::readInt(&cursor);
-    Debug::assert(entityCount == 0, "TODO support entities");
+    Debug::assert(header->entityCount == 0, "TODO support entities");
 
     delete[] buffer;
 }

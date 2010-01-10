@@ -17,13 +17,10 @@ std::string Utils::intToString(int value)
 }
 
 std::string Utils::readString(const char ** cursor) {
-    int length = readInt(cursor);
-    char* buffer = new char[length];
-    for (int i = 0; i < length; i++)
-        buffer[i] = *(*cursor)++;
-    std::string returnValue = buffer;
-    delete buffer;
-    return returnValue;
+    int size = readInt(cursor);
+    std::string value(*cursor, size);
+    *cursor += size;
+    return value;
 }
 
 int Utils::readInt(const char ** cursor) {

@@ -31,8 +31,8 @@ PropertiesResource::PropertiesResource(ResourceFile * resourceFile, std::string 
         const char * ptr = buffer + sizeof(Header);
         for(unsigned int i=0; i<header->propertyCount; ++i) {
             // read the property
-            std::string name = readString(&ptr);
-            std::string type = readString(&ptr);
+            std::string name = Utils::readString(&ptr);
+            std::string type = Utils::readString(&ptr);
             Variant val = readValue(s_types[type], &ptr);
 
             // add to map
@@ -67,7 +67,7 @@ PropertiesResource::Variant PropertiesResource::readValue(int type, const char *
             val.setValue(*Utils::readStruct<bool>(ptr));
             break;
         case Variant::TypeString:
-            val.setValue(readString(ptr));
+            val.setValue(Utils::readString(ptr));
             break;
         case Variant::TypeRGB:
             val.setValue(*Utils::readStruct<Variant::RGB>(ptr));
@@ -78,20 +78,6 @@ PropertiesResource::Variant PropertiesResource::readValue(int type, const char *
             break;
     }
     return val;
-}
-
-// return a string and advance the read pointer
-// TODO replace Util::readString with this function
-std::string PropertiesResource::readString(const char ** readPtr)
-{
-    int * size = (int*)(*readPtr);
-
-    *readPtr += sizeof(int);
-    std::string out(*readPtr, *size);
-
-    *readPtr += out.size();
-
-    return out;
 }
 
 PropertiesResource::~PropertiesResource()

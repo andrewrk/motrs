@@ -74,7 +74,6 @@ private:
 
     bool m_good; // always true if things are good
 
-    std::string readString(const char ** ptr);
     Variant readValue(int type, const char ** ptr);
 
 };

@@ -26,9 +26,9 @@ namespace Utils
 
     template <class T>
     T* readStruct(const char** cursor) {
-        T* value = (T*)cursor;
+        const char* value = *cursor;
         *cursor += sizeof(T);
-        return value;
+        return (T*)value;
     }
 }
 
