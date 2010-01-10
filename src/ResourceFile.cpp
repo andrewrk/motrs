@@ -326,6 +326,7 @@ void ResourceFile::updateRecordCache()
 }
 
 void ResourceFile::printNames() {
+    updateRecordCache();
     for (std::map<std::string, CacheEntry>::const_iterator it = m_records.begin(); it != m_records.end(); ++it)
         std::cout << it->first << std::endl;
 }

@@ -64,7 +64,7 @@ class ResourceFile
         };
 
         typedef struct {
-            char name[128]; // 4 bytes. null terminated string.
+            char name[128]; // null terminated string.
             unsigned int offset; // 4 bytes, where the resource is
             unsigned int size; // 4 bytes unsigned
             time_t dateModified; // 4 bytes signed

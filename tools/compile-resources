@@ -311,7 +311,7 @@ static_resources = (
     "bitmaps",
 )
 
-# things that simply need to be hashmap-compiled
+# things that are compiled by a function
 compiled_resources = (
     ("tiles", compile_hashmap),
     ("universes", compile_hashmap),
