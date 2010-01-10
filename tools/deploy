@@ -24,8 +24,17 @@ rm -f $TMP
 git add CMakeLists.txt
 git commit -m "deploying project version $VERSION"
 
-# build for windows
+# build resource-edit
+LINUX=$(mktemp -d)
+cd $LINUX
+cmake $SOURCE
+make resource-edit
+
+# cop resource-edit to windows
 BUILD=$(mktemp -d)
+cp $LINUX/resource-edit $BUILD
+
+# build for windows
 RELEASE=$BUILD/motrs-$VERSION
 cd $BUILD
 cmake $SOURCE -DCMAKE_TOOLCHAIN_FILE=$SOURCE/cmake/win32-toolchain.cmake -DCMAKE_INSTALL_PREFIX=$RELEASE
