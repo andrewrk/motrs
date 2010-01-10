@@ -23,11 +23,12 @@ Map::Map(ResourceFile * resourceFile, std::string resourceName) :
 
     // pallet
     for (int i = 0; i < header->palletSize; i++) {
-        Tile * tile = new Tile(resourceFile, Utils::readString(&cursor));
-        if (tile->isGood())
-            m_pallet.push_back(tile);
-        else
+        Tile * tile = new Tile(&cursor);
+        if (!tile->isGood()) {
             m_good = false;
+            return;
+        }
+        m_pallet.push_back(tile);
     }
 
     // layers/tiles

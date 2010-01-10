@@ -2,9 +2,9 @@
 #define _TILE_H_
 
 #include "PropertiesResource.h"
-#include "Animation.h"
+#include "Image.h"
 
-class Tile : public PropertiesResource
+class Tile
 {
 public:
     static const int size;
@@ -44,20 +44,26 @@ public:
         stQuickSand = 3,
     };
 
-    Tile(ResourceFile * resourceFile, std::string resourceName);
+
+
+    Tile(const char** cursor);
     ~Tile();
 
+    bool isGood();
 
 private:
+    bool m_good;
+
     Shape m_shape;
     SurfaceType m_surfaceType;
     
     // display
-    Animation * m_animation;
+    Image * m_image;
 
-    SDL_Surface * m_bitmap; 
-    Uint32 m_colorKey;
-    bool m_useColorKey;
+    // wtf:
+//    SDL_Surface * m_bitmap;
+//    Uint32 m_colorKey;
+//    bool m_useColorKey;
 };
 
 #endif
