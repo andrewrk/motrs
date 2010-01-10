@@ -305,7 +305,10 @@ compiled_resources = (
 
 command, datfile, in_dir, out_dir = sys.argv
 resource_tool = os.path.join(out_dir, "resource-edit")
-datfile_time = os.path.getmtime(datfile)
+
+datfile_time = 0
+if os.path.exists(datfile):
+    datfile_time = os.path.getmtime(datfile)
 
 in_resources, out_resources = [os.path.join(x, "resources") for x in (in_dir, out_dir)]
 compile_animations = os.path.join(in_dir, "tools", "compile-animations")

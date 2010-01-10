@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>740</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -50,25 +50,25 @@
     <property name="title">
      <string>&amp;Tools</string>
     </property>
-    <addaction name="action_Test"/>
+    <addaction name="actionTest"/>
     <addaction name="separator"/>
-    <addaction name="action_Settings"/>
+    <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menu_Window">
     <property name="title">
      <string>&amp;Window</string>
     </property>
-    <addaction name="action_Tiles"/>
-    <addaction name="action_Objects"/>
-    <addaction name="action_Worlds"/>
-    <addaction name="action_Triggers"/>
-    <addaction name="action_Layers"/>
-    <addaction name="actionO_verview"/>
-    <addaction name="action_Maps"/>
-    <addaction name="action_Tools"/>
+    <addaction name="actionTiles"/>
+    <addaction name="actionObjects"/>
+    <addaction name="actionWorlds"/>
+    <addaction name="actionTriggers"/>
+    <addaction name="actionLayers"/>
+    <addaction name="actionOverview"/>
+    <addaction name="actionMaps"/>
+    <addaction name="actionTools"/>
     <addaction name="separator"/>
-    <addaction name="actionTil_e_Editor"/>
-    <addaction name="actionO_bject_Editor"/>
+    <addaction name="actionTileEditor"/>
+    <addaction name="actionObjectEditor"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menu_Tools"/>
@@ -124,7 +124,7 @@
     <string>Overview</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>1</number>
+    <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_6"/>
   </widget>
@@ -169,12 +169,12 @@
     <string>&amp;Quit</string>
    </property>
   </action>
-  <action name="action_Settings">
+  <action name="actionSettings">
    <property name="text">
     <string>&amp;Settings</string>
    </property>
   </action>
-  <action name="action_Tiles">
+  <action name="actionTiles">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -185,7 +185,7 @@
     <string>T&amp;iles</string>
    </property>
   </action>
-  <action name="action_Objects">
+  <action name="actionObjects">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -196,7 +196,7 @@
     <string>&amp;Objects</string>
    </property>
   </action>
-  <action name="action_Worlds">
+  <action name="actionWorlds">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -207,7 +207,7 @@
     <string>&amp;Worlds</string>
    </property>
   </action>
-  <action name="action_Triggers">
+  <action name="actionTriggers">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -218,7 +218,7 @@
     <string>&amp;Triggers</string>
    </property>
   </action>
-  <action name="action_Layers">
+  <action name="actionLayers">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -229,7 +229,7 @@
     <string>&amp;Layers</string>
    </property>
   </action>
-  <action name="actionO_verview">
+  <action name="actionOverview">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -240,7 +240,7 @@
     <string>O&amp;verview</string>
    </property>
   </action>
-  <action name="action_Maps">
+  <action name="actionMaps">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -251,7 +251,7 @@
     <string>&amp;Maps</string>
    </property>
   </action>
-  <action name="action_Tools">
+  <action name="actionTools">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -262,7 +262,7 @@
     <string>&amp;Tools</string>
    </property>
   </action>
-  <action name="action_Test">
+  <action name="actionTest">
    <property name="text">
     <string>&amp;Test</string>
    </property>
@@ -270,17 +270,12 @@
     <string>F5</string>
    </property>
   </action>
-  <action name="actionT_ile_Editor">
-   <property name="text">
-    <string>T&amp;ile Editor</string>
-   </property>
-  </action>
-  <action name="actionTil_e_Editor">
+  <action name="actionTileEditor">
    <property name="text">
     <string>Til&amp;e Editor</string>
    </property>
   </action>
-  <action name="actionO_bject_Editor">
+  <action name="actionObjectEditor">
    <property name="text">
     <string>O&amp;bject Editor</string>
    </property>
