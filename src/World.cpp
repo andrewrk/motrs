@@ -10,7 +10,7 @@ World::World(ResourceFile* resourceFile, std::string resourceName)
         m_good = false;
         return;
     }
-    char * cursor = buffer;
+    const char * cursor = buffer;
     int count = Utils::readInt(&cursor);
     m_good = true;
     for (int i = 0; i < count; i++) {

@@ -17,7 +17,7 @@ Map::Map(ResourceFile * resourceFile, std::string resourceName) :
         m_good = false;
         return;
     }
-    char * cursor = buffer;
+    const char * cursor = buffer;
     Header* header = Utils::readStruct<Header>(&cursor);
 
     // pallet

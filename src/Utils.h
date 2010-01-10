@@ -21,11 +21,11 @@ namespace Utils
     int stringToInt(std::string value);
     std::string intToString(int value);
 
-    std::string readString(char ** cursor);
-    int readInt(char ** cursor);
+    std::string readString(const char ** cursor);
+    int readInt(const char ** cursor);
 
     template <class T>
-    T* readStruct(char** cursor) {
+    T* readStruct(const char** cursor) {
         T* value = (T*)cursor;
         *cursor += sizeof(T);
         return value;

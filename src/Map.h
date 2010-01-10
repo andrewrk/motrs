@@ -46,4 +46,4 @@ private:
     std::vector<Entity*> m_entities;
 };
 
-#endif // _MAP_H_
+#endif

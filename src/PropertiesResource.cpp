@@ -1,5 +1,7 @@
 #include "PropertiesResource.h"
 
+#include "Utils.h"
+
 #include <iostream>
 
 
@@ -42,16 +44,11 @@ PropertiesResource::PropertiesResource(ResourceFile * resourceFile, std::string 
 
 void PropertiesResource::ensureTypesLoaded() {
     if( s_types.size() == 0 ) {
-        s_types.insert(
-            std::pair<std::string, int>("string", Variant::TypeString) );
-        s_types.insert(
-            std::pair<std::string, int>("color", Variant::TypeRGB) );
-        s_types.insert(
-            std::pair<std::string, int>("int", Variant::TypeInt) );
-        s_types.insert(
-            std::pair<std::string, int>("float", Variant::TypeFloat) );
-        s_types.insert(
-            std::pair<std::string, int>("bool", Variant::TypeBool) );
+        s_types["string"] = Variant::TypeString;
+        s_types["color"] = Variant::TypeRGB;
+        s_types["int"] = Variant::TypeInt;
+        s_types["float"] = Variant::TypeFloat;
+        s_types["bool"] = Variant::TypeBool;
     }
 }
 
@@ -61,18 +58,24 @@ PropertiesResource::Variant PropertiesResource::readValue(int type, const char *
     Variant val;
     switch(type) {
         case Variant::TypeInt:
-            val.setValue( *((int *) (*ptr)) );
+            val.setValue(Utils::readInt(ptr));
+            break;
         case Variant::TypeFloat:
-            val.setValue( *((float *) (*ptr)) );
+            val.setValue(*Utils::readStruct<float>(ptr));
+            break;
         case Variant::TypeBool:
-            val.setValue( *((bool *) (*ptr)) );
+            val.setValue(*Utils::readStruct<bool>(ptr));
+            break;
         case Variant::TypeString:
-            val.setValue( readString(ptr) );
+            val.setValue(readString(ptr));
+            break;
         case Variant::TypeRGB:
-            val.setValue( *((Variant::RGB *) (*ptr)) );
+            val.setValue(*Utils::readStruct<Variant::RGB>(ptr));
+            break;
         default:
-            std::cerr << "PropertiesResource: unrecognized type\n";
+            std::cerr << "PropertiesResource: unrecognized type: " << type << std::endl;
             m_good = false;
+            break;
     }
     return val;
 }
@@ -87,7 +90,7 @@ std::string PropertiesResource::readString(const char ** readPtr)
     std::string out(*readPtr, *size);
 
     *readPtr += out.size();
-    
+
     return out;
 }
 

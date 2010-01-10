@@ -7,8 +7,13 @@
 
 #include <cmath>
 
+#include <iostream>
 
+#if 0
 const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
+#else
+const char * Gameplay::ResourceFilePath = "./resources.dat";
+#endif
 
 Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     m_good(true),
