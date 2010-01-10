@@ -23,10 +23,10 @@ int main(int argc, char* argv[]) {
     atexit(SDL_Quit);
 
     // create screen
-    Uint32 vmflags = SDL_HWSURFACE|SDL_DOUBLEBUF;
+    Uint32 vmflags = SDL_HWSURFACE | SDL_DOUBLEBUF;
     // TODO tmp
     windowMode = true;
-    if (! windowMode)
+    if (!windowMode)
         vmflags |= SDL_FULLSCREEN;
 
     SDL_Surface * screen = SDL_SetVideoMode(800, 600, 32, vmflags);
