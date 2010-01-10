@@ -34,7 +34,6 @@ private:
         ltFull = 1,
         ltSparse = 2,
     };
-
     typedef struct {
         int x, y, tile;
     } SparseTile;

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os,sys,re
-from struct import pack, unpack
+from struct import pack, unpack, calcsize
 from PIL import Image
 
 def update_folder(in_folder, datfile):
@@ -42,7 +42,7 @@ def compile_folder(in_folder, out_folder, compile_func):
                 compile_func(in_file, out_file)
         break
 
-def store_string(string, out_handle):
+def write_string(string, out_handle):
     out_handle.write(pack( "i" , len(string) ))
     for char in string:
         out_handle.write(pack("c" , char ))
@@ -62,15 +62,89 @@ def compile_world(in_file, out_file):
     """
     build_path(out_file)
     out_handle = open(out_file, "wb")
-    lines = open(in_file, "rU").read().split("\n")
-    lines = [line for line in lines if line != ""]
+    lines = read_lines(in_file)
     out_handle.write(pack("i", len(lines)))
     for line in lines:
-        line = line.strip()
         (x, y, z, id) = line.split()
         out_handle.write(pack("iii", int(x), int(y), int(z)))
-        store_string(id, out_handle)
+        write_string(id, out_handle)
     out_handle.close()
+
+def compile_map(in_file, out_file):
+    def compress_layer(values, size_x, size_y):
+        assert len(values) == size_x * size_y
+        FMT_FULL = 1
+        FMT_SPARSE = 2
+        def sparse_values():
+            for y in range(size_y):
+                for x in range(size_x):
+                    yield (x, y, values[y * size_x + x])
+        sparse_version = "".join(pack("iii", x, y, v) for (x, y, v) in sparse_values() if v != 0)
+        full_version = "".join(pack("i", v) for v in values)
+        if len(sparse_version) > len(full_version):
+            # full
+            return pack("i", FMT_FULL) + full_version
+        else:
+            # sparse
+            return pack("ii", FMT_SPARSE, len(sparse_version) / calcsize("iii")) + sparse_version
+    lines = read_lines(in_file)
+    pallet = []
+    size = None
+    layers = []
+    submaps = []
+    triggers = []
+    entities = []
+    for line in lines:
+        (kind, value) = line.split("=", 1)
+        if kind == "size":
+            assert size == None
+            (x, y) = value.split(",")
+            size = (int(x), int(y))
+        elif kind == "tile":
+            raise "TODO: support tile"
+        elif kind == "layer":
+            values = value.split(",")
+            layers.append(compress_layer([int(v) for v in values], size[0], size[1]))
+        elif kind == "submap":
+            raise "TODO: support submap"
+        elif kind == "trigger":
+            raise "TODO: support trigger"
+        elif kind == "entity":
+            raise "TODO: support entity"
+        else:
+            raise "unknown kind: " + kind
+
+
+    out_handle = open_output(out_file)
+    # header
+    out_handle.write(pack("i" * 7, len(pallet), size[0], size[1], 
+            len(layers), len(submaps), len(triggers), len(entities)))
+    # pallet
+    for tile in pallet:
+        raise "TODO: support tile"
+    for layer in layers:
+        out_handle.write(layer)
+    for submap in submaps:
+        raise "TODO: support submap"
+    for trigger in triggers:
+        raise "TODO: support trigger"
+    for entity in entities:
+        raise "TODO: support entity"
+    out_handle.close()
+
+def read_lines(in_file):
+    lines = open(in_file, "rU").read().split("\n")
+    def strip_comments(line):
+        comment_start = line.find("#")
+        if comment_start != -1:
+            line = line[:comment_start]
+        return line.strip()
+    lines = [strip_comments(line) for line in lines]
+    return [line for line in lines if line != ""]
+
+def open_output(out_file):
+    build_path(out_file)
+    return open(out_file, "wb")
 
 def write_properties(text, out_handle):
     """
@@ -83,10 +157,10 @@ def write_properties(text, out_handle):
 
     color_re = re.compile('^\s*(\d+)\s*\,\s*(\d+)\s*\,\s*(\d+)\s*$')
     for propName,typeName,value in props:
-        store_string(propName, out_handle)
-        store_string(typeName, out_handle)
+        write_string(propName, out_handle)
+        write_string(typeName, out_handle)
         if typeName == 'string':
-            store_string(value, out_handle)
+            write_string(value, out_handle)
         elif typeName == 'color':
             if not (value.lower() in ("none", "false", "null", "0", "no")):
                 matches = color_re.match(value)
@@ -110,7 +184,7 @@ def write_properties(text, out_handle):
             # array length
             out_handle.write(pack("i", int(count)))
             for string in strings:
-                store_string(string, out_handle)
+                write_string(string, out_handle)
         else:
             sys.stderr.write("ERROR: Unsupported property type: %s\n" % typeName)
             sys.exit(1)
@@ -218,8 +292,6 @@ def build_path(file_path):
 # things that just need to be copied
 static_resources = (
     "bitmaps",
-    "maps",
-    "worlds",
 )
 
 # things that simply need to be hashmap-compiled
@@ -228,6 +300,7 @@ compiled_resources = (
     ("universes", compile_hashmap),
     ("characters", compile_hashmap),
     ("worlds", compile_world),
+    ("maps", compile_map),
 )
 
 command, datfile, in_dir, out_dir = sys.argv
