@@ -6,15 +6,6 @@
 const unsigned long int ResourceFile::initialMaxResources = 100;
 const unsigned long int ResourceFile::extraBufferSpace = 4*1024;
 
-ResourceFile::ResourceFile() :
-    m_state(StateUninitialized),
-    m_fileName(),
-    m_file(),
-    m_records()
-{
-
-}
-
 ResourceFile::ResourceFile(std::string fileName) :
     m_state(StateUninitialized),
     m_fileName(),
@@ -42,6 +33,7 @@ void ResourceFile::open(std::string fileName)
     m_file.open(m_fileName.c_str(),
         std::fstream::in | std::fstream::out | std::fstream::binary);
     if( ! m_file.good() ) {
+
         m_state = StateError;
         return;
     }
@@ -333,4 +325,8 @@ void ResourceFile::updateRecordCache()
     }
 }
 
+void ResourceFile::printNames() {
+    for (std::map<std::string, CacheEntry>::const_iterator it = m_records.begin(); it != m_records.end(); ++it)
+        std::cout << it->first << std::endl;
+}
 

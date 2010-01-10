@@ -12,7 +12,6 @@
 class ResourceFile
 {
     public:
-        ResourceFile();
         ResourceFile(std::string fileName);
         ~ResourceFile();
 
@@ -53,6 +52,7 @@ class ResourceFile
         // get rid of extra buffer space
         void squeeze();
 
+        void printNames();
     private:
         static const unsigned long int initialMaxResources;
         static const unsigned long int extraBufferSpace;
