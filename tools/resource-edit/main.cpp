@@ -21,66 +21,92 @@ int main(int argc, char * argv[])
         return 1;
     }
 
-    if( argc < 4 ) {
+    if( argc < 2 ) {
         printUsage(argv[0]);
-        return 1;
+        exit(1);
     }
 
     // split input
     string command(argv[1]);
 
-    if( command.compare("update") != 0 ) {
-        printUsage(argv[0]);
-        return 1;
-    }
+    if( command.compare("update") == 0 ) {
+        if( argc != 4){
+            printUsage(argv[0]);
+            exit(1);
+        }
 
-    string datfile(argv[2]);
-    string infile(argv[3]);
-    
-    // get the modification date of the file on disk
-    struct tm * clock;
-    struct stat attrib;
-    stat(infile.c_str(), &attrib);
-    clock = gmtime(&(attrib.st_mtime));
-    time_t diskModified = mktime(clock);
-    
-    // get the modification date of the resource in the resource file
-    ResourceFile dat(datfile);
-    if( ! dat.isOpen() ) {
-        // try creating the file
-        dat.createNew(datfile);
+        string datfile(argv[2]);
+        string infile(argv[3]);
+
+        // get the modification date of the file on disk
+        struct tm * clock;
+        struct stat attrib;
+        stat(infile.c_str(), &attrib);
+        clock = gmtime(&(attrib.st_mtime));
+        time_t diskModified = mktime(clock);
+
+        // get the modification date of the resource in the resource file
+        ResourceFile dat(datfile);
+        if( ! dat.isOpen() ) {
+            // try creating the file
+            dat.createNew(datfile);
+            if( ! dat.isOpen() ) {
+                cerr << "Error opening " << datfile << endl;
+                exit(1);
+            }
+        }
+        string infileTitle = fileTitle(infile);
+        time_t resourceModified = dat.getResourceTime(infileTitle);
+
+        // if the disk file is newer, update it
+        if( diskModified > resourceModified ) {
+            cout << "Updating " << infileTitle << "...\n";
+
+            // load the disk content into memory
+            ifstream in(infile.c_str());
+            in.seekg(0, ios::end);
+            unsigned long int length = in.tellg();
+            in.seekg(0, ios::beg);
+
+            char * data = new char[length];
+            in.read(data, length);
+            dat.updateResource(infileTitle, data, length, diskModified);
+            delete[] data;
+        }
+    } else if( command.compare("list") == 0 ) {
+        if( argc != 3){
+            printUsage(argv[0]);
+            exit(1);
+        }
+
+        string datfile(argv[2]);
+
+        ResourceFile dat(datfile);
         if( ! dat.isOpen() ) {
             cerr << "Error opening " << datfile << endl;
             exit(1);
         }
+
+        dat.printNames();
+    } else {
+        cout << "command not recognized: " << command << endl;
+        printUsage(argv[0]);
+        return 1;
     }
-    string infileTitle = fileTitle(infile);
-    time_t resourceModified = dat.getResourceTime(infileTitle);
 
-    // if the disk file is newer, update it
-    if( diskModified > resourceModified ) {
-        cout << "Updating " << infileTitle << "...\n";
 
-        // load the disk content into memory
-        ifstream in(infile.c_str());
-        in.seekg(0, ios::end);
-        unsigned long int length = in.tellg();
-        in.seekg(0, ios::beg);
 
-        char * data = new char[length];
-        in.read(data, length);
-        dat.updateResource(infileTitle, data, length, diskModified);
-        delete[] data;
-    }
-    
+
     return 0;
 }
 
 void printUsage(char * arg0)
 {
     cout << "Usage: \n\n";
-    cout << arg0 << " update <resource-file> <files>\n\n";
-    cout << "makes sure <file> is updated and in <resource-file>.\n";
+    cout << arg0 << " update <resource-file> <files>\n";
+    cout << "makes sure <file> is updated and in <resource-file>.\n\n";
+    cout << arg0 << " list <resource-file>\n";
+    cout << "prints a list of the files in <resource-file>\n\n";
 }
 
 string fileTitle(string fullPath)
