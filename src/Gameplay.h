@@ -27,7 +27,11 @@ private:
 
     World * m_currentWorld;
 
-    // crappity crap below
+    void processEvents();
+    void updateDisplay();
+    void nextFrame();
+
+    // TODO: crappity crap below
 //    typedef struct {
 //        int x;
 //        int y;
@@ -43,7 +47,6 @@ private:
 //    SDL_Surface* dash;
 //
 //
-    void processEvents();
 //
 //    int screenX(int absX);
 //    int screenY(int absY);
@@ -70,8 +73,6 @@ private:
 //    void setCharFeetX(Character* ch, float newX);
 //    void setCharFeetY(Character* ch, float newY);
 //
-    void updateDisplay();
-    void nextFrame();
 //    void initGameplay(SDL_Surface* screen);
 //    void initMapTest(SDL_Surface* screen, char* mapToTest, int startX, int startY, char* charToTest);
 //    int keyPressed(SDLKey key);

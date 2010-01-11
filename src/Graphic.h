@@ -1,25 +1,22 @@
-#ifndef _ANIMATION_H_
-#define _ANIMATION_H_
+#ifndef _GRAPHIC_H_
+#define _GRAPHIC_H_
 
 #include "SDL.h"
 #include "ResourceFile.h"
 #include <vector>
 
-class Animation
+/* Graphics are things that are displayed. it can be an animation
+ * or a still image.
+ */
+class Graphic
 {
     public:
-        // create an animation from resource data. fps is how many times
-        // nextFrame() will be called per second
-        Animation(const char * buffer, int hostFps);
-        ~Animation();
+        // create an animation or bitmap from memory
+        Graphic(const char * buffer)
 
-        // call this whenever you advance a frame (you are the host)
-        // it will compensate for fps differences between you and the animation.
-        void nextFrame(int frameSkip = 1);
-
-        // override fps compensation and go to the next frame in the
-        // animation.
-        void advanceFrame(int frameSkip = 1);
+        // create an animation from memory and offset the animation
+        Graphic(const char * buffer, int offset)
+        ~Graphic();
 
         // draw to an SDL surface
         void draw(SDL_Surface * dest, SDL_Rect * destRect);
@@ -47,9 +44,8 @@ class Animation
         int m_frameCount;
         int m_currentFrame;
         int m_fps;
-        int m_hostFps;
+        int m_offset;
 
-        float m_framesPassed; // how many frames have passed by
         std::vector<SDL_Rect> m_spriteBounds; // boundaries of each sprite
 };
 

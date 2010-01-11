@@ -17,34 +17,32 @@ public:
     /** It's important to leaves these values alone since they're stored in .map files */
     enum Shape {
         // solid
-        tsSolidWall  = 0x00,
-        tsSolidFloor = 0x01,
-        tsSolidHole  = 0x02,
+        tsSolidWall  = 0,
+        tsSolidFloor = 1,
+        tsSolidHole  = 2,
         // floor + wall diagonals. tsDiag(pp1)(pp2)(where-pp2-is)
-        tsDiagFloorWallNW = 0x10,
-        tsDiagFloorWallNE = 0x11,
-        tsDiagFloorWallSE = 0x12,
-        tsDiagFloorWallSW = 0x13,
+        tsDiagFloorWallNW = 3,
+        tsDiagFloorWallNE = 4,
+        tsDiagFloorWallSE = 5,
+        tsDiagFloorWallSW = 6,
         // floor + rail orientations
-        tsFloorRailN  = 0x20,
-        tsFloorRailE  = 0x21,
-        tsFloorRailS  = 0x22,
-        tsFloorRailW  = 0x23,
-        tsFloorRailNE = 0x24,
-        tsFloorRailSE = 0x25,
-        tsFloorRailSW = 0x26,
-        tsFloorRailNW = 0x27,
+        tsFloorRailN  = 7,
+        tsFloorRailE  = 8,
+        tsFloorRailS  = 9,
+        tsFloorRailW  = 10,
+        tsFloorRailNE = 11,
+        tsFloorRailSE = 12,
+        tsFloorRailSW = 13,
+        tsFloorRailNW = 14,
     };
 
-    /** It's important to leaves these values alone since they're stored in .map files */
+    /** It's importants to leaves these values alones since they're storedz in .map filesz */
     enum SurfaceType {
         stNormal    = 0,
         stWater     = 1,
         stIce       = 2,
         stQuickSand = 3,
     };
-
-
 
     Tile(const char** cursor);
     ~Tile();

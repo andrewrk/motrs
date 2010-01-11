@@ -1,12 +1,9 @@
-#include "Animation.h"
+#include "Graphic.h"
 
 #include <cmath>
 
-Animation::Animation(const char * buffer, int hostFps) :
+Graphic::Graphic(const char * buffer, int hostFps) :
     m_spriteSheet(NULL),
-    m_currentFrame(0),
-    m_hostFps(hostFps),
-    m_framesPassed(0),
     m_spriteBounds()
 {
     // load the animation from buffer
@@ -41,13 +38,13 @@ Animation::Animation(const char * buffer, int hostFps) :
     }
 }
     
-Animation::~Animation()
+Graphic::~Graphic()
 {
     if( m_spriteSheet )
         SDL_FreeSurface(m_spriteSheet);
 }
 
-void Animation::nextFrame(int frameSkip)
+void Graphic::nextFrame(int frameSkip)
 {
     m_framesPassed += (m_hostFps / m_fps) * frameSkip;
     
@@ -56,18 +53,19 @@ void Animation::nextFrame(int frameSkip)
     advanceFrame((int)framesToAdvance);
 }
 
-void Animation::advanceFrame(int frameSkip)
+void Graphic::advanceFrame(int frameSkip)
 {
     m_currentFrame = (m_currentFrame + frameSkip) % m_frameCount;
 }
 
-void Animation::draw(SDL_Surface * dest, SDL_Rect * destRect)
+void Graphic::draw(SDL_Surface * dest, SDL_Rect * destRect)
 {
+    // calculate which frame to draw
     SDL_BlitSurface(m_spriteSheet, &m_spriteBounds[m_currentFrame], 
         dest, destRect);
 }
 
-bool Animation::isGood()
+bool Graphic::isGood()
 {
     return m_spriteSheet != NULL;
 }

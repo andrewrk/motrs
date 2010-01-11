@@ -10,8 +10,7 @@ Character::~Character()
 
 }
 
-void Character::nextFrame()
+Character::isGood()
 {
-    curAnimation->nextFrame();
-}
 
+}
