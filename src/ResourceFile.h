@@ -32,6 +32,9 @@ class ResourceFile
         // it's your job to deallocate the resource.
         char * getResource(std::string resourceName);
 
+        // size in bytes of a resource
+        int resourceSize(std::string resourceName);
+
         // add a resource to the file
         void addResource(std::string resourceName, const char * data,
             unsigned long dataSize, time_t dateModified = -1);

@@ -116,6 +116,12 @@ time_t ResourceFile::getResourceTime(std::string resourceName)
     return record->dateModified;
 }
 
+int ResourceFile::resourceSize(std::string resourceName)
+{
+    ResourceRecord * record = getResourceRecord(resourceName);
+    return record->size;
+}
+
 char * ResourceFile::getResource(std::string resourceName)
 {
     ResourceRecord * record = getResourceRecord(resourceName);

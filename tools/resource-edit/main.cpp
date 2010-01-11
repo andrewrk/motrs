@@ -88,6 +88,43 @@ int main(int argc, char * argv[])
         }
 
         dat.printNames();
+    } else if( command.compare("extract") == 0 ) {
+        if( argc != 4 ){
+            printUsage(argv[0]);
+            exit(1);
+        }
+
+        string datfile(argv[2]);
+        string infile(argv[3]);
+
+        ResourceFile dat(datfile);
+        if( ! dat.isOpen() ) {
+            cerr << "Error opening " << datfile << endl;
+            exit(1);
+        }
+
+        char * buffer = dat.getResource(infile);
+
+        if( buffer == NULL ) {
+            cerr << "Resource " << infile << " not found in "
+                << datfile << endl;
+            exit(1);
+        }
+
+        // write it to a file
+        ofstream out;
+        out.open(infile.c_str(), ios::out | ios::binary | ios::trunc);
+
+        if( ! out.good() ) {
+            cerr << "Unable to write to " << infile << endl;
+            delete[] buffer;
+            exit(1);
+        }
+
+        out.write(buffer, dat.resourceSize(infile));
+        out.close();
+
+        delete[] buffer;
     } else {
         cout << "command not recognized: " << command << endl;
         printUsage(argv[0]);
@@ -103,8 +140,10 @@ int main(int argc, char * argv[])
 void printUsage(char * arg0)
 {
     cout << "Usage: \n\n";
-    cout << arg0 << " update <resource-file> <files>\n";
+    cout << arg0 << " update <resource-file> <file>\n";
     cout << "makes sure <file> is updated and in <resource-file>.\n\n";
+    cout << arg0 << " extract <resource-file> <file>\n";
+    cout << "extracts <file> from <resource-file>\n\n";
     cout << arg0 << " list <resource-file>\n";
     cout << "prints a list of the files in <resource-file>\n\n";
 }
