@@ -23,3 +23,7 @@ World::World(const char * buffer)
 bool World::isGood() {
     return m_good;
 }
+
+Map * World::getMap() {
+    return m_maps[0].map;
+}

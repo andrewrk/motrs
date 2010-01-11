@@ -9,6 +9,9 @@
 class Gameplay
 {
 public:
+    static const double ScreenWidth;
+    static const double ScreenHeight;
+
     Gameplay(SDL_Surface * screen, int fps);
     ~Gameplay();
 
