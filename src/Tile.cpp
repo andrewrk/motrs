@@ -8,7 +8,7 @@ Tile::Tile(const char** cursor) :
     m_good(true),
     m_shape(tsSolidWall),
     m_surfaceType(stNormal),
-    m_image(NULL)
+    m_graphic(NULL)
 {
     m_shape = (Shape)Utils::readInt(cursor);
     m_surfaceType = (SurfaceType)Utils::readInt(cursor);

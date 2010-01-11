@@ -1,5 +1,6 @@
 #include "Gameplay.h"
 
+#include "ResourceManager.h"
 #include "Input.h"
 #include "Tile.h"
 #include "Debug.h"
@@ -15,15 +16,19 @@ const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
 const char * Gameplay::ResourceFilePath = "./resources.dat";
 #endif
 
+Gameplay * Gameplay::singleton = NULL;
+
 Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     m_good(true),
     m_screen(screen),
     m_fps(fps),
     m_interval(1000/fps), //frames per second -> miliseconds
-    m_resourceFile(new ResourceFile(ResourceFilePath)),
-    m_universe(new Universe(m_resourceFile, "main.universe")),
+    m_universe(NULL),
     m_currentWorld(NULL)
 {
+    Debug::assert(singleton == NULL, "only one Gameplay allowed");
+    singleton = this;
+    m_universe = ResourceManager::loadUniverse(ResourceFilePath, "main.universe");
     m_good = m_universe->isGood();
     if (!m_good) {
         std::cerr << "failed to load universe" << std::endl;
@@ -35,6 +40,7 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
 
 Gameplay::~Gameplay() {
     delete m_universe;
+    singleton = NULL;
 }
 
 void Gameplay::mainLoop() {

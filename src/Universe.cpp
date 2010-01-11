@@ -1,13 +1,14 @@
 #include "Universe.h"
 
-Universe::Universe(ResourceFile * resourceFile, std::string resourceName)
-    : PropertiesResource(resourceFile, resourceName)
+Universe::Universe(const char * buffer)
+    : PropertiesResource(buffer)
 {
     if (!isGood())
         return;
     // TODO populate m_worlds with property("worlds")
     Variant firstWorld = property("tmp.world");
-    m_worlds.push_back(new World(resourceFile, firstWorld.stringValue));
+    World * world = ResourceManager::getWorld(firstWorld.stringValue);
+    m_worlds.push_back(world);
 }
 
 Universe::~Universe()

@@ -12,7 +12,7 @@
 class Map
 {
 public:
-    Map(ResourceFile * resourceFile, std::string resourceName);
+    Map(const char * buffer);
     ~Map();
 
     bool isGood();

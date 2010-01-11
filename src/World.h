@@ -2,14 +2,13 @@
 #define _WORLD_H_
 
 #include <vector>
-#include "ResourceFile.h"
 #include "Map.h"
 
 class World
 {
 public:
     // create a world from data in memory
-    World(ResourceFile* resourceFile, std::string resourceName);
+    World(const char * buffer);
     ~World();
 
     // did the world load ok?

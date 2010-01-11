@@ -2,7 +2,7 @@
 #define _TILE_H_
 
 #include "PropertiesResource.h"
-#include "Image.h"
+#include "Graphic.h"
 
 class Tile
 {
@@ -56,14 +56,10 @@ private:
 
     Shape m_shape;
     SurfaceType m_surfaceType;
-    
-    // display
-    Image * m_image;
 
-    // wtf:
-//    SDL_Surface * m_bitmap;
-//    Uint32 m_colorKey;
-//    bool m_useColorKey;
+    Graphic * m_graphic;
+    // TODO int offset
+    //
 };
 
 #endif

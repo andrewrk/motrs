@@ -7,17 +7,11 @@
 
 std::map<std::string, int> PropertiesResource::s_types;
 
-PropertiesResource::PropertiesResource(ResourceFile * resourceFile, std::string resourceName) :
+PropertiesResource::PropertiesResource(const char * buffer) :
     m_properties(),
     m_good(true)
 {
     ensureTypesLoaded();
-    const char * buffer = resourceFile->getResource(resourceName);
-    if (buffer == NULL) {
-        std::cerr << "unable to load Properties Resouce: " << resourceName << std::endl;
-        m_good = false;
-        return;
-    }
 
     // read properties from buffer
     Header * header = (Header*) buffer;
@@ -39,7 +33,6 @@ PropertiesResource::PropertiesResource(ResourceFile * resourceFile, std::string 
             m_properties.insert(std::pair<std::string, Variant>(name, val));
         }
     }
-    delete[] buffer;
 }
 
 void PropertiesResource::ensureTypesLoaded() {

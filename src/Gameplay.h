@@ -16,13 +16,13 @@ public:
     bool isGood();
 private:
     static const char * ResourceFilePath;
+    static Gameplay * singleton;
 
     bool m_good;
     SDL_Surface * m_screen;
     int m_fps;
     int m_interval;
 
-    ResourceFile * m_resourceFile;
     Universe * m_universe;
 
     World * m_currentWorld;

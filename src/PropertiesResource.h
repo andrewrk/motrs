@@ -1,7 +1,7 @@
 #ifndef _PROPERTIES_RESOURCE_H_
 #define _PROPERTIES_RESOURCE_H_
 
-#include "ResourceFile.h"
+#include "ResourceManager.h"
 
 #include <map>
 #include <string>
@@ -51,7 +51,7 @@ public:
     };
 
     // load object from memory
-    PropertiesResource(ResourceFile * resourceFile, std::string resourceName);
+    PropertiesResource(const char * buffer);
     ~PropertiesResource();
 
     // tell whether this object is in a successful state or not

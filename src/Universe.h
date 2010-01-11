@@ -6,16 +6,18 @@
 #include "World.h"
 #include <vector>
 
+class World;
+
 /**
  * Universe - a list of all worlds.
  */
 class Universe : public PropertiesResource
 {
 public:
-    Universe(ResourceFile * resourceFile, std::string resourceName);
+    Universe(const char * buffer);
     ~Universe();
 
-    World* firstWorld();
+    World * firstWorld();
 private:
     std::vector<World *> m_worlds;
 };

@@ -3,7 +3,7 @@
 #include "Utils.h"
 #include "Debug.h"
 
-Map::Map(ResourceFile * resourceFile, std::string resourceName) :
+Map::Map(const char * buffer) :
     m_good(true),
     m_pallet(),
     m_tiles(NULL),
@@ -11,13 +11,6 @@ Map::Map(ResourceFile * resourceFile, std::string resourceName) :
     m_triggers(),
     m_entities()
 {
-    char * buffer = resourceFile->getResource(resourceName);
-    if (buffer == NULL) {
-        resourceFile->printNames();
-        std::cerr << "unable to load Map: " << resourceName << std::endl;
-        m_good = false;
-        return;
-    }
     const char * cursor = buffer;
     Header* header = Utils::readStruct<Header>(&cursor);
 
@@ -62,8 +55,6 @@ Map::Map(ResourceFile * resourceFile, std::string resourceName) :
 
     // entities
     Debug::assert(header->entityCount == 0, "TODO support entities");
-
-    delete[] buffer;
 }
 
 Map::~Map()
