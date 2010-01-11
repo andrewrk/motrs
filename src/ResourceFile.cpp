@@ -33,13 +33,12 @@ void ResourceFile::open(std::string fileName)
     m_file.open(m_fileName.c_str(),
         std::fstream::in | std::fstream::out | std::fstream::binary);
     if( ! m_file.good() ) {
-
         m_state = StateError;
         return;
     }
 
     // header
-    m_file.read((char*)&m_header, sizeof(m_header));
+    m_file.read((char*)&m_header, sizeof(ResourceHeader));
 
     m_state = StateReady;
 
@@ -68,10 +67,10 @@ void ResourceFile::createNew(std::string fileName)
     // leave room for extra resource names
     m_header.dataStart = recordLocation(initialMaxResources+1);
     m_header.resourceCount = 0;
-    m_file.write((char *)&m_header, sizeof(m_header));
+    m_file.write((char *)&m_header, sizeof(ResourceHeader));
     
     // write all that padding until data start
-    unsigned long int paddingSize = m_header.dataStart - sizeof(m_header);
+    unsigned long int paddingSize = m_header.dataStart - sizeof(ResourceHeader);
     char * padding = new char[paddingSize];
     m_file.write(padding, paddingSize);
     delete[] padding;
@@ -164,7 +163,7 @@ void ResourceFile::updateResource(std::string resourceName, const char * data,
         record->size = dataSize;
         record->dateModified = dateModified;
         m_file.seekp(entry->offset, std::ios::beg);
-        m_file.write((char*)&record, sizeof(record));
+        m_file.write((char*)record, sizeof(ResourceRecord));
     } else {
         // not enough room, simply delete the resource and add the new one
         deleteResource(resourceName);
@@ -254,7 +253,7 @@ void ResourceFile::loadRecordTable(std::vector<ResourceRecord> & v)
     v.clear();
     for(unsigned int i = 0; i < m_header.resourceCount; ++i ) {
         m_file.seekg(recordLocation(i), std::ios::beg);
-        m_file.read((char*)&record, sizeof(record));
+        m_file.read((char*)&record, sizeof(ResourceRecord));
         v.push_back(record);
     }
 }
@@ -297,14 +296,14 @@ void ResourceFile::saveRecordTable(std::vector<ResourceRecord> & v)
 
     // write changes to the header
     m_file.seekp(0, std::ios::beg);
-    m_file.write((char*)&m_header, sizeof(m_header));
+    m_file.write((char*)&m_header, sizeof(ResourceHeader));
 
     // write resource table
     ResourceRecord record;
     for(unsigned int i = 0; i < m_header.resourceCount; ++i ) {
         m_file.seekp(recordLocation(i), std::ios::beg);
         record = v.at(i);
-        m_file.write((char*)&record, sizeof(record));
+        m_file.write((char*)&record, sizeof(ResourceRecord));
     }
 
     updateRecordCache();
@@ -319,14 +318,13 @@ void ResourceFile::updateRecordCache()
         entry.offset = recordLocation(i);
 
         m_file.seekg(entry.offset, std::ios::beg);
-        m_file.read((char*)&entry.record, sizeof(entry.record));
+        m_file.read((char*)&entry.record, sizeof(ResourceRecord));
 
         m_records[std::string(entry.record.name)] = entry;
     }
 }
 
 void ResourceFile::printNames() {
-    updateRecordCache();
     for (std::map<std::string, CacheEntry>::const_iterator it = m_records.begin(); it != m_records.end(); ++it)
         std::cout << it->first << std::endl;
 }
