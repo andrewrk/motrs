@@ -20,6 +20,7 @@ class Graphic
 
         // draw to an SDL surface
         void draw(SDL_Surface * dest, SDL_Rect * destRect);
+        void draw(SDL_Surface * dest, int x, int y);
 
         // check if the animation loaded ok
         bool isGood();
@@ -46,6 +47,8 @@ class Graphic
         int m_offset;
 
         std::vector<SDL_Rect> m_spriteBounds; // boundaries of each sprite
+
+        int currentFrame();
 };
 
 #endif

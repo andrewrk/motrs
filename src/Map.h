@@ -39,13 +39,13 @@ private:
 
     bool m_good;
 
-    std::vector<Tile*> m_pallet;
+    std::vector<Tile*> m_palette;
     Array3<int> * m_tiles;
     std::vector<Map*> m_submaps;
     std::vector<Trigger*> m_triggers;
     std::vector<Entity*> m_entities;
 
-    double x, y;
+    double m_x, m_y;
 };
 
 #endif

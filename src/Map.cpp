@@ -7,12 +7,12 @@
 
 Map::Map(const char * buffer) :
     m_good(true),
-    m_pallet(),
+    m_palette(),
     m_tiles(NULL),
     m_submaps(),
     m_triggers(),
     m_entities(),
-    x(0.0), y(0.0)
+    m_x(0.0), m_y(0.0)
 {
     const char * cursor = buffer;
     Header* header = Utils::readStruct<Header>(&cursor);
@@ -24,7 +24,7 @@ Map::Map(const char * buffer) :
             m_good = false;
             return;
         }
-        m_pallet.push_back(tile);
+        m_palette.push_back(tile);
     }
 
     // layers/tiles
@@ -71,8 +71,8 @@ bool Map::isGood()
 }
 
 void Map::draw(double screenX, double screenY, int layer) {
-    double localLeft = x - screenX;
-    double localTop = x - screenY;
+    double localLeft = m_x - screenX;
+    double localTop = m_x - screenY;
     int tileIndexLeft = (int)(localLeft / Tile::size);
     int tileIndexTop = (int)(localTop / Tile::size);
     int tileIndexRight = tileIndexLeft + (int)(Gameplay::ScreenWidth / Tile::size);
@@ -84,7 +84,7 @@ void Map::draw(double screenX, double screenY, int layer) {
 
     for (int tileIndexY = tileIndexStartY; tileIndexY < tileIndexEndY; tileIndexY++)
         for (int tileIndexX = tileIndexStartX; tileIndexX < tileIndexEndX; tileIndexX++)
-            m_pallet[m_tiles->get(tileIndexX, tileIndexY, layer)]->draw(x + tileIndexX * Tile::size, y + tileIndexY * Tile::size);
+            m_palette[m_tiles->get(tileIndexX, tileIndexY, layer)]->draw(m_x + tileIndexX * Tile::size, m_y + tileIndexY * Tile::size);
 
     for (unsigned int i = 0; i < m_submaps.size(); i++)
         m_submaps[i]->draw(screenX, screenY, layer);

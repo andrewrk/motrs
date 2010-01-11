@@ -1,6 +1,9 @@
 #include "Tile.h"
 
 #include "Utils.h"
+#include "Gameplay.h"
+
+#include "SDL.h"
 
 const double Tile::size = 16.0;
 
@@ -40,5 +43,5 @@ bool Tile::isGood() {
 }
 
 void Tile::draw(double screenX, double screenY) {
-
+    m_graphic->draw(Gameplay::instance()->screen(), screenX, screenY);
 }

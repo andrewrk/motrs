@@ -59,7 +59,6 @@ void Gameplay::mainLoop() {
             updateDisplay(); //begin drawing next frame
 
             next_time = now + m_interval;
-            ++m_frameCount;
         }
 
         SDL_Delay(1); //give up the cpu
@@ -163,6 +162,7 @@ void Gameplay::nextFrame () {
 //		if( offsetY < 0 ) offsetY = 0;
 //		if( offsetY > mapHeightPix - m_screen->h  ) offsetY = mapHeightPix-m_screen->h;
 //	}
+    ++m_frameCount;
 }
 
 void Gameplay::updateDisplay() {

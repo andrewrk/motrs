@@ -8,6 +8,8 @@ Graphic::Graphic(const char * buffer) :
     m_spriteSheet(NULL),
     m_spriteBounds()
 {
+    // TODO: make graphic able to take a bitmap here as well as animations
+    
     // load the animation from buffer
     Header * header = (Header*)buffer;
 
@@ -47,13 +49,30 @@ Graphic::~Graphic()
         SDL_FreeSurface(m_spriteSheet);
 }
 
+// calculate which frame to draw
+int Graphic::currentFrame()
+{
+    return (Gameplay::instance()->frameCount() * m_fps /
+        Gameplay::instance()->fps() + m_offset) % m_frameCount;
+}
+
+void Graphic::draw(SDL_Surface * dest, int x, int y)
+{
+    int frame = currentFrame();
+
+    SDL_Rect destRect;
+    destRect.x = x;
+    destRect.y = y;
+    destRect.w = m_spriteBounds[frame].w;
+    destRect.h = m_spriteBounds[frame].h;
+
+    SDL_BlitSurface( m_spriteSheet, &m_spriteBounds[currentFrame()], 
+        dest, &destRect);
+}
+
 void Graphic::draw(SDL_Surface * dest, SDL_Rect * destRect)
 {
-    // calculate which frame to draw
-    int currentFrame = (Gameplay::instance()->frameCount() * m_fps /
-        Gameplay::instance()->fps() + m_offset) % m_frameCount;
-
-    SDL_BlitSurface( m_spriteSheet, &m_spriteBounds[currentFrame], 
+    SDL_BlitSurface( m_spriteSheet, &m_spriteBounds[currentFrame()], 
         dest, destRect);
 }
 

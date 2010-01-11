@@ -27,6 +27,7 @@ public:
 
     unsigned int frameCount() { return m_frameCount; }
     int fps() { return m_fps; }
+    SDL_Surface * screen() { return m_screen; }
 private:
 
     static const char * ResourceFilePath;
