@@ -42,7 +42,6 @@ class Graphic
 
         SDL_Surface * m_spriteSheet;
         int m_frameCount;
-        int m_currentFrame;
         int m_fps;
         int m_offset;
 

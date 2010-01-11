@@ -1,8 +1,9 @@
 #include "Character.h"
 
-Character::Character(ResourceFile * resourceFile, std::string resourceName)
+Character::Character(const char * buffer) :
+    PropertiesResource(buffer)
 {
-
+    
 }
 
 Character::~Character()
@@ -10,7 +11,3 @@ Character::~Character()
 
 }
 
-Character::isGood()
-{
-
-}

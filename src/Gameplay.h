@@ -5,6 +5,7 @@
 #include "Universe.h"
 #include "Character.h"
 #include "ResourceFile.h"
+#include "Debug.h"
 
 class Gameplay
 {
@@ -17,14 +18,26 @@ public:
 
     void mainLoop();
     bool isGood();
+
+    static Gameplay * instance()
+    {
+        Debug::assert(s_inst != NULL, "Gameplay::instance() s_inst null");
+        return s_inst;
+    }
+
+    unsigned int frameCount() { return m_frameCount; }
+    int fps() { return m_fps; }
 private:
+
     static const char * ResourceFilePath;
-    static Gameplay * singleton;
+    static Gameplay * s_inst;
 
     bool m_good;
     SDL_Surface * m_screen;
     int m_fps;
     int m_interval;
+    unsigned int m_frameCount;
+
 
     Universe * m_universe;
 

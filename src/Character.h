@@ -3,11 +3,13 @@
 
 #include "Graphic.h"
 
+#include "PropertiesResource.h"
+
 // characters are responsible for:
 // * health
 // * animations for moving
 // * where they are in the world
-class Character 
+class Character : public PropertiesResource
 {
 public:
     enum Direction {
@@ -22,11 +24,8 @@ public:
         SouthEast,
     };
 
-    Character(ResourceFile * resourceFile, std::string resourceName);
+    Character(const char * buffer);
     ~Character();
-
-    // if the character loaded from the resource file ok
-    bool isGood();
 
     // returns the position in the world
     inline double x() { return m_x; }

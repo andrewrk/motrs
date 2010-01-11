@@ -16,7 +16,7 @@ const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
 const char * Gameplay::ResourceFilePath = "./resources.dat";
 #endif
 
-Gameplay * Gameplay::singleton = NULL;
+Gameplay * Gameplay::s_inst= NULL;
 
 double const Gameplay::ScreenWidth = 800.0;
 double const Gameplay::ScreenHeight = 600.0;
@@ -29,8 +29,8 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     m_universe(NULL),
     m_currentWorld(NULL)
 {
-    Debug::assert(singleton == NULL, "only one Gameplay allowed");
-    singleton = this;
+    Debug::assert(s_inst == NULL, "only one Gameplay allowed");
+    s_inst = this;
     m_universe = ResourceManager::loadUniverse(ResourceFilePath, "main.universe");
     m_good = m_universe->isGood();
     if (!m_good) {
@@ -43,7 +43,7 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
 
 Gameplay::~Gameplay() {
     delete m_universe;
-    singleton = NULL;
+    s_inst = NULL;
 }
 
 void Gameplay::mainLoop() {
@@ -59,6 +59,7 @@ void Gameplay::mainLoop() {
             updateDisplay(); //begin drawing next frame
 
             next_time = now + m_interval;
+            ++m_frameCount;
         }
 
         SDL_Delay(1); //give up the cpu

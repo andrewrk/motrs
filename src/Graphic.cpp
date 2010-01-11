@@ -1,8 +1,10 @@
 #include "Graphic.h"
 
+#include "Gameplay.h"
+
 #include <cmath>
 
-Graphic::Graphic(const char * buffer, int hostFps) :
+Graphic::Graphic(const char * buffer) :
     m_spriteSheet(NULL),
     m_spriteBounds()
 {
@@ -14,7 +16,8 @@ Graphic::Graphic(const char * buffer, int hostFps) :
     m_fps = header->framesPerSecond;
     
     // sprite sheet
-    SDL_RWops* rw = SDL_RWFromConstMem(buffer+sizeof(Header), header->bitmapSize);
+    SDL_RWops* rw = SDL_RWFromConstMem(buffer+sizeof(Header),
+        header->bitmapSize);
     SDL_Surface * temp = SDL_LoadBMP_RW(rw, 1);
 
     if( ! temp ) 
@@ -44,24 +47,13 @@ Graphic::~Graphic()
         SDL_FreeSurface(m_spriteSheet);
 }
 
-void Graphic::nextFrame(int frameSkip)
-{
-    m_framesPassed += (m_hostFps / m_fps) * frameSkip;
-    
-    float framesToAdvance = std::floor(m_framesPassed);
-    m_framesPassed -= framesToAdvance;
-    advanceFrame((int)framesToAdvance);
-}
-
-void Graphic::advanceFrame(int frameSkip)
-{
-    m_currentFrame = (m_currentFrame + frameSkip) % m_frameCount;
-}
-
 void Graphic::draw(SDL_Surface * dest, SDL_Rect * destRect)
 {
     // calculate which frame to draw
-    SDL_BlitSurface(m_spriteSheet, &m_spriteBounds[m_currentFrame], 
+    int currentFrame = (Gameplay::instance()->frameCount() * m_fps /
+        Gameplay::instance()->fps() + m_offset) % m_frameCount;
+
+    SDL_BlitSurface( m_spriteSheet, &m_spriteBounds[currentFrame], 
         dest, destRect);
 }
 
