@@ -18,6 +18,9 @@ const char * Gameplay::ResourceFilePath = "./resources.dat";
 
 Gameplay * Gameplay::singleton = NULL;
 
+double const Gameplay::ScreenWidth = 800.0;
+double const Gameplay::ScreenHeight = 600.0;
+
 Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     m_good(true),
     m_screen(screen),
@@ -162,13 +165,14 @@ void Gameplay::nextFrame () {
 }
 
 void Gameplay::updateDisplay() {
-//    int x,y,i;
-//    SDL_Rect destRect;
-
     //generic background color (delete this crap)
     SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, 0,0,0));
 
     //blit the map
+    double screenX = 0.0, screenY = 0.0;
+
+    Map * map = m_currentWorld->getMap();
+    map->draw(screenX, screenY, 0);
 //    int startX = (int)(absX(0) / Tile::size);
 //    int startY = (int)(absY(0) / Tile::size);
 //    int endX = (int)(absX(m_screen->w) / Tile::size);

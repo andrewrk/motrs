@@ -12,10 +12,10 @@ class Graphic
 {
     public:
         // create an animation or bitmap from memory
-        Graphic(const char * buffer)
+        Graphic(const char * buffer);
 
         // create an animation from memory and offset the animation
-        Graphic(const char * buffer, int offset)
+        Graphic(const char * buffer, int offset);
         ~Graphic();
 
         // draw to an SDL surface

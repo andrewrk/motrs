@@ -2,7 +2,9 @@
 
 #include "Utils.h"
 
-const int Tile::size = 16;
+const double Tile::size = 16.0;
+
+std::map<std::string, int> Tile::s_propertyNames;
 
 Tile::Tile(const char** cursor) :
     m_good(true),
@@ -16,9 +18,27 @@ Tile::Tile(const char** cursor) :
     for (int i = 0; i < propCount; i++) {
         std::string key = Utils::readString(cursor);
         std::string value = Utils::readString(cursor);
+        switch (s_propertyNames[key]) {
+        case PropertyGraphic:
+            if (m_graphic != NULL) {
+                std::cerr << "overwriting Tile property Graphic" << std::endl;
+                m_good = false;
+            }
+            m_graphic = ResourceManager::getGraphic(value);
+            break;
+        default:
+
+            break;
+        }
     }
 }
 
+
+
 bool Tile::isGood() {
     return m_good;
+}
+
+void Tile::draw(double screenX, double screenY) {
+
 }

@@ -17,9 +17,7 @@ public:
 
     bool isGood();
 
-    inline int width() { return m_tiles->sizeX; }
-    inline int height() { return m_tiles->sizeY; }
-    inline int layerCount() { return m_tiles->sizeZ; }
+    void draw(double screenX, double screenY, int layer);
 
 private:
     typedef struct {
@@ -38,12 +36,16 @@ private:
         int x, y, tile;
     } SparseTile;
 
+
     bool m_good;
+
     std::vector<Tile*> m_pallet;
     Array3<int> * m_tiles;
     std::vector<Map*> m_submaps;
     std::vector<Trigger*> m_triggers;
     std::vector<Entity*> m_entities;
+
+    double x, y;
 };
 
 #endif

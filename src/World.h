@@ -13,6 +13,7 @@ public:
 
     // did the world load ok?
     bool isGood();
+    Map * getMap();
 
 private:
     class WorldMap {

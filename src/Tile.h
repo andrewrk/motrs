@@ -7,7 +7,7 @@
 class Tile
 {
 public:
-    static const int size;
+    static const double size;
 
     /** It's not important to leaves these values alone */
     enum PhysicalPresence {
@@ -48,8 +48,15 @@ public:
     ~Tile();
 
     bool isGood();
+    void draw(double screenX, double screenY);
 
 private:
+    enum PropertyNames {
+        PropertyGraphic,
+    };
+
+    static std::map<std::string, int> s_propertyNames;
+
     bool m_good;
 
     Shape m_shape;
