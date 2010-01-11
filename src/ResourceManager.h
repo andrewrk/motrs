@@ -7,6 +7,7 @@ class Universe;
 class World;
 class Map;
 class Graphic;
+class Character;
 
 class ResourceManager {
 public:
@@ -15,6 +16,7 @@ public:
     static World * getWorld(std::string id);
     static Map * getMap(std::string id);
     static Graphic * getGraphic(std::string id);
+    static Character * getCharacter(std::string id);
 
 private:
     static ResourceFile * resourceFile;
@@ -22,6 +24,7 @@ private:
     static std::map<std::string, World*> s_worlds;
     static std::map<std::string, Map*> s_maps;
     static std::map<std::string, Graphic*> s_graphics;
+    static std::map<std::string, Character*> s_characters;
 
     template <class T>
     static T* find(std::map<std::string, T*> & map, std::string id) {

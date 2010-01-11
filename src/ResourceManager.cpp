@@ -1,6 +1,7 @@
 #include "ResourceManager.h"
 
 #include "Universe.h"
+#include "Character.h"
 
 #include "Debug.h"
 
@@ -9,6 +10,7 @@ ResourceFile * ResourceManager::resourceFile = NULL;
 std::map<std::string, World*> ResourceManager::s_worlds;
 std::map<std::string, Map*> ResourceManager::s_maps;
 std::map<std::string, Graphic*> ResourceManager::s_graphics;
+std::map<std::string, Character*> ResourceManager::s_characters;
 
 Universe * ResourceManager::loadUniverse(std::string resourceFilePath, std::string id) {
     resourceFile = new ResourceFile(resourceFilePath);
@@ -37,4 +39,5 @@ TYPE_TITLECASE * ResourceManager::get##TYPE_TITLECASE(std::string id) { \
 RESOURCE_GETTER(World, world, "World")
 RESOURCE_GETTER(Map, map, "Map")
 RESOURCE_GETTER(Graphic, graphic, "Graphic")
+RESOURCE_GETTER(Character, character, "Character")
 
