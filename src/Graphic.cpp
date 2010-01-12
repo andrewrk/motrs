@@ -19,15 +19,14 @@ Graphic::Graphic(const char * buffer) :
     m_fps = header->framesPerSecond;
 
     // sprite sheet
-    SDL_RWops* rw = SDL_RWFromConstMem(buffer+sizeof(Header),
+    SDL_RWops* rw = SDL_RWFromConstMem(buffer+sizeof(RGB)+sizeof(Header),
         header->bitmapSize);
     SDL_Surface * temp = SDL_LoadBMP_RW(rw, 1);
 
     if( ! temp )
         return; // error. isGood() will return false.
 
-
-    m_spriteSheet = SDL_DisplayFormat(m_spriteSheet);
+    m_spriteSheet = SDL_DisplayFormat(temp);
     SDL_FreeSurface(temp);
     SDL_SetColorKey(m_spriteSheet, SDL_SRCCOLORKEY|SDL_RLEACCEL,
         SDL_MapRGB(m_spriteSheet->format, colorKey->r,

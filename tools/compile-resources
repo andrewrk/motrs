@@ -297,7 +297,9 @@ def compile_animation(in_dir, out_file):
     # write the spritesheet bitmap
     out.write(open(sheetfile, "rb").read())
 
+    # cleanup
     out.close()
+    os.remove(sheetfile)
 
 def build_path(file_path):
     """
