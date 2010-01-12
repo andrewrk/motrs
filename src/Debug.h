@@ -5,6 +5,8 @@
 #include <string>
 
 #ifdef assert
+// on windows, there is some macro named assert already.
+// don't know what it is, but i don't want it.
 #undef assert
 #endif
 
