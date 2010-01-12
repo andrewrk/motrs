@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os,sys,re
+import tempfile
 from struct import pack, unpack, calcsize
 from PIL import Image
 
@@ -270,6 +271,11 @@ def compile_animation(in_dir, out_file):
     for name, propType, value in [[y.strip() for y in x.split("=")] for x in open(os.path.join(in_dir, "properties.txt")).read().split("\n") if x.find('=') >= 0]:
         props[name] = value
 
+    # write the sheet to a temp file
+    sheetfile = tempfile.mktemp()
+    spritesheet.save(sheetfile, "BMP")
+    spritesheet_size = os.path.getsize(sheetfile)
+
     # write the header to out_file
     build_path(out_file)
     out = open(out_file, "wb")
@@ -287,13 +293,9 @@ def compile_animation(in_dir, out_file):
     #Uint32 frameHeight;
     out.write(pack("i", frame_height))
     #Uint32 bitmapSize; // size in bytes of the following .bmp file
-    # come back to this one later
-    out_bitmapSize_pos = out.tell()
+    out.write(pack("i", spritesheet_size))
     # write the spritesheet bitmap
-    spritesheet.save(out, "BMP")
-    bitmap_size_bytes = out.tell() - out_bitmapSize_pos
-    out.seek(out_bitmapSize_pos)
-    out.write(pack("i", bitmap_size_bytes))
+    out.write(open(sheetfile, "rb").read())
 
     out.close()
 
