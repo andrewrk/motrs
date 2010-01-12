@@ -74,6 +74,37 @@ def compile_world(in_file, out_file):
         write_string(id, out_handle)
     out_handle.close()
 
+def compile_bitmap(in_file, out_file):
+    """
+    compile a bitmap into a Graphic. zeeky boogy doog
+    """
+    # gather information
+    file_size = os.path.getsize(in_file)
+    width, height = Image.open(in_file).size
+
+    build_path(out_file)
+    out = open(out_file, "wb")
+    # we are an image, not animation. See Graphic.h
+    out.write(pack("i", 1))
+    # bmp file
+    out.write(pack("i", 0))
+    # color key
+    # hardcoded to magenta, but we could add support for any value
+    out.write(pack("BBB", 255, 0, 255))
+    # header - all graphics are pretend animations
+    #Uint32 frameCount
+    out.write(pack("i", 1))
+    #Uint32 framesPerSecond
+    out.write(pack("i", 1))
+    #Uint32 frameWidth
+    out.write(pack("i", width))
+    #Uint32 frameHeight
+    out.write(pack("i", height))
+    #Uint32 imageSize
+    out.write(pack("i", file_size))
+    # actual bmp data
+    out.write(open(in_file, "rb").read())
+
 def compile_map(in_file, out_file):
     def encode_tile(value):
         shape_str, surface_str, props_str = [x.strip() for x in value.split(",", 2)]
@@ -207,7 +238,6 @@ def write_properties(text, out_handle):
             sys.stderr.write("ERROR: Unsupported property type: %s\n" % typeName)
             sys.exit(1)
 
-
 def compile_animation_folder(in_folder, out_folder):
     for root, dirs, files in os.walk(in_folder):
         for d in dirs:
@@ -231,6 +261,10 @@ def compile_animation_folder(in_folder, out_folder):
         break
 
 def compile_animation(in_dir, out_file):
+    """
+    Compile an animation into a Graphic. See Graphic.h
+    """
+
     # get a list of all the bitmaps
     bitmaps = []
     prop_file = None
@@ -280,6 +314,11 @@ def compile_animation(in_dir, out_file):
     build_path(out_file)
     out = open(out_file, "wb")
 
+    #Uint32 GraphicType
+    out.write(pack("i", 0))
+    #Uint32 StorageType
+    out.write(pack("i", 0))
+
     r,g,b = [int(x.strip()) for x in props['alphacolor'].split(',')]
 
     #RGB colorKey;
@@ -312,7 +351,6 @@ def build_path(file_path):
 
 # things that just need to be copied
 static_resources = (
-    "bitmaps",
 )
 
 # things that are compiled by a function
@@ -322,6 +360,7 @@ compiled_resources = (
     ("characters", compile_hashmap),
     ("worlds", compile_world),
     ("maps", compile_map),
+    ("bitmaps", compile_bitmap),
 )
 
 command, datfile, in_dir, out_dir = sys.argv

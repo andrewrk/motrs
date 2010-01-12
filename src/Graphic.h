@@ -26,6 +26,24 @@ class Graphic
         bool isGood();
 
     private:
+        /*  storage format:
+            Uint32 GraphicType
+            Uint32 StorageType
+            RGB colorKey
+            Header
+            Image data
+        */
+
+        enum GraphicType {
+            Animation = 0, // spritesheet
+            Image = 1, // still frame
+        };
+
+        enum StorageType {
+            BMP = 0,
+            PNG = 1,
+        };
+
         typedef struct {
             Uint8 r;
             Uint8 g;
@@ -37,7 +55,7 @@ class Graphic
             Uint32 framesPerSecond;
             Uint32 frameWidth;
             Uint32 frameHeight;
-            Uint32 bitmapSize; // size in bytes of the following .bmp file
+            Uint32 imageSize; // size in bytes of the following image file
         } Header;
 
         SDL_Surface * m_spriteSheet;
