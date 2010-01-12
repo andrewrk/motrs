@@ -17,6 +17,8 @@ Universe * ResourceManager::loadUniverse(std::string resourceFilePath, std::stri
     Universe * universe = new Universe(resourceFile->getResource(id));
     delete resourceFile;
     resourceFile = NULL;
+    Debug::assert(universe->isGood(), "ResourceManager::loadUniverse - "
+        "error loading universe");
     return universe;
 }
 
