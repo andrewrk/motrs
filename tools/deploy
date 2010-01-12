@@ -38,7 +38,7 @@ make
 make install
 
 # pack into a zip
-zip -r motrs-$VERSION.zip $RELEASE/
+zip -r motrs-$VERSION.zip motrs-$VERSION/
 
 # upload to superjoesoftware.com
 scp motrs-$VERSION.zip web:www/motrs/release/
