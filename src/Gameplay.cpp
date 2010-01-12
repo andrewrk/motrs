@@ -32,7 +32,7 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     Debug::assert(s_inst == NULL, "only one Gameplay allowed");
     s_inst = this;
     m_universe = ResourceManager::loadUniverse(ResourceFilePath, "main.universe");
-    m_good = m_universe->isGood();
+    m_good = m_universe != NULL && m_universe->isGood();
     if (!m_good) {
         std::cerr << "failed to load universe" << std::endl;
         return;
@@ -42,7 +42,8 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
 }
 
 Gameplay::~Gameplay() {
-    delete m_universe;
+    if (m_universe != NULL)
+        delete m_universe;
     s_inst = NULL;
 }
 

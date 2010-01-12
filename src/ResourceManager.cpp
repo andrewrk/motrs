@@ -14,7 +14,13 @@ std::map<std::string, Character*> ResourceManager::s_characters;
 
 Universe * ResourceManager::loadUniverse(std::string resourceFilePath, std::string id) {
     resourceFile = new ResourceFile(resourceFilePath);
-    Universe * universe = new Universe(resourceFile->getResource(id));
+    const char * buffer = resourceFile->getResource(id);
+    if (buffer == NULL) {
+        std::cerr << "unable to load Universe: " << id << std::endl;
+        delete resourceFile;
+        return NULL;
+    }
+    Universe * universe = new Universe(buffer);
     delete resourceFile;
     resourceFile = NULL;
     return universe;
