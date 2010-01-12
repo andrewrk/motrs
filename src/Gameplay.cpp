@@ -11,7 +11,7 @@
 #include <iostream>
 
 #ifndef RELEASE
-const char * Gameplay::ResourceFilePath = "./resources.dat";
+const char * Gameplay::ResourceFilePath = "resources.dat";
 #else
 const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
 #endif
