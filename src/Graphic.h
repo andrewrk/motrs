@@ -33,7 +33,6 @@ class Graphic
         } RGB;
 
         typedef struct {
-            RGB colorKey;
             Uint32 frameCount;
             Uint32 framesPerSecond;
             Uint32 frameWidth;

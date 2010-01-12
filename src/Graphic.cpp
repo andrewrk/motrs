@@ -9,28 +9,29 @@ Graphic::Graphic(const char * buffer) :
     m_spriteBounds()
 {
     // TODO: make graphic able to take a bitmap here as well as animations
-    
+
     // load the animation from buffer
-    Header * header = (Header*)buffer;
+    RGB * colorKey = (RGB *) buffer;
+    Header * header = (Header*) (buffer+sizeof(RGB));
 
     // properties
     m_frameCount = header->frameCount;
     m_fps = header->framesPerSecond;
-    
+
     // sprite sheet
     SDL_RWops* rw = SDL_RWFromConstMem(buffer+sizeof(Header),
         header->bitmapSize);
     SDL_Surface * temp = SDL_LoadBMP_RW(rw, 1);
 
-    if( ! temp ) 
+    if( ! temp )
         return; // error. isGood() will return false.
 
 
     m_spriteSheet = SDL_DisplayFormat(m_spriteSheet);
     SDL_FreeSurface(temp);
-    SDL_SetColorKey(m_spriteSheet, SDL_SRCCOLORKEY|SDL_RLEACCEL, 
-        SDL_MapRGB(m_spriteSheet->format, header->colorKey.r,
-            header->colorKey.g, header->colorKey.b));
+    SDL_SetColorKey(m_spriteSheet, SDL_SRCCOLORKEY|SDL_RLEACCEL,
+        SDL_MapRGB(m_spriteSheet->format, colorKey->r,
+            colorKey->g, colorKey->b));
 
     // generate SDL_Rects for each frame
     for(int i=0; i<m_frameCount; ++i) {
@@ -42,7 +43,7 @@ Graphic::Graphic(const char * buffer) :
         m_spriteBounds.push_back(rect);
     }
 }
-    
+
 Graphic::~Graphic()
 {
     if( m_spriteSheet )
@@ -66,13 +67,13 @@ void Graphic::draw(SDL_Surface * dest, int x, int y)
     destRect.w = m_spriteBounds[frame].w;
     destRect.h = m_spriteBounds[frame].h;
 
-    SDL_BlitSurface( m_spriteSheet, &m_spriteBounds[currentFrame()], 
+    SDL_BlitSurface( m_spriteSheet, &m_spriteBounds[currentFrame()],
         dest, &destRect);
 }
 
 void Graphic::draw(SDL_Surface * dest, SDL_Rect * destRect)
 {
-    SDL_BlitSurface( m_spriteSheet, &m_spriteBounds[currentFrame()], 
+    SDL_BlitSurface( m_spriteSheet, &m_spriteBounds[currentFrame()],
         dest, destRect);
 }
 
