@@ -1,4 +1,4 @@
 size=2,2
 tile=0x1,0,{graphic=sonic_run_east.ani}
-layer=1,1,1,1
+layer=0,0,0,0
 
