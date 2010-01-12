@@ -3,6 +3,10 @@
 
 #include <iostream>
 
+#ifdef assert
+#undef assert
+#endif
+
 namespace Debug
 {
     inline void assert(bool value, std::string message)

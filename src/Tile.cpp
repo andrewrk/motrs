@@ -43,5 +43,5 @@ bool Tile::isGood() {
 }
 
 void Tile::draw(double screenX, double screenY) {
-    m_graphic->draw(Gameplay::instance()->screen(), screenX, screenY);
+    m_graphic->draw(Gameplay::instance()->screen(), (int)screenX, (int)screenY);
 }
