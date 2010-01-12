@@ -70,7 +70,12 @@ ELSE(QT_FOUND)
     MESSAGE("Could not find Qt4")
 ENDIF(QT_FOUND)
 ################################################################
-SET(CMAKE_CXX_FLAGS "-ggdb -Wall")
+
+IF(${RELEASE})
+    SET(CMAKE_CXX_FLAGS "-O2")
+ELSE()
+    SET(CMAKE_CXX_FLAGS "-ggdb -Wall")
+ENDIF()
 
 # compile resource compiling tools
 SET(TOOLS_OUT_DIR "${CMAKE_BINARY_DIR}/tools")

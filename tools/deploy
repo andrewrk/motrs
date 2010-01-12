@@ -20,14 +20,10 @@ sed "s/^SET(VERSION_REVISION [0-9][0-9]*)\$/SET(VERSION_REVISION $REVISION)/" <C
 cp $TMP CMakeLists.txt
 rm -f $TMP
 
-# commit the revision increment to git
-git add CMakeLists.txt
-git commit -m "deploying project version $VERSION"
-
 # build resource-edit
 LINUX=$(mktemp -d)
 cd $LINUX
-cmake $SOURCE
+cmake $SOURCE -DRELEASE=1
 make resource-edit
 
 # cop resource-edit to windows
@@ -37,7 +33,7 @@ cp $LINUX/resource-edit $BUILD
 # build for windows
 RELEASE=$BUILD/motrs-$VERSION
 cd $BUILD
-cmake $SOURCE -DCMAKE_TOOLCHAIN_FILE=$SOURCE/cmake/win32-toolchain.cmake -DCMAKE_INSTALL_PREFIX=$RELEASE
+cmake $SOURCE -DCMAKE_TOOLCHAIN_FILE=$SOURCE/cmake/win32-toolchain.cmake -DCMAKE_INSTALL_PREFIX=$RELEASE -DRELEASE=1
 make
 make install
 
@@ -57,3 +53,9 @@ scp latest_version.txt web:www/motrs/
 # clean up
 rm -rf $BUILD
 cd $SOURCE
+
+# commit the revision increment to git
+git add CMakeLists.txt
+git commit -m "deploying project version $VERSION"
+
+

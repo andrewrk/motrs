@@ -10,10 +10,10 @@
 
 #include <iostream>
 
-#if 0
-const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
-#else
+#ifndef RELEASE
 const char * Gameplay::ResourceFilePath = "./resources.dat";
+#else
+const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
 #endif
 
 Gameplay * Gameplay::s_inst= NULL;

@@ -2,6 +2,7 @@
 #define _DEBUG_H_
 
 #include <iostream>
+#include <string>
 
 #ifdef assert
 #undef assert
@@ -11,11 +12,12 @@ namespace Debug
 {
     inline void assert(bool value, std::string message)
     {
-        // TODO: leave this code out when compiling in release mode
+#ifndef RELEASE
         if( ! value ) {
-            std::cout << message << std::endl;
+            std::cerr << message << std::endl;
             throw 0;
         }
+#endif
     }
 
 }
