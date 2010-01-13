@@ -23,6 +23,8 @@ Universe * ResourceManager::loadUniverse(std::string resourceFilePath, std::stri
     Universe * universe = new Universe(buffer);
     delete resourceFile;
     resourceFile = NULL;
+    Debug::assert(universe->isGood(), "ResourceManager::loadUniverse - "
+        "error loading universe");
     return universe;
 }
 
@@ -36,6 +38,7 @@ TYPE_TITLECASE * ResourceManager::get##TYPE_TITLECASE(std::string id) { \
             std::cerr << "unable to load " TYPE_QUOTED ": " << id << std::endl; \
             return NULL; \
         } \
+        /* TODO: type checking */ \
         TYPE_LOWERCASE = new TYPE_TITLECASE(buffer); \
         delete[] buffer; \
     } \

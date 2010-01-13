@@ -21,7 +21,7 @@ public:
 
 private:
     typedef struct {
-        int palletSize;
+        int paletteSize;
         int sizeX, sizeY, layerCount;
         int submapCount;
         int triggerCount;

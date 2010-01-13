@@ -15,7 +15,7 @@ SET(OUT_INCLUDE_PATH "${CMAKE_BINARY_DIR}/cmakeincludes")
 SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 0)
 SET(VERSION_PATCH 0)
-SET(VERSION_REVISION 2)
+SET(VERSION_REVISION 5)
 SET(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.${VERSION_REVISION}")
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/include/version.h.in
     ${OUT_INCLUDE_PATH}/version.h)
@@ -25,20 +25,13 @@ MESSAGE("Compiling version ${VERSION}")
 
 # check for SDL
 FIND_PACKAGE(SDL)
-SET(SDL_DLL "${MINGW_DLL_PATH}/SDL.dll")
 IF(SDL_FOUND)
     MESSAGE("Found SDL")
 
     SET(DEP_INCLUDES ${DEP_INCLUDES} ${SDL_INCLUDE_DIR})
     SET(DEP_LIBS ${DEP_LIBS} ${SDL_LIBRARY})
-    IF(NOT WIN32 OR EXISTS ${SDL_DLL})
-        SET(DLL_FILES ${DLL_FILES} ${SDL_DLL})
-        SET(HAVE_SDL TRUE)
-        SET(STATUS_SDL "OK")
-    ELSE(NOT WIN32 OR EXISTS ${SDL_DLL})
-        SET(STATUS_SDL "MISSING DLL")
-        MESSAGE("...but missing ${SDL_DLL} for Windows build.")
-    ENDIF(NOT WIN32 OR EXISTS ${SDL_DLL})
+    SET(HAVE_SDL TRUE)
+    SET(STATUS_SDL "OK")
 ELSE(SDL_FOUND)
     SET(STATUS_SDL "not found")
     MESSAGE("Could not find SDL")
@@ -47,28 +40,34 @@ ENDIF(SDL_FOUND)
 # check for Qt4
 SET(QT_MIN_VERSION "4.4.0")
 FIND_PACKAGE(Qt4 4.4.3 COMPONENTS QtCore QtGui REQUIRED)
-SET(QT_DLL1 ${MINGW_DLL_PATH}/QtCore4.dll)
-SET(QT_DLL2 ${MINGW_DLL_PATH}/QtGui4.dll)
-SET(QT_DLL3 ${MINGW_DLL_PATH}/libgcc_s_dw2-1.dll)
 IF(QT_FOUND)
     MESSAGE("Found Qt")
 
     INCLUDE(${QT_USE_FILE})
     SET(EDITOR_DEP_LIBS "${EDITOR_DEP_LIBS} ${QT_LIBRARIES}")
 
-    IF(NOT WIN32 OR (EXISTS ${QT_DLL1} AND EXISTS ${QT_DLL2}
-    AND EXISTS ${QT_DLL3}))
-        SET(EDITOR_DLL_FILES ${EDITOR_DLL_FILES} ${QT_DLL1} ${QT_DLL2} ${QT_DLL3})
-        SET(HAVE_QT TRUE)
-        SET(STATUS_QT "OK")
-    ELSE()
-        SET(STATUS_QT "missing dll")
-        MESSAGE("...but missing one of ${QT_DLL1}, ${QT_DLL2}, or ${QT_DLL3} for Windows build.")
-    ENDIF()
+    SET(HAVE_QT TRUE)
+    SET(STATUS_QT "OK")
 ELSE(QT_FOUND)
     SET(STATUS_QT "not found")
     MESSAGE("Could not find Qt4")
 ENDIF(QT_FOUND)
+
+######### DLLs ###########
+IF(WIN32)
+    SET(DLL_FILES
+        ${MINGW_DLL_PATH}/SDL.dll
+    )
+
+    SET(EDITOR_DLL_FILES
+        ${MINGW_DLL_PATH}/QtCore4.dll
+        ${MINGW_DLL_PATH}/QtGui4.dll
+        ${MINGW_DLL_PATH}/libgcc_s_dw2-1.dll
+        ${MINGW_DLL_PATH}/mingwm10.dll
+    )
+
+    SET(ALL_DLL_FILES ${DLL_FILES} ${EDITOR_DLL_FILES})
+ENDIF()
 ################################################################
 SET(CMAKE_CXX_FLAGS "-ggdb -Wall")
 
@@ -133,6 +132,7 @@ ENDIF()
 # install 
 IF(WIN32)
     SET(DATA_DIR ${PROGRAM_NAME})
+    SET(RELATIVE_DATA_DIR .)
 
     INSTALL(TARGETS ${PROGRAM_NAME} RUNTIME DESTINATION ${PROGRAM_NAME})
     INSTALL(FILES ${DLL_FILES} DESTINATION ${PROGRAM_NAME})
@@ -142,6 +142,7 @@ IF(WIN32)
 
 ELSE(WIN32)
     SET(DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROGRAM_NAME}")
+    SET(RELATIVE_DATA_DIR ${DATA_DIR})
     INSTALL(TARGETS ${PROGRAM_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 ENDIF(WIN32)
 
@@ -153,18 +154,36 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/include/os_config.h.in
 MESSAGE("\n"
 "Installation Summary\n"
 "--------------------\n"
-"* Install Directory            : ${CMAKE_INSTALL_PREFIX}\n"
+" * Install Directory			: ${CMAKE_INSTALL_PREFIX}\n"
 )
 
 MESSAGE(
 "Required Libraries\n"
 "------------------\n"
-"* SDL                          : ${STATUS_SDL}\n"
-"* Qt4                          : ${STATUS_QT}\n"
+" * SDL					: ${STATUS_SDL}\n"
+" * Qt4					: ${STATUS_QT}\n"
 )
 
+IF(WIN32)
 MESSAGE(
-"If everything is OK, proceed with\n"
+"DLLs for Windows Release\n"
+"----------------\n"
+)
+    FOREACH(DLL ${ALL_DLL_FILES})
+        IF(EXISTS ${DLL})
+MESSAGE(
+"${DLL}		: OK"
+)
+        ELSE()
+MESSAGE(
+"${DLL}		: missing"
+)
+        ENDIF()
+    ENDFOREACH()
+ENDIF(WIN32)
+
+MESSAGE(
+"\nIf everything is OK, proceed with:\n"
 "make\n"
 )
 

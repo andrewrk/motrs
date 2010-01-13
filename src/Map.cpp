@@ -18,7 +18,7 @@ Map::Map(const char * buffer) :
     Header* header = Utils::readStruct<Header>(&cursor);
 
     // pallet
-    for (int i = 0; i < header->palletSize; i++) {
+    for (int i = 0; i < header->paletteSize; i++) {
         Tile * tile = new Tile(&cursor);
         if (!tile->isGood()) {
             m_good = false;

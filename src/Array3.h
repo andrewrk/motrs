@@ -1,7 +1,13 @@
 #ifndef _ARRAY3_
 #define _ARRAY3_
 
+#include "version.h"
+
+#ifndef RELEASE
 #define RANGE_CHECK 1
+#else
+#define RANGE_CHECK 0
+#endif
 
 #include <iostream>
 #include <cstring>
