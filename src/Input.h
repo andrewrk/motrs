@@ -16,16 +16,8 @@ public:
 
         // Fighting
         Attack_1, Attack_2,
-        Weapon_1,
-        Weapon_2,
-        Weapon_3,
-        Weapon_4,
-        Weapon_5,
-        Weapon_6,
-        Weapon_7,
-        Weapon_8,
-        Weapon_9,
-        Weapon_0,
+        Weapon_1, Weapon_2, Weapon_3, Weapon_4, Weapon_5,
+        Weapon_6, Weapon_7, Weapon_8, Weapon_9, Weapon_0,
 
         // Misc
         Interact,

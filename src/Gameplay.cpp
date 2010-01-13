@@ -50,7 +50,9 @@ Gameplay::~Gameplay() {
 void Gameplay::mainLoop() {
     Uint32 next_time = 0;
     while (true) {
-        processEvents(); //input
+        //input
+        if (!processEvents())
+            return;
 
         //set up an interval
         Uint32 now = SDL_GetTicks();
@@ -70,16 +72,22 @@ bool Gameplay::isGood() {
     return m_good;
 }
 
-void Gameplay::processEvents() {
-    Input::refresh();
-    //handle all events
+bool Gameplay::processEvents() {
     SDL_Event event;
     while(SDL_PollEvent(&event)){
         switch(event.type){
+            case SDL_KEYDOWN:
+                // Handle Alt+F4 in windows
+                if (event.key.keysym.sym == SDLK_F4 && (event.key.keysym.mod & KMOD_ALT))
+                    return false;
+                break;
             case SDL_QUIT:
-                exit(0);
+                return false;
         }
     }
+    Input::refresh();
+
+    return true;
 }
 
 
@@ -185,7 +193,7 @@ void Gameplay::updateDisplay() {
 //    if( startY < 0) startY = 0;
 //    if( endX >= curmap->width() ) endX = curmap->width()-1;
 //    if( endY >= curmap->height() ) endY = curmap->height()-1;
-   
+
     // TODO: loop through tiles and paint them
 //    for(i=0;i<curmap->layerCount();i++){
 //        for(y=startY;y<=endY;y++){

@@ -44,7 +44,7 @@ private:
 
     World * m_currentWorld;
 
-    void processEvents();
+    bool processEvents();
     void updateDisplay();
     void nextFrame();
 
