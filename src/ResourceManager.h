@@ -3,6 +3,8 @@
 
 #include "ResourceFile.h"
 
+#include "Debug.h"
+
 class Universe;
 class World;
 class Map;
@@ -27,11 +29,28 @@ private:
     static std::map<std::string, Character*> s_characters;
 
     template <class T>
-    static T* find(std::map<std::string, T*> & map, std::string id) {
+    static T * find(std::map<std::string, T*> & map, std::string id) {
         typename std::map<std::string, T*>::const_iterator it = map.find(id);
         if (it == map.end())
             return NULL;
         return it->second;
+    }
+
+    template <class T>
+    static T * getResource(std::string resourceTypeName, std::map<std::string, T*> & cache, std::string id) {
+        Debug::assert(resourceFile != NULL, "ResourceManager::get" + resourceTypeName + ": resourceFile == NULL");
+        T * resource = find(cache, id);
+        if (resource == NULL) {
+            const char * buffer = resourceFile->getResource(id);
+            if (buffer == NULL) {
+                std::cerr << "unable to load " + resourceTypeName + ": " << id << std::endl;
+                return NULL;
+            }
+            /* TODO: type checking */
+            resource = new T(buffer);
+            delete[] buffer;
+        }
+        return resource;
     }
 };
 

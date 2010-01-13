@@ -28,25 +28,24 @@ Universe * ResourceManager::loadUniverse(std::string resourceFilePath, std::stri
     return universe;
 }
 
-#define RESOURCE_GETTER(TYPE_TITLECASE, TYPE_LOWERCASE, TYPE_QUOTED) \
-TYPE_TITLECASE * ResourceManager::get##TYPE_TITLECASE(std::string id) { \
-    Debug::assert(resourceFile != NULL, "ResourceManager::get" TYPE_QUOTED ": resourceFile == NULL"); \
-    TYPE_TITLECASE * TYPE_LOWERCASE = find(s_##TYPE_LOWERCASE##s, id); \
-    if (TYPE_LOWERCASE == NULL) { \
-        const char * buffer = resourceFile->getResource(id); \
-        if (buffer == NULL) { \
-            std::cerr << "unable to load " TYPE_QUOTED ": " << id << std::endl; \
-            return NULL; \
-        } \
-        /* TODO: type checking */ \
-        TYPE_LOWERCASE = new TYPE_TITLECASE(buffer); \
-        delete[] buffer; \
-    } \
-    return TYPE_LOWERCASE; \
+//RESOURCE_GETTER(World, world, "World")
+//RESOURCE_GETTER(Map, map, "Map")
+//RESOURCE_GETTER(Graphic, graphic, "Graphic")
+//RESOURCE_GETTER(Character, character, "Character")
+
+World * ResourceManager::getWorld(std::string id) {
+    return getResource("World", s_worlds, id);
 }
 
-RESOURCE_GETTER(World, world, "World")
-RESOURCE_GETTER(Map, map, "Map")
-RESOURCE_GETTER(Graphic, graphic, "Graphic")
-RESOURCE_GETTER(Character, character, "Character")
+Map * ResourceManager::getMap(std::string id) {
+    return getResource("Map", s_maps, id);
+}
+
+Graphic * ResourceManager::getGraphic(std::string id) {
+    return getResource("Graphic", s_graphics, id);
+}
+
+Character * ResourceManager::getCharacter(std::string id) {
+    return getResource("Character", s_characters, id);
+}
 
