@@ -11,7 +11,8 @@ World::World(const char * buffer)
         int x = Utils::readInt(&cursor);
         int y = Utils::readInt(&cursor);
         int z = Utils::readInt(&cursor);
-        Map * map = ResourceManager::getMap(Utils::readString(&cursor));
+        std::string mapId = Utils::readString(&cursor);
+        Map * map = ResourceManager::getMap(mapId);
         if (!map->isGood()) {
             m_good = false;
             break;
