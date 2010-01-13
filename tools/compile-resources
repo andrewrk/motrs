@@ -188,8 +188,8 @@ def open_output(out_file):
 
 def encode_inline_props(props_str):
     """
-    props = "{ key = value , key = value , ... }"
-    props must be stripped before being passed to this function
+    props_str = "{ key = value , key = value , ... }"
+    props_str must be stripped before being passed to this function
     """
     assert props_str.startswith("{") and props_str.endswith("}")
     props = [[x.strip() for x in item.split("=")] for item in props_str[1:-1].split(",")]
