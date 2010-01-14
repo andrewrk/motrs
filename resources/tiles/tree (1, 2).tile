@@ -1,3 +1,0 @@
-bitmap=string=tree (1, 2).bmp
-alpha=color=255, 0, 255
-obstacle=bool=true

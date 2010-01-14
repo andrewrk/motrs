@@ -1,3 +1,0 @@
-bitmap=string=table (0, 0).bmp
-alpha=color=255, 0, 255
-obstacle=bool=true
