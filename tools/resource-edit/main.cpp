@@ -150,7 +150,9 @@ void printUsage(char * arg0)
 
 string fileTitle(string fullPath)
 {
-    size_t pos = fullPath.rfind('/');
+    int pos_forward = fullPath.rfind('/');
+    int pos_back = fullPath.rfind('\\');
+    int pos = pos_forward > pos_back ? pos_forward : pos_back;
     return fullPath.substr(pos+1);
 }
 
