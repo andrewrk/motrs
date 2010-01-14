@@ -355,7 +355,6 @@ static_resources = (
 
 # things that are compiled by a function
 compiled_resources = (
-    ("tiles", compile_hashmap),
     ("universes", compile_hashmap),
     ("characters", compile_hashmap),
     ("worlds", compile_world),
