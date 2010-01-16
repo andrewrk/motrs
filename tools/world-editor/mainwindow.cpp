@@ -2,17 +2,25 @@
 #include "ui_mainwindow.h"
 #include "settingsdialog.h"
 
+
+#include "moc_mainwindow.cxx"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    m_view(new WorldView(this))
 {
     ui->setupUi(this);
-    setCentralWidget(ui->view);
+
+    setCentralWidget(m_view);
+
+    ui->dock_art->setWidget(ui->widget_art);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete m_view;
 }
 
 void MainWindow::resizeEvent(QResizeEvent * e)
@@ -28,9 +36,6 @@ void MainWindow::showEvent(QShowEvent * e)
 
 void MainWindow::on_actionSettings_triggered()
 {
-    if( SettingsDialog::instance()->exec() == QDialog::Accepted ) {
-
-    }
+    SettingsDialog::instance()->exec();
 }
 
-#include "moc_mainwindow.cxx"

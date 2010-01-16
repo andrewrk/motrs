@@ -13,24 +13,7 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralWidget">
-   <widget class="QGraphicsView" name="view">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>220</y>
-      <width>256</width>
-      <height>192</height>
-     </rect>
-    </property>
-    <property name="verticalScrollBarPolicy">
-     <enum>Qt::ScrollBarAlwaysOn</enum>
-    </property>
-    <property name="horizontalScrollBarPolicy">
-     <enum>Qt::ScrollBarAlwaysOn</enum>
-    </property>
-   </widget>
-  </widget>
+  <widget class="QWidget" name="centralWidget"/>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
@@ -58,13 +41,10 @@
     <property name="title">
      <string>&amp;Window</string>
     </property>
-    <addaction name="actionTiles"/>
     <addaction name="actionObjects"/>
     <addaction name="actionWorlds"/>
     <addaction name="actionTriggers"/>
     <addaction name="actionLayers"/>
-    <addaction name="actionOverview"/>
-    <addaction name="actionMaps"/>
     <addaction name="actionTools"/>
     <addaction name="separator"/>
     <addaction name="actionTileEditor"/>
@@ -83,24 +63,6 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="dock_tiles">
-   <property name="floating">
-    <bool>false</bool>
-   </property>
-   <property name="features">
-    <set>QDockWidget::AllDockWidgetFeatures</set>
-   </property>
-   <property name="allowedAreas">
-    <set>Qt::AllDockWidgetAreas</set>
-   </property>
-   <property name="windowTitle">
-    <string>Tiles</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>1</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents"/>
-  </widget>
   <widget class="QDockWidget" name="dock_worlds">
    <property name="windowTitle">
     <string>Worlds</string>
@@ -118,15 +80,6 @@
     <number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_4"/>
-  </widget>
-  <widget class="QDockWidget" name="dock_overview">
-   <property name="windowTitle">
-    <string>Overview</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_6"/>
   </widget>
   <widget class="QDockWidget" name="dock_objects">
    <property name="windowTitle">
@@ -155,14 +108,46 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_5"/>
   </widget>
-  <widget class="QDockWidget" name="dock_maps">
+  <widget class="QDockWidget" name="dock_art">
    <property name="windowTitle">
-    <string>Maps</string>
+    <string>Art</string>
    </property>
    <attribute name="dockWidgetArea">
-    <number>1</number>
+    <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_7"/>
+   <widget class="QWidget" name="dockWidgetContents">
+    <widget class="QWidget" name="widget_art" native="true">
+     <property name="geometry">
+      <rect>
+       <x>23</x>
+       <y>27</y>
+       <width>181</width>
+       <height>391</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QPlainTextEdit" name="text_artFilter">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>35</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGraphicsView" name="view_art"/>
+      </item>
+     </layout>
+    </widget>
+   </widget>
   </widget>
   <action name="actionQuit">
    <property name="text">
@@ -172,17 +157,6 @@
   <action name="actionSettings">
    <property name="text">
     <string>&amp;Settings</string>
-   </property>
-  </action>
-  <action name="actionTiles">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>T&amp;iles</string>
    </property>
   </action>
   <action name="actionObjects">
@@ -227,28 +201,6 @@
    </property>
    <property name="text">
     <string>&amp;Layers</string>
-   </property>
-  </action>
-  <action name="actionOverview">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>O&amp;verview</string>
-   </property>
-  </action>
-  <action name="actionMaps">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>&amp;Maps</string>
    </property>
   </action>
   <action name="actionTools">

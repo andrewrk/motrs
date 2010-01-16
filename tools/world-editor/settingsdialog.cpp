@@ -3,6 +3,10 @@
 
 #include <QSettings>
 
+
+#include "moc_settingsdialog.cxx"
+
+
 SettingsDialog * SettingsDialog::s_inst = NULL;
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
@@ -42,14 +46,21 @@ SettingsDialog * SettingsDialog::instance()
     return s_inst;
 }
 
-#include "moc_settingsdialog.cxx"
 
-void SettingsDialog::on_SettingsDialog_accepted()
+
+
+
+
+void SettingsDialog::on_btnOK_clicked()
 {
-    qDebug("accepted");
+    QSettings settings;
+    settings.setValue("paths/data", m_ui->txtDataFolder->toPlainText());
+    accept();
 }
 
-void SettingsDialog::on_SettingsDialog_rejected()
-{
 
+
+void SettingsDialog::on_btnCancel_clicked()
+{
+    reject();
 }

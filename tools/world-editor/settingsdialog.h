@@ -25,8 +25,10 @@ private:
     static SettingsDialog * s_inst;
 
 private slots:
-    void on_SettingsDialog_rejected();
-    void on_SettingsDialog_accepted();
+
+private slots:
+    void on_btnCancel_clicked();
+    void on_btnOK_clicked();
 };
 
 #endif // SETTINGSDIALOG_H

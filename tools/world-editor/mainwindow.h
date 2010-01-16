@@ -3,6 +3,8 @@
 
 #include <QtGui/QMainWindow>
 
+#include "worldview.h"
+
 namespace Ui
 {
     class MainWindow;
@@ -22,6 +24,8 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+
+    WorldView * m_view;
 
 private slots:
     void on_actionSettings_triggered();
