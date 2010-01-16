@@ -32,9 +32,13 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     Debug::assert(s_inst == NULL, "only one Gameplay allowed");
     s_inst = this;
     m_universe = ResourceManager::loadUniverse(ResourceFilePath, "main.universe");
-    m_good = m_universe != NULL && m_universe->isGood();
-    if (!m_good) {
-        std::cerr << "failed to load universe" << std::endl;
+    if (!(m_universe != NULL && m_universe->isGood())) {
+        m_good = false;
+        return;
+    }
+    if (m_universe->worldCount() == 0) {
+        std::cerr << "no worlds" << std::endl;
+        m_good = false;
         return;
     }
     m_currentWorld = m_universe->firstWorld();

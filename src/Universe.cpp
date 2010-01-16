@@ -1,19 +1,50 @@
 #include "Universe.h"
 
-Universe::Universe(const char * buffer)
-    : PropertiesResource(buffer)
+#include "Utils.h"
+
+Universe::Universe(const char * buffer) :
+    m_worlds(),
+    m_good(true),
+    m_startWorld(-1),
+    m_startX(-1),
+    m_startY(-1),
+    m_startZ(-1)
 {
-    if (!isGood())
+    const char * cursor = buffer;
+    int version = Utils::readInt(&cursor);
+    if (version != 1) {
+        std::cerr << "Unsupported Universe version: " << version << std::endl;
+        m_good = false;
         return;
-    // TODO populate m_worlds with property("worlds")
-    std::string firstWorldId = property("tmp.world").stringValue;
-    World * world = ResourceManager::getWorld(firstWorldId);
-    m_worlds.push_back(world);
+    }
+
+    m_startWorld = Utils::readInt(&cursor);
+    m_startX = Utils::readInt(&cursor);
+    m_startY = Utils::readInt(&cursor);
+    m_startZ = Utils::readInt(&cursor);
+
+    int worldCount = Utils::readInt(&cursor);
+    for (int i = 0; i < worldCount; i++) {
+        std::string worldId = Utils::readString(&cursor);
+        World * world = ResourceManager::getWorld(worldId);
+        if (world == NULL) {
+            m_good = false;
+            return;
+        }
+        m_worlds.push_back(world);
+    }
 }
 
 Universe::~Universe()
 {
+}
 
+bool Universe::isGood() {
+    return m_good;
+}
+
+int Universe::worldCount() {
+    return m_worlds.size();
 }
 
 World * Universe::firstWorld() {

@@ -37,17 +37,23 @@ private:
     }
 
     template <class T>
-    static T * getResource(std::string resourceTypeName, std::map<std::string, T*> & cache, std::string id) {
+    static T * getResource(std::string resourceTypeName, std::map<std::string, T*> & cache, char typeCode, std::string id) {
         Debug::assert(resourceFile != NULL, "ResourceManager::get" + resourceTypeName + ": resourceFile == NULL");
         T * resource = find(cache, id);
         if (resource == NULL) {
             const char * buffer = resourceFile->getResource(id);
             if (buffer == NULL) {
-                std::cerr << "unable to load " + resourceTypeName + ": " << id << std::endl;
+                std::cerr << "Unable to find " + resourceTypeName + ": " << id << std::endl;
                 return NULL;
             }
-            /* TODO: type checking */
-            resource = new T(buffer);
+            char actualTypeCode = *buffer;
+            if (actualTypeCode != typeCode) {
+                std::cerr << "Wrong type code in resource " << id << ". " <<
+                        "Should be '" << typeCode << "'' but it's '" << actualTypeCode << "'." << std::endl;
+                delete buffer;
+                return NULL;
+            }
+            resource = new T(buffer + sizeof(char));
             delete[] buffer;
         }
         return resource;

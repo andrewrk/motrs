@@ -9,6 +9,11 @@ Graphic::Graphic(const char * buffer) :
     m_spriteSheet(NULL),
     m_spriteBounds()
 {
+    int versionNumber = Utils::readInt(&buffer);
+    if (versionNumber != 1) {
+        std::cerr << "Wrong Graphic version number: " << versionNumber << std::endl;
+        return;
+    }
     int graphicType = Utils::readInt(&buffer);
     int storageType = Utils::readInt(&buffer);
 
@@ -34,6 +39,9 @@ Graphic::Graphic(const char * buffer) :
     } else if( storageType == PNG ) {
         // TODO: implement PNG support
         Debug::assert(false, "TODO: add PNG support in Graphic");
+    } else {
+        std::cerr << "unknown storageType: " << storageType << std::endl;
+        return;
     }
 
     // generate SDL_Rects for each frame
@@ -45,7 +53,6 @@ Graphic::Graphic(const char * buffer) :
         rect.h = header->frameHeight;
         m_spriteBounds.push_back(rect);
     }
-
 
 }
 

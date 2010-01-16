@@ -2,12 +2,18 @@
 
 #include "Utils.h"
 
-World::World(const char * buffer)
+World::World(const char * buffer) :
+    m_good(true)
 {
     const char * cursor = buffer;
-    int count = Utils::readInt(&cursor);
-    m_good = true;
-    for (int i = 0; i < count; i++) {
+    int version = Utils::readInt(&cursor);
+    if (version != 1) {
+        std::cerr << "Unsupported World version: " << version << std::endl;
+        m_good = false;
+        return;
+    }
+    int mapCount = Utils::readInt(&cursor);
+    for (int i = 0; i < mapCount; i++) {
         int x = Utils::readInt(&cursor);
         int y = Utils::readInt(&cursor);
         int z = Utils::readInt(&cursor);

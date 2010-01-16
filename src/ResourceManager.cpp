@@ -16,36 +16,41 @@ Universe * ResourceManager::loadUniverse(std::string resourceFilePath, std::stri
     resourceFile = new ResourceFile(resourceFilePath);
     const char * buffer = resourceFile->getResource(id);
     if (buffer == NULL) {
-        std::cerr << "unable to load Universe: " << id << std::endl;
+        std::cerr << "Unable to find Universe: " << id << std::endl;
         delete resourceFile;
         return NULL;
     }
-    Universe * universe = new Universe(buffer);
+    char actualTypeCode = *buffer;
+    if (actualTypeCode != 'U') {
+        std::cerr << "Wrong type code in resource " << id << ". " <<
+                "Should be 'U' but it's '" << actualTypeCode << "'." << std::endl;
+        delete resourceFile;
+        delete buffer;
+        return NULL;
+    }
+    Universe * universe = new Universe(buffer + sizeof(char));
     delete resourceFile;
     resourceFile = NULL;
-    Debug::assert(universe->isGood(), "ResourceManager::loadUniverse - "
-        "error loading universe");
+    if (!universe->isGood()) {
+        delete universe;
+        return NULL;
+    }
     return universe;
 }
 
-//RESOURCE_GETTER(World, world, "World")
-//RESOURCE_GETTER(Map, map, "Map")
-//RESOURCE_GETTER(Graphic, graphic, "Graphic")
-//RESOURCE_GETTER(Character, character, "Character")
-
 World * ResourceManager::getWorld(std::string id) {
-    return getResource("World", s_worlds, id);
+    return getResource("World", s_worlds, 'W', id);
 }
 
 Map * ResourceManager::getMap(std::string id) {
-    return getResource("Map", s_maps, id);
+    return getResource("Map", s_maps, 'M', id);
 }
 
 Graphic * ResourceManager::getGraphic(std::string id) {
-    return getResource("Graphic", s_graphics, id);
+    return getResource("Graphic", s_graphics, 'G', id);
 }
 
 Character * ResourceManager::getCharacter(std::string id) {
-    return getResource("Character", s_characters, id);
+    return getResource("Character", s_characters, 'C', id);
 }
 

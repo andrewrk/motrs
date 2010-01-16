@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os,sys,re
+import os, sys, re
 import tempfile
 from struct import pack, unpack, calcsize
 from PIL import Image
@@ -51,28 +51,128 @@ def write_string(string, out_handle):
 def encode_string(s):
     return pack("i", len(s)) + s
 
-def compile_hashmap(in_file, out_file):
-    """
-    compile file from text format into binary format 
-    """
-    build_path(out_file)
-    out_handle = open(out_file, "wb")
-    write_properties(open(in_file,"r").read(), out_handle)
+def split_strip(src):
+    return [x.strip() for x in src.split(",")]
+
+def compile_universe(in_path, out_path):
+    declarations = read_declarations(in_path)
+    assert(declarations[0][0] == "version")
+    version_number = int(declarations[0][1])
+    assert(version_number == 1)
+    start = None
+    worlds = []
+    for (kind, value) in declarations[1:]:
+        if kind == "world":
+            worlds.append(encode_string(value))
+        elif kind == "start":
+            assert(start == None)
+            start = pack("iiii", *[int(x) for x in split_strip(value)])
+        else:
+            raise "unsupported kind: " + kind
+    assert(start != None)
+    out_handle = open_output(out_path)
+    out_handle.write("U" + pack("i", version_number))
+    out_handle.write(start)
+    out_handle.write(pack("i", len(worlds)))
+    [out_handle.write(world) for world in worlds]
     out_handle.close()
 
-def compile_world(in_file, out_file):
-    """
-    compile a world. blah
-    """
-    build_path(out_file)
-    out_handle = open(out_file, "wb")
-    lines = read_lines(in_file)
-    out_handle.write(pack("i", len(lines)))
-    for line in lines:
-        (x, y, z, id) = line.split()
-        out_handle.write(pack("iii", int(x), int(y), int(z)))
-        write_string(id, out_handle)
+def compile_world(in_path, out_path):
+    declarations = read_declarations(in_path)
+    assert(declarations[0][0] == "version")
+    version_number = int(declarations[0][1])
+    assert(version_number == 1)
+    maps = []
+    for (kind, value) in declarations[1:]:
+        if kind == "map":
+            (x_str, y_str, z_str, id) = split_strip(value)
+            maps.append(pack("iii", int(x_str), int(y_str), int(z_str)) + encode_string(id))
+        else:
+            raise "unsupported kind: " + kind
+    out_handle = open_output(out_path)
+    out_handle.write("W" + pack("i", version_number))
+
+    out_handle.write(pack("i", len(maps)))
+    [out_handle.write(map) for map in maps]
+
     out_handle.close()
+
+
+def compile_map(in_path, out_path):
+    def encode_tile(value):
+        shape_str, surface_str, graphic_id = split_strip(value)
+        return pack("ii", int(shape_str), int(surface_str)) + encode_string(graphic_id)
+    def encode_layer(value, size_x, size_y):
+        values = [int(v) for v in value.split(",")]
+        assert len(values) == size_x * size_y
+        FMT_FULL = 1
+        FMT_SPARSE = 2
+        def sparse_values():
+            for y in range(size_y):
+                for x in range(size_x):
+                    yield (x, y, values[y * size_x + x])
+        sparse_version = "".join(pack("iii", x, y, v) for (x, y, v) in sparse_values() if v != 0)
+        full_version = "".join(pack("i", v) for v in values)
+        if len(sparse_version) > len(full_version):
+            # full
+            return pack("i", FMT_FULL) + full_version
+        else:
+            # sparse
+            return pack("ii", FMT_SPARSE, len(sparse_version) / calcsize("iii")) + sparse_version
+
+    declarations = read_declarations(in_path)
+    assert(declarations[0][0] == "version")
+    version_number = int(declarations[0][1])
+    assert(version_number == 1)
+
+    pallet = []
+    size = None
+    layers = []
+    submaps = []
+    triggers = []
+    entities = []
+    for (kind, value) in declarations[1:]:
+        if kind == "size":
+            assert size == None
+            (x, y) = value.split(",")
+            size = (int(x), int(y))
+        elif kind == "tile":
+            pallet.append(encode_tile(value))
+        elif kind == "layer":
+            layers.append(encode_layer(value, size[0], size[1]))
+        elif kind == "submap":
+            raise "TODO: support submap"
+        elif kind == "trigger":
+            raise "TODO: support trigger"
+        elif kind == "entity":
+            raise "TODO: support entity"
+        else:
+            raise "unsupported kind: " + kind
+    assert size != None
+    out_handle = open_output(out_path)
+    out_handle.write("M" + pack("i", version_number))
+    out_handle.write(pack("ii", size[0], size[1]))
+
+    all_lists = (pallet, layers, submaps, triggers, entities)
+    for list_of_things in all_lists:
+        out_handle.write(pack("i", len(list_of_things)))
+        [out_handle.write(thing) for thing in list_of_things]
+    out_handle.close()
+
+def read_declarations(in_path):
+    lines = open(in_path, "rU").read().split("\n")
+    def strip_comments(line):
+        comment_start = line.find("#")
+        if comment_start != -1:
+            line = line[:comment_start]
+        return line.strip()
+    lines = [strip_comments(line) for line in lines]
+    return [line.split("=", 1) for line in lines if line != ""]
+
+def open_output(out_file):
+    build_path(out_file)
+    return open(out_file, "wb")
+
 
 def compile_bitmap(in_file, out_file):
     """
@@ -84,6 +184,8 @@ def compile_bitmap(in_file, out_file):
 
     build_path(out_file)
     out = open(out_file, "wb")
+    out.write("G") # typecode
+    out.write(pack("i", 1)) # version
     # we are an image, not animation. See Graphic.h
     out.write(pack("i", 1))
     # bmp file
@@ -104,139 +206,6 @@ def compile_bitmap(in_file, out_file):
     out.write(pack("i", file_size))
     # actual bmp data
     out.write(open(in_file, "rb").read())
-
-def compile_map(in_file, out_file):
-    def encode_tile(value):
-        shape_str, surface_str, props_str = [x.strip() for x in value.split(",", 2)]
-        assert shape_str.startswith("0x")
-        shape = int(shape_str[2:], 16)
-        surface = int(surface_str)
-        return pack("ii", shape, surface) + encode_inline_props(props_str)
-    def encode_layer(value, size_x, size_y):
-        values = [int(v) for v in value.split(",")]
-        assert len(values) == size_x * size_y
-        FMT_FULL = 1
-        FMT_SPARSE = 2
-        def sparse_values():
-            for y in range(size_y):
-                for x in range(size_x):
-                    yield (x, y, values[y * size_x + x])
-        sparse_version = "".join(pack("iii", x, y, v) for (x, y, v) in sparse_values() if v != 0)
-        full_version = "".join(pack("i", v) for v in values)
-        if len(sparse_version) > len(full_version):
-            # full
-            return pack("i", FMT_FULL) + full_version
-        else:
-            # sparse
-            return pack("ii", FMT_SPARSE, len(sparse_version) / calcsize("iii")) + sparse_version
-    lines = read_lines(in_file)
-    pallet = []
-    size = None
-    layers = []
-    submaps = []
-    triggers = []
-    entities = []
-    for line in lines:
-        (kind, value) = line.split("=", 1)
-        if kind == "size":
-            assert size == None
-            (x, y) = value.split(",")
-            size = (int(x), int(y))
-        elif kind == "tile":
-            pallet.append(encode_tile(value))
-        elif kind == "layer":
-            layers.append(encode_layer(value, size[0], size[1]))
-        elif kind == "submap":
-            raise "TODO: support submap"
-        elif kind == "trigger":
-            raise "TODO: support trigger"
-        elif kind == "entity":
-            raise "TODO: support entity"
-        else:
-            raise "unknown kind: " + kind
-
-    out_handle = open_output(out_file)
-    # header
-    out_handle.write(pack("i" * 7, len(pallet), size[0], size[1], 
-            len(layers), len(submaps), len(triggers), len(entities)))
-    # pallet
-    for tile in pallet:
-        out_handle.write(tile)
-    for layer in layers:
-        out_handle.write(layer)
-    for submap in submaps:
-        out_handle.write(submap)
-    for trigger in triggers:
-        out_handle.write(trigger)
-    for entity in entities:
-        out_handle.write(entity)
-    out_handle.close()
-
-def read_lines(in_file):
-    lines = open(in_file, "rU").read().split("\n")
-    def strip_comments(line):
-        comment_start = line.find("#")
-        if comment_start != -1:
-            line = line[:comment_start]
-        return line.strip()
-    lines = [strip_comments(line) for line in lines]
-    return [line for line in lines if line != ""]
-
-def open_output(out_file):
-    build_path(out_file)
-    return open(out_file, "wb")
-
-def encode_inline_props(props_str):
-    """
-    props_str = "{ key = value , key = value , ... }"
-    props_str must be stripped before being passed to this function
-    """
-    assert props_str.startswith("{") and props_str.endswith("}")
-    props = [[x.strip() for x in item.split("=")] for item in props_str[1:-1].split(",")]
-    return pack("i", len(props)) + "".join(encode_string(k) + encode_string(v) for (k, v) in props)
-
-def write_properties(text, out_handle):
-    """
-    compile from text format into binary format 
-    """
-    props = [[y.strip() for y in x.split("=")] for x in text.split("\n") if x.find('=') >= 0]
-
-    out_handle.write(pack("i", 1)) #version
-    out_handle.write(pack("i", len(props) )) # number properties
-
-    color_re = re.compile('^\s*(\d+)\s*\,\s*(\d+)\s*\,\s*(\d+)\s*$')
-    for propName,typeName,value in props:
-        write_string(propName, out_handle)
-        write_string(typeName, out_handle)
-        if typeName == 'string':
-            write_string(value, out_handle)
-        elif typeName == 'color':
-            if not (value.lower() in ("none", "false", "null", "0", "no")):
-                matches = color_re.match(value)
-                if matches == None:
-                    sys.stderr.write("Error in %s, the property %s has an invalid value: %s\n" % (in_file, propName, value))
-                    sys.exit(1)
-                
-                out_handle.write(pack("BBB", int(matches.group(1)), int(matches.group(2)), int(matches.group(3))))
-        elif typeName == 'int':
-            out_handle.write(pack("i", int(value)))
-        elif typeName == 'float':
-            out_handle.write(pack("f", float(value)))
-        elif typeName == 'bool':
-            out_val = 0
-            if value.lower() in ("true", "1", "yes", "y", "t"):
-                out_val = 1
-            out_handle.write(pack("b", out_val))
-        elif typeName == 'array_string':
-            strings = [x.strip() for x in value.split(",")]
-            count = len(strings)
-            # array length
-            out_handle.write(pack("i", int(count)))
-            for string in strings:
-                write_string(string, out_handle)
-        else:
-            sys.stderr.write("ERROR: Unsupported property type: %s\n" % typeName)
-            sys.exit(1)
 
 def compile_animation_folder(in_folder, out_folder):
     for root, dirs, files in os.walk(in_folder):
@@ -349,44 +318,41 @@ def build_path(file_path):
         os.makedirs(d)
 
 
-# things that just need to be copied
-static_resources = (
-)
+def main():
+    command, datfile, in_dir, out_dir = sys.argv
+    global resource_tool
+    resource_tool = os.path.join(out_dir, "resource-edit")
 
-# things that are compiled by a function
-compiled_resources = (
-    ("universes", compile_hashmap),
-    ("characters", compile_hashmap),
-    ("worlds", compile_world),
-    ("maps", compile_map),
-    ("bitmaps", compile_bitmap),
-)
+    global datfile_time
+    datfile_time = 0
+    if os.path.exists(datfile):
+        datfile_time = os.path.getmtime(datfile)
 
-command, datfile, in_dir, out_dir = sys.argv
-resource_tool = os.path.join(out_dir, "resource-edit")
+    in_resources, out_resources = [os.path.join(x, "resources") for x in (in_dir, out_dir)]
+    compile_animations = os.path.join(in_dir, "tools", "compile-animations")
+    compile_props = os.path.join(in_dir, "tools", "compile-props")
 
-datfile_time = 0
-if os.path.exists(datfile):
-    datfile_time = os.path.getmtime(datfile)
+    # compile single-source resources
+    compiled_resources = (
+        ("universes", compile_universe),
+        #("characters", compile_character),
+        ("worlds", compile_world),
+        ("maps", compile_map),
+        ("bitmaps", compile_bitmap),
+    )
+    for (item, func) in compiled_resources:
+        print("Checking %s..." % item)
+        in_files, out_files = (os.path.join(in_resources, item), os.path.join(out_resources, item))
+        compile_folder(in_files, out_files, func)
+        update_folder(out_files, datfile)
 
-in_resources, out_resources = [os.path.join(x, "resources") for x in (in_dir, out_dir)]
-compile_animations = os.path.join(in_dir, "tools", "compile-animations")
-compile_props = os.path.join(in_dir, "tools", "compile-props")
+    # compile animations
+    print("Checking animations...")
+    in_ani, out_ani = (os.path.join(in_resources, "animations"), os.path.join(out_resources, "animations"))
+    compile_animation_folder(in_ani, out_ani)
+    update_folder(out_ani, datfile)
 
-# compile static resources
-for item in static_resources:
-    print("Checking %s..." % item)
-    update_folder(os.path.join(in_resources, item), datfile)
 
-# compile hashmap resources
-for (item, func) in compiled_resources:
-    print("Checking %s..." % item)
-    in_files, out_files = (os.path.join(in_resources, item), os.path.join(out_resources, item))
-    compile_folder(in_files, out_files, func)
-    update_folder(out_files, datfile)
+if __name__ == "__main__":
+    main()
 
-# compile animations
-print("Checking animations...")
-in_ani, out_ani = (os.path.join(in_resources, "animations"), os.path.join(out_resources, "animations"))
-compile_animation_folder(in_ani, out_ani)
-update_folder(out_ani, datfile)

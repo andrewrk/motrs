@@ -9,12 +9,12 @@ class Tile
 public:
     static const double size;
 
-    /** It's not important to leaves these values alone */
+    /** It's not important to leave these values alone */
     enum PhysicalPresence {
         ppHole, ppFloor, ppRail, ppEmbrasure, ppWall
     };
 
-    /** It's important to leaves these values alone since they're stored in .map files */
+    /** It's important to leave these values alone since they're stored in .map files */
     enum Shape {
         // solid
         tsSolidWall  = 0,
@@ -36,13 +36,16 @@ public:
         tsFloorRailNW = 14,
     };
 
-    /** It's importants to leaves these values alones since they're storedz in .map filesz */
+    /** It's important to leave these values alones since they're stored in .map files */
     enum SurfaceType {
         stNormal    = 0,
         stWater     = 1,
         stIce       = 2,
         stQuickSand = 3,
     };
+
+    static Tile * nullTile();
+
 
     Tile(const char** cursor);
     ~Tile();
@@ -51,12 +54,8 @@ public:
     void draw(double screenX, double screenY);
 
 private:
-    enum PropertyNames {
-        PropertyGraphic,
-    };
-
-    static std::map<std::string, int> s_propertyNames;
-
+    /** don't use this constructor. It's for making the NullTile */
+    Tile();
     bool m_good;
 
     Shape m_shape;

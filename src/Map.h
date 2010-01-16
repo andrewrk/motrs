@@ -20,13 +20,6 @@ public:
     void draw(double screenX, double screenY, int layer);
 
 private:
-    typedef struct {
-        int paletteSize;
-        int sizeX, sizeY, layerCount;
-        int submapCount;
-        int triggerCount;
-        int entityCount;
-    } Header;
 
     enum LayerType {
         ltFull = 1,

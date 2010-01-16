@@ -1,4 +1,9 @@
-start_world=int=0
-start_x=int=0
-start_y=int=0
-tmp.world=string=tmp.world
+version=1
+
+# multiple world declarations allowed. order is significant.
+world=tmp.world
+
+# universe must specify a starting location. 
+# start=worldIndex,x,y,z
+# x,y,z are coordinates of the center of the hero's feet.
+start=0,16,16,0

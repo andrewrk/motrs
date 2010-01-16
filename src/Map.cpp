@@ -15,10 +15,20 @@ Map::Map(const char * buffer) :
     m_x(0.0), m_y(0.0)
 {
     const char * cursor = buffer;
-    Header* header = Utils::readStruct<Header>(&cursor);
+    int version = Utils::readInt(&cursor);
+    if (version != 1) {
+        std::cerr << "Unsupported Map version: " << version << std::endl;
+        m_good = false;
+        return;
+    }
+
+    int sizeX = Utils::readInt(&cursor);
+    int sizeY = Utils::readInt(&cursor);
 
     // pallet
-    for (int i = 0; i < header->paletteSize; i++) {
+    int tileCount = Utils::readInt(&cursor);
+    m_palette.push_back(Tile::nullTile());
+    for (int i = 0; i < tileCount; i++) {
         Tile * tile = new Tile(&cursor);
         if (!tile->isGood()) {
             m_good = false;
@@ -27,14 +37,15 @@ Map::Map(const char * buffer) :
         m_palette.push_back(tile);
     }
 
-    // layers/tiles
-    m_tiles = new Array3<int>(header->sizeX, header->sizeY, header->layerCount);
-    for (int z = 0; z < header->layerCount; z++) {
+    // layers
+    int layerCount = Utils::readInt(&cursor);
+    m_tiles = new Array3<int>(sizeX, sizeY, layerCount);
+    for (int z = 0; z < layerCount; z++) {
         LayerType layerType = (LayerType)Utils::readInt(&cursor);
         switch (layerType) {
             case ltFull:
-                for (int y = 0; y < header->sizeY; y++)
-                    for (int x = 0; x < header->sizeX; x++)
+                for (int y = 0; y < sizeY; y++)
+                    for (int x = 0; x < sizeX; x++)
                         m_tiles->set(x, y, z, Utils::readInt(&cursor));
                 break;
             case ltSparse: {
@@ -51,18 +62,22 @@ Map::Map(const char * buffer) :
     }
 
     // submaps
-    Debug::assert(header->submapCount == 0, "TODO support submaps");
+    int submapCount = Utils::readInt(&cursor);
+    Debug::assert(submapCount == 0, "TODO support submaps");
 
     // triggers
-    Debug::assert(header->triggerCount == 0, "TODO support triggers");
+    int triggerCount = Utils::readInt(&cursor);
+    Debug::assert(triggerCount == 0, "TODO support triggers");
 
     // entities
-    Debug::assert(header->entityCount == 0, "TODO support entities");
+    int entityCount = Utils::readInt(&cursor);
+    Debug::assert(entityCount == 0, "TODO support entities");
 }
 
 Map::~Map()
 {
-
+    for (unsigned int i = 0; i < m_palette.size(); i++)
+        delete m_palette[i];
 }
 
 bool Map::isGood()
@@ -82,9 +97,13 @@ void Map::draw(double screenX, double screenY, int layer) {
     int tileIndexEndX = Utils::min(tileIndexRight, m_tiles->sizeX);
     int tileIndexEndY = Utils::min(tileIndexBottom, m_tiles->sizeY);
 
-    for (int tileIndexY = tileIndexStartY; tileIndexY < tileIndexEndY; tileIndexY++)
-        for (int tileIndexX = tileIndexStartX; tileIndexX < tileIndexEndX; tileIndexX++)
-            m_palette[m_tiles->get(tileIndexX, tileIndexY, layer)]->draw(m_x + tileIndexX * Tile::size, m_y + tileIndexY * Tile::size);
+    for (int tileIndexY = tileIndexStartY; tileIndexY < tileIndexEndY; tileIndexY++) {
+        for (int tileIndexX = tileIndexStartX; tileIndexX < tileIndexEndX; tileIndexX++) {
+            int tileIndex = m_tiles->get(tileIndexX, tileIndexY, layer);
+            Tile * tile = m_palette[tileIndex];
+            tile->draw(m_x + tileIndexX * Tile::size, m_y + tileIndexY * Tile::size);
+        }
+    }
 
     for (unsigned int i = 0; i < m_submaps.size(); i++)
         m_submaps[i]->draw(screenX, screenY, layer);

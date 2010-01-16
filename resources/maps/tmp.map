@@ -1,4 +1,31 @@
-size=2,2
-tile=0x1,0,{graphic=Sand Tile 1.bmp}
-layer=0,0,0,0
+version=1
 
+# size=sizeX,sizeY
+# sizes in number of tiles, not in actual coordinates.
+size=2,2
+
+# Tile declarations define the pallet. order is significant.
+# tile=shape,surface,graphicId
+# For meaning of shape and surface see Tile.h.
+# graphicId can be a bitmap, an animation, or blank.
+# There is an implicit tile declaration in position 0 of every pallet:
+# tile=0,0,
+# which is black nothingness. The rest of the pallet is 1-based.
+tile=1,0,Sand Tile 1.bmp
+
+
+# Layer declarations are always full arrays (no sparse allowed).
+# Flatten a 2d grid in row-major order. 
+# There must be (sizeX*sizeY) comma delimitted tile indexes.
+# layer=0,0,...
+layer=1,1,1,1
+
+
+# submap declarations yet to come. most likely like this:
+# submap=x,y,localId,resourceId
+
+# trigger declarations yet to come.
+# trigger=???
+
+# entity declarations yet to come.
+# entity=???
