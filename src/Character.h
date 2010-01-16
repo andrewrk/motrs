@@ -6,9 +6,9 @@
 #include "PropertiesResource.h"
 
 // characters are responsible for:
-// * health
-// * animations for moving
-// * where they are in the world
+//  * health
+//  * animations for moving
+//  * where they are in the world (why would character know what room it's in?)
 class Character : public PropertiesResource
 {
 public:
@@ -28,31 +28,30 @@ public:
     ~Character();
 
     // returns the position in the world
-    inline double x() { return m_x; }
-    inline double y() { return m_y; }
+    double x() { return m_x; }
+    double y() { return m_y; }
 
     // returns the actual position in the world of the player's feet
-    inline double feetX() { return m_x + m_feetOffsetX; }
-    inline double feetY() { return m_y + m_feetOffsetY; }
+    double feetX() { return m_x + m_feetOffsetX; }
+    double feetY() { return m_y + m_feetOffsetY; }
 
     // the width and height of the foot hit box area
-    inline double feetWidth() { return m_feetWidth; }
-    inline double feetHeight() { return m_feetHeight; }
+    double feetWidth() { return m_feetWidth; }
+    double feetHeight() { return m_feetHeight; }
 
 private:
     Graphic * m_currentGraphic;
 
     // animations for walking, running, and standing, indexed by direction
-    Graphic ** m_walking;
-    Graphic ** m_running;
-    Graphic ** m_standing;
+    Graphic * m_walking[9];
+    Graphic * m_running[9];
+    Graphic * m_standing[9];
 
     int m_directionPointing;
 
     // hit box offset
-    double m_feetOffsetX, m_feetOffsetY;
-    double m_feetWidth, m_feetHeight;
-    
+    double m_feetX, m_feetY, m_feetW, m_feetH;
+
     double m_speed;
 
     double m_x;
