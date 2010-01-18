@@ -17,10 +17,10 @@ void Input::refresh() {
     SDL_PumpEvents();
 
     // tmp:
-    m_map[Up] = SDLK_w;
-    m_map[Right] = SDLK_d;
-    m_map[Down] = SDLK_s;
-    m_map[Left] = SDLK_a;
+    m_map[North] = SDLK_w;
+    m_map[East] = SDLK_d;
+    m_map[South] = SDLK_s;
+    m_map[West] = SDLK_a;
 
     Uint8 * keystate = SDL_GetKeyState(NULL);
     for (int k = 0; k < Key_size; k++) {

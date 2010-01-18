@@ -55,6 +55,12 @@ void Entity::setPosition(double x, double y, int z, Direction direction) {
     m_direction = direction;
 }
 
+void Entity::move(double dx, double dy) {
+    m_x += dx;
+    m_y += dy;
+}
+
 void Entity::draw(double screenX, double screenY) {
     m_standing[m_direction]->draw(Gameplay::instance()->screen(),(int)(m_x - screenX), (int)(m_y - screenY));
 }
+

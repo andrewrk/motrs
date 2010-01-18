@@ -9,7 +9,7 @@ class Input {
 public:
     enum Key {
         // Movement
-        Up, Right, Down, Left,
+        North, East, South, West,
         Jump,
         ActivateDash,
         ToggleRun,

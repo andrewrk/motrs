@@ -82,7 +82,7 @@ bool Gameplay::processEvents() {
     while(SDL_PollEvent(&event)){
         switch(event.type){
             case SDL_KEYDOWN:
-                // Handle Alt+F4 in windows
+                // Handle Alt+F4 for windows
                 if (event.key.keysym.sym == SDLK_F4 && (event.key.keysym.mod & KMOD_ALT))
                     return false;
                 break;
@@ -96,7 +96,17 @@ bool Gameplay::processEvents() {
 }
 
 
-void Gameplay::nextFrame () {
+void Gameplay::nextFrame() {
+    int north = Input::state(Input::North) ? 1 : 0;
+    int east = Input::state(Input::East) ? 1 : 0;
+    int south = Input::state(Input::South) ? 1 : 0;
+    int west = Input::state(Input::West) ? 1 : 0;
+    int input_dx = east - west;
+    int input_dy = south - north;
+    double speed = 3.0;
+    double dx = speed * input_dx;
+    double dy = speed * input_dy;
+    m_player->move(dx, dy);
 //	//which keys are down
 //	Uint8* keystate;
 //	int dirX, dirY;
@@ -176,7 +186,7 @@ void Gameplay::nextFrame () {
 //		if( offsetY < 0 ) offsetY = 0;
 //		if( offsetY > mapHeightPix - m_screen->h  ) offsetY = mapHeightPix-m_screen->h;
 //	}
-    ++m_frameCount;
+    m_frameCount++;
 }
 
 void Gameplay::updateDisplay() {

@@ -2,7 +2,7 @@ version=1
 
 # size=sizeX,sizeY
 # sizes in number of tiles, not in actual coordinates.
-size=2,2
+size=8,8
 
 # Tile declarations define the pallet. order is significant.
 # tile=shape,surface,graphicId
@@ -18,7 +18,7 @@ tile=1,0,Sand Tile 1.bmp
 # Flatten a 2d grid in row-major order. 
 # There must be (sizeX*sizeY) comma delimitted tile indexes.
 # layer=0,0,...
-layer=1,1,1,1
+layer=1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 
 
 # submap declarations yet to come. most likely like this:

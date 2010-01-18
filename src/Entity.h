@@ -40,6 +40,7 @@ public:
     double feetHeight() { return m_feetH; }
 
     void setPosition(double x, double y, int z, Direction direction);
+    void move(double dx, double dy);
 
     void draw(double screenX, double screenY);
 private:
