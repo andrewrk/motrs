@@ -1,9 +1,12 @@
-version=1
+version=2
 
 # multiple world declarations allowed. order is significant.
 world=tmp.world
 
-# universe must specify a starting location. 
+# player defines who you are.
+player=sonic.entity
+
+# start is where you start in the universe
 # start=worldIndex,x,y,z
 # x,y,z are coordinates of the center of the hero's feet.
 start=0,16,16,0

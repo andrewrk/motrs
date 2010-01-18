@@ -21,6 +21,8 @@ public:
     int worldCount();
     World * firstWorld();
 
+    Entity * player();
+
 private:
     std::vector<World *> m_worlds;
     bool m_good;
@@ -28,6 +30,8 @@ private:
     int m_startX;
     int m_startY;
     int m_startZ;
+
+    Entity * m_player;
 };
 
 #endif

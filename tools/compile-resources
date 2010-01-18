@@ -58,23 +58,29 @@ def compile_universe(in_path, out_path):
     declarations = read_declarations(in_path)
     assert(declarations[0][0] == "version")
     version_number = int(declarations[0][1])
-    assert(version_number == 1)
-    start = None
+    assert(version_number == 2)
     worlds = []
+    player = None
+    start = None
     for (kind, value) in declarations[1:]:
         if kind == "world":
             worlds.append(encode_string(value))
+        elif kind == "player":
+            assert(player == None)
+            player = encode_string(value)
         elif kind == "start":
             assert(start == None)
             start = pack("iiii", *[int(x) for x in split_strip(value)])
         else:
             raise(Exception("unsupported kind: " + kind))
+    assert(player != None)
     assert(start != None)
     out_handle = open_output(out_path)
     out_handle.write("U" + pack("i", version_number))
-    out_handle.write(start)
     out_handle.write(pack("i", len(worlds)))
     [out_handle.write(world) for world in worlds]
+    out_handle.write(player)
+    out_handle.write(start)
     out_handle.close()
 
 def compile_world(in_path, out_path):
