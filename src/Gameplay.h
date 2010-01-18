@@ -3,7 +3,7 @@
 
 #include "SDL.h"
 #include "Universe.h"
-#include "Character.h"
+#include "Entity.h"
 #include "ResourceFile.h"
 #include "Debug.h"
 

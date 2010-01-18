@@ -2,7 +2,6 @@
 #define _GRAPHIC_H_
 
 #include "SDL.h"
-#include "ResourceFile.h"
 #include <vector>
 
 /* Graphics are things that are displayed. it can be an animation

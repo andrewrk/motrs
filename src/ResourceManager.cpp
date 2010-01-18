@@ -1,7 +1,7 @@
 #include "ResourceManager.h"
 
 #include "Universe.h"
-#include "Character.h"
+#include "Entity.h"
 
 #include "Debug.h"
 
@@ -10,7 +10,7 @@ ResourceFile * ResourceManager::resourceFile = NULL;
 std::map<std::string, World*> ResourceManager::s_worlds;
 std::map<std::string, Map*> ResourceManager::s_maps;
 std::map<std::string, Graphic*> ResourceManager::s_graphics;
-std::map<std::string, Character*> ResourceManager::s_characters;
+std::map<std::string, Entity*> ResourceManager::s_entities;
 
 Universe * ResourceManager::loadUniverse(std::string resourceFilePath, std::string id) {
     resourceFile = new ResourceFile(resourceFilePath);
@@ -50,7 +50,7 @@ Graphic * ResourceManager::getGraphic(std::string id) {
     return getResource("Graphic", s_graphics, 'G', id);
 }
 
-Character * ResourceManager::getCharacter(std::string id) {
-    return getResource("Character", s_characters, 'C', id);
+Entity * ResourceManager::getEntity(std::string id) {
+    return getResource("Entity", s_entities, 'E', id);
 }
 
