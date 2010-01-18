@@ -112,14 +112,14 @@ void Gameplay::nextFrame() {
     double marginSouth =  m_screenY + screenHeight() - (m_player->feetY() + m_player->feetHeight());
     double marginWest = m_player->feetX() - m_screenX;
 
-    if (marginNorth < 0)
-        m_screenY += marginNorth;
-    else if (marginSouth < 0)
-        m_screenY -= marginSouth;
-    if (marginWest < 0)
-        m_screenX += marginWest;
-    else if (marginEast < 0)
-        m_screenX -= marginEast;
+    if (marginNorth < minMarginNorth())
+        m_screenY -= minMarginNorth() - marginNorth;
+    else if (marginSouth < minMarginSouth())
+        m_screenY += minMarginSouth() - marginSouth;
+    if (marginWest < minMarginWest())
+        m_screenX -= minMarginWest() - marginWest;
+    else if (marginEast < minMarginEast())
+        m_screenX += minMarginEast() - marginEast;
 
     m_frameCount++;
 }
