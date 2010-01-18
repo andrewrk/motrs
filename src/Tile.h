@@ -7,6 +7,7 @@ class Tile
 {
 public:
     static const double size;
+    static const int sizeInt;
 
     /** It's not important to leave these values alone */
     enum PhysicalPresence {

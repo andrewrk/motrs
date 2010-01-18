@@ -2,11 +2,11 @@
 #define _RESORCE_MANAGER_H_
 
 #include "ResourceFile.h"
+#include "World.h"
 
 #include "Debug.h"
 
 class Universe;
-class World;
 class Map;
 class Graphic;
 class Entity;

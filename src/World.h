@@ -3,24 +3,33 @@
 
 #include <vector>
 #include "Map.h"
+#include "Universe.h"
 
 class World
 {
 public:
     // create a world from data in memory
     World(const char * buffer);
+    // create an empty world
+    World();
     ~World();
 
     // did the world load ok?
     bool isGood();
+
+    // return the Location at specified coordinates
+    Universe::Location locationOf(double absoluteX, double absoluteY);
+
+    //hax
     Map * getMap();
 
-private:
+protected:
     class WorldMap {
     public:
-        int x, y, z;
+        double x, y;
+        int z;
         Map * map;
-        WorldMap(int x, int y, int z, Map * map)
+        WorldMap(double x, double y, int z, Map * map)
             : x(x), y(y), z(z), map(map) {}
     };
 

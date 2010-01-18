@@ -17,7 +17,12 @@ public:
 
     bool isGood();
 
+    // draw on screen
     void draw(double screenX, double screenY, int layer);
+
+    // width and height accessors
+    inline double width(){ return m_width; }
+    inline double height() { return m_height; }
 
 private:
 
@@ -38,7 +43,9 @@ private:
     std::vector<Trigger*> m_triggers;
     std::vector<Entity*> m_entities;
 
+    // size in absolute coordinates
     double m_x, m_y;
+    double m_width, m_height; // these are computed when the map is created
 };
 
 #endif
