@@ -1,7 +1,6 @@
 #ifndef _TILE_H_
 #define _TILE_H_
 
-#include "PropertiesResource.h"
 #include "Graphic.h"
 
 class Tile

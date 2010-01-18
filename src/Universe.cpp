@@ -1,5 +1,7 @@
 #include "Universe.h"
 
+#include "ResourceManager.h"
+
 #include "Utils.h"
 
 Universe::Universe(const char * buffer) :

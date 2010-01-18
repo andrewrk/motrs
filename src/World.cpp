@@ -1,5 +1,7 @@
 #include "World.h"
 
+#include "ResourceManager.h"
+
 #include "Utils.h"
 
 World::World(const char * buffer) :

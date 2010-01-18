@@ -1,8 +1,6 @@
 #ifndef _UNIVERSE_H_
 #define _UNIVERSE_H_
 
-#include "PropertiesResource.h"
-
 #include "World.h"
 #include <vector>
 

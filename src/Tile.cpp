@@ -2,6 +2,7 @@
 
 #include "Utils.h"
 #include "Gameplay.h"
+#include "ResourceManager.h"
 
 #include "SDL.h"
 

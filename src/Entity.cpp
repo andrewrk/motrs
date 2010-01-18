@@ -1,5 +1,6 @@
 #include "Entity.h"
 
+#include "ResourceManager.h"
 #include "Gameplay.h"
 
 #include "Utils.h"
@@ -41,7 +42,6 @@ Entity::Entity(const char * buffer) :
     m_feetOffsetY = (double)Utils::readInt(&cursor);
     m_feetW = (double)Utils::readInt(&cursor);
     m_feetH = (double)Utils::readInt(&cursor);
-
 }
 
 Entity::~Entity()
@@ -49,8 +49,8 @@ Entity::~Entity()
 }
 
 void Entity::setPosition(double x, double y, int z, Direction direction) {
-    m_x = x;
-    m_y = y;
+    m_x = x - m_feetOffsetX - m_feetW / 2.0;
+    m_y = y - m_feetOffsetY - m_feetH / 2.0;
     m_z = z;
     m_direction = direction;
 }

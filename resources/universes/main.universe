@@ -9,4 +9,4 @@ player=sonic.entity
 # start is where you start in the universe
 # start=worldIndex,x,y,z
 # x,y,z are coordinates of the center of the hero's feet.
-start=0,16,16,0
+start=0,16,32,0

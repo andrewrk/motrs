@@ -3,8 +3,6 @@
 
 #include "Graphic.h"
 
-#include "PropertiesResource.h"
-
 // entities are responsible for:
 //  * specs (health, speed, defense, etc.)
 //  * animations for moving
