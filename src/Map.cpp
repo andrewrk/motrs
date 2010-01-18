@@ -86,12 +86,12 @@ bool Map::isGood()
 }
 
 void Map::draw(double screenX, double screenY, int layer) {
-    double localLeft = m_x - screenX;
-    double localTop = m_x - screenY;
+    double localLeft =  screenX - m_x;
+    double localTop =  screenY - m_x;
     int tileIndexLeft = (int)(localLeft / Tile::size);
     int tileIndexTop = (int)(localTop / Tile::size);
-    int tileIndexRight = tileIndexLeft + (int)(Gameplay::ScreenWidth / Tile::size);
-    int tileIndexBottom = tileIndexTop + (int)(Gameplay::ScreenHeight / Tile::size);
+    int tileIndexRight = tileIndexLeft + (int)(Gameplay::instance()->screenWidth() / Tile::size) + 1;
+    int tileIndexBottom = tileIndexTop + (int)(Gameplay::instance()->screenHeight() / Tile::size) + 1;
     int tileIndexStartX = Utils::max(tileIndexLeft, 0);
     int tileIndexStartY = Utils::max(tileIndexTop, 0);
     int tileIndexEndX = Utils::min(tileIndexRight, m_tiles->sizeX);
@@ -101,7 +101,7 @@ void Map::draw(double screenX, double screenY, int layer) {
         for (int tileIndexX = tileIndexStartX; tileIndexX < tileIndexEndX; tileIndexX++) {
             int tileIndex = m_tiles->get(tileIndexX, tileIndexY, layer);
             Tile * tile = m_palette[tileIndex];
-            tile->draw(m_x + tileIndexX * Tile::size, m_y + tileIndexY * Tile::size);
+            tile->draw(m_x + tileIndexX * Tile::size - screenX, m_y + tileIndexY * Tile::size - screenY);
         }
     }
 

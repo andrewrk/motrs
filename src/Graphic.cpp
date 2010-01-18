@@ -76,8 +76,9 @@ void Graphic::draw(SDL_Surface * dest, int x, int y)
     SDL_Rect destRect;
     destRect.x = x;
     destRect.y = y;
-    destRect.w = m_spriteBounds[frame].w;
-    destRect.h = m_spriteBounds[frame].h;
+    destRect.w = m_spriteBounds[frame].w / 4;
+    destRect.h = m_spriteBounds[frame].h / 4;
+
 
     SDL_BlitSurface( m_spriteSheet, &m_spriteBounds[currentFrame()],
         dest, &destRect);

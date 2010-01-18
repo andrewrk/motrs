@@ -27,10 +27,6 @@ public:
 
     bool isGood() { return m_good; }
 
-    // returns the position in the world
-    double x() { return m_x; }
-    double y() { return m_y; }
-
     // returns the actual position in the world of the player's feet
     double feetX() { return m_x + m_feetOffsetX; }
     double feetY() { return m_y + m_feetOffsetY; }

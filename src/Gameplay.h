@@ -10,8 +10,10 @@
 class Gameplay
 {
 public:
-    static const double ScreenWidth;
-    static const double ScreenHeight;
+    static Gameplay * instance() {
+        Debug::assert(s_inst != NULL, "Gameplay::instance() s_inst null");
+        return s_inst;
+    }
 
     Gameplay(SDL_Surface * screen, int fps);
     ~Gameplay();
@@ -19,15 +21,12 @@ public:
     void mainLoop();
     bool isGood();
 
-    static Gameplay * instance()
-    {
-        Debug::assert(s_inst != NULL, "Gameplay::instance() s_inst null");
-        return s_inst;
-    }
-
     unsigned int frameCount() { return m_frameCount; }
     int fps() { return m_fps; }
     SDL_Surface * screen() { return m_screen; }
+
+    double screenWidth() { return 800.0; }
+    double screenHeight() { return 600.0; }
 private:
 
     static const char * ResourceFilePath;
@@ -39,6 +38,7 @@ private:
     int m_interval;
     unsigned int m_frameCount;
 
+    double m_screenX, m_screenY;
 
     Universe * m_universe;
 
