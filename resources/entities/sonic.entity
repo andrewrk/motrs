@@ -14,5 +14,5 @@ run   = sonic_run_east.ani,sonic_run_east.ani,sonic_run_east.ani,sonic_run_east.
 # feet=x,y,w,h
 feet=4,30,20,20
 
-# speed
-speed=8
+# TODO: specs = speed, health, defense, stamina, more?
+# specs = 10,10,10,10, ???

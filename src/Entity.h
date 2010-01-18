@@ -6,7 +6,7 @@
 #include "PropertiesResource.h"
 
 // entities are responsible for:
-//  * health
+//  * specs (health, speed, defense, etc.)
 //  * animations for moving
 //  * where they are in the world (why would an entity know what room it's in?)
 class Entity
@@ -40,29 +40,25 @@ public:
     double feetHeight() { return m_feetH; }
 
 private:
+    bool m_good;
+
     Graphic * m_currentGraphic;
 
     // animations for walking, running, and standing, indexed by direction
+    Graphic * m_standing[9];
     Graphic * m_walking[9];
     Graphic * m_running[9];
-    Graphic * m_standing[9];
 
     int m_directionPointing;
 
     // hit box
     double m_feetX, m_feetY, m_feetW, m_feetH;
 
-    double m_speed;
-
     double m_x;
     double m_y;
 
     double m_velX;
     double m_velY;
-
-    // health
-    double m_hp;
-    double m_maxHp;
 };
 
 #endif

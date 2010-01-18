@@ -68,7 +68,7 @@ def compile_universe(in_path, out_path):
             assert(start == None)
             start = pack("iiii", *[int(x) for x in split_strip(value)])
         else:
-            raise "unsupported kind: " + kind
+            raise(Exception("unsupported kind: " + kind))
     assert(start != None)
     out_handle = open_output(out_path)
     out_handle.write("U" + pack("i", version_number))
@@ -88,13 +88,12 @@ def compile_world(in_path, out_path):
             (x_str, y_str, z_str, id) = split_strip(value)
             maps.append(pack("iii", int(x_str), int(y_str), int(z_str)) + encode_string(id))
         else:
-            raise "unsupported kind: " + kind
+            raise(Exception("unsupported kind: " + kind))
     out_handle = open_output(out_path)
     out_handle.write("W" + pack("i", version_number))
 
     out_handle.write(pack("i", len(maps)))
     [out_handle.write(map) for map in maps]
-
     out_handle.close()
 
 
@@ -141,13 +140,13 @@ def compile_map(in_path, out_path):
         elif kind == "layer":
             layers.append(encode_layer(value, size[0], size[1]))
         elif kind == "submap":
-            raise "TODO: support submap"
+            raise("TODO: support submap")
         elif kind == "trigger":
-            raise "TODO: support trigger"
+            raise("TODO: support trigger")
         elif kind == "entity":
-            raise "TODO: support entity"
+            raise("TODO: support entity")
         else:
-            raise "unsupported kind: " + kind
+            raise(Exception("unsupported kind: " + kind))
     assert size != None
     out_handle = open_output(out_path)
     out_handle.write("M" + pack("i", version_number))
@@ -159,6 +158,37 @@ def compile_map(in_path, out_path):
         [out_handle.write(thing) for thing in list_of_things]
     out_handle.close()
 
+def compile_entity(in_path, out_path):
+    declarations = read_declarations(in_path)
+    assert(declarations[0][0] == "version")
+    version_number = int(declarations[0][1])
+    assert(version_number == 1)
+    movement_kinds = ("stand", "walk", "run")
+    movement_map = {}
+    feet = None
+    for (kind, value) in declarations[1:]:
+        if kind in movement_kinds:
+            assert(kind not in movement_map)
+            graphic_ids = split_strip(value)
+            assert(len(graphic_ids) == 9)
+            encoded_ids = "".join(encode_string(id) for id in graphic_ids)
+            movement_map[kind] = encoded_ids
+        elif kind == "feet":
+            assert(feet == None)
+            dims = split_strip(value)
+            feet = pack("iiii", *[int(dim) for dim in dims])
+        else:
+            raise(Exception("unsupported kind: " + kind))
+    assert(len(movement_map) == 3)
+
+    out_handle = open_output(out_path)
+    out_handle.write("E" + pack("i", version_number))
+
+    [out_handle.write(movement_map[movement_kind]) for movement_kind in movement_kinds]
+    out_handle.write(feet)
+    out_handle.close()
+
+
 def read_declarations(in_path):
     lines = open(in_path, "rU").read().split("\n")
     def strip_comments(line):
@@ -167,7 +197,7 @@ def read_declarations(in_path):
             line = line[:comment_start]
         return line.strip()
     lines = [strip_comments(line) for line in lines]
-    return [line.split("=", 1) for line in lines if line != ""]
+    return [[x.strip() for x in line.split("=", 1)] for line in lines if line != ""]
 
 def open_output(out_file):
     build_path(out_file)
@@ -335,9 +365,9 @@ def main():
     # compile single-source resources
     compiled_resources = (
         ("universes", compile_universe),
-        #("characters", compile_character),
         ("worlds", compile_world),
         ("maps", compile_map),
+        ("entities", compile_entity),
         ("bitmaps", compile_bitmap),
     )
     for (item, func) in compiled_resources:
