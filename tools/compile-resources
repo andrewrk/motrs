@@ -319,6 +319,7 @@ def compile_animation(in_dir, out_file):
     build_path(out_file)
     out = open(out_file, "wb")
 
+    out.write("G" + pack("i", 1))
     #Uint32 GraphicType
     out.write(pack("i", 0))
     #Uint32 StorageType

@@ -27,7 +27,8 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     m_fps(fps),
     m_interval(1000/fps), //frames per second -> miliseconds
     m_universe(NULL),
-    m_currentWorld(NULL)
+    m_currentWorld(NULL),
+    m_player(NULL)
 {
     Debug::assert(s_inst == NULL, "only one Gameplay allowed");
     s_inst = this;
@@ -41,8 +42,8 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
         m_good = false;
         return;
     }
-    m_currentWorld = m_universe->firstWorld();
-    // TODO more here
+    m_currentWorld = m_universe->startWorld();
+    m_player = m_universe->player();
 }
 
 Gameplay::~Gameplay() {
@@ -187,6 +188,8 @@ void Gameplay::updateDisplay() {
 
     Map * map = m_currentWorld->getMap();
     map->draw(screenX, screenY, 0);
+
+    m_player->draw(screenX, screenY);
 //    int startX = (int)(absX(0) / Tile::size);
 //    int startY = (int)(absY(0) / Tile::size);
 //    int endX = (int)(absX(m_screen->w) / Tile::size);

@@ -49,7 +49,7 @@ private:
             char actualTypeCode = *buffer;
             if (actualTypeCode != typeCode) {
                 std::cerr << "Wrong type code in resource " << id << ". " <<
-                        "Should be '" << typeCode << "'' but it's '" << actualTypeCode << "'." << std::endl;
+                        "Should be '" << typeCode << "' but it's '" << actualTypeCode << "'." << std::endl;
                 delete buffer;
                 return NULL;
             }

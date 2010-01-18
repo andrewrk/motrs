@@ -19,17 +19,14 @@ public:
 
     bool isGood();
     int worldCount();
-    World * firstWorld();
+    World * startWorld();
 
-    Entity * player();
+    Entity * player() { return m_player; }
 
 private:
     std::vector<World *> m_worlds;
     bool m_good;
     int m_startWorld;
-    int m_startX;
-    int m_startY;
-    int m_startZ;
 
     Entity * m_player;
 };

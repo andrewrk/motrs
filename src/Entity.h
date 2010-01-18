@@ -27,18 +27,23 @@ public:
     Entity(const char * buffer);
     ~Entity();
 
+    bool isGood() { return m_good; }
+
     // returns the position in the world
     double x() { return m_x; }
     double y() { return m_y; }
 
     // returns the actual position in the world of the player's feet
-    double feetX() { return m_x + m_feetX; }
-    double feetY() { return m_y + m_feetY; }
+    double feetX() { return m_x + m_feetOffsetX; }
+    double feetY() { return m_y + m_feetOffsetY; }
 
     // the width and height of the foot hit box area
     double feetWidth() { return m_feetW; }
     double feetHeight() { return m_feetH; }
 
+    void setPosition(double x, double y, int z, Direction direction);
+
+    void draw(double screenX, double screenY);
 private:
     bool m_good;
 
@@ -49,13 +54,14 @@ private:
     Graphic * m_walking[9];
     Graphic * m_running[9];
 
-    int m_directionPointing;
+    Direction m_direction;
 
     // hit box
-    double m_feetX, m_feetY, m_feetW, m_feetH;
+    double m_feetOffsetX, m_feetOffsetY, m_feetW, m_feetH;
 
     double m_x;
     double m_y;
+    int m_z;
 
     double m_velX;
     double m_velY;

@@ -43,6 +43,7 @@ private:
     Universe * m_universe;
 
     World * m_currentWorld;
+    Entity * m_player;
 
     bool processEvents();
     void updateDisplay();

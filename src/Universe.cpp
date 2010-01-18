@@ -6,9 +6,6 @@ Universe::Universe(const char * buffer) :
     m_worlds(),
     m_good(true),
     m_startWorld(-1),
-    m_startX(-1),
-    m_startY(-1),
-    m_startZ(-1),
     m_player(NULL)
 {
     const char * cursor = buffer;
@@ -31,15 +28,17 @@ Universe::Universe(const char * buffer) :
     }
 
     m_player = ResourceManager::getEntity(Utils::readString(&cursor));
-    if (m_player == NULL) {
+    if (m_player == NULL || !m_player->isGood()) {
         m_good = false;
         return;
     }
 
     m_startWorld = Utils::readInt(&cursor);
-    m_startX = Utils::readInt(&cursor);
-    m_startY = Utils::readInt(&cursor);
-    m_startZ = Utils::readInt(&cursor);
+    double startX = (double)Utils::readInt(&cursor);
+    double startY = (double)Utils::readInt(&cursor);
+    int startZ = Utils::readInt(&cursor);
+    m_player->setPosition(startX, startY, startZ, Entity::Center);
+
 }
 
 Universe::~Universe()
@@ -54,6 +53,6 @@ int Universe::worldCount() {
     return m_worlds.size();
 }
 
-World * Universe::firstWorld() {
-    return m_worlds[0];
+World * Universe::startWorld() {
+    return m_worlds[m_startWorld];
 }
