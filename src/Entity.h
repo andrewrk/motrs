@@ -21,6 +21,11 @@ public:
         East,
         SouthEast,
     };
+    enum MovementMode {
+        Stand,
+        Walk,
+        Run,
+    };
 
     Entity(const char * buffer);
     ~Entity();
@@ -36,7 +41,9 @@ public:
     double feetHeight() { return m_feetH; }
 
     void setPosition(double x, double y, int z, Direction direction);
+    void setMovementMode(MovementMode movementMode);
     void move(double dx, double dy);
+    void orient(Direction direction);
 
     void draw(double screenX, double screenY);
 private:
@@ -50,6 +57,7 @@ private:
     Graphic * m_running[9];
 
     Direction m_direction;
+    MovementMode m_movementMode;
 
     // hit box
     double m_feetOffsetX, m_feetOffsetY, m_feetW, m_feetH;

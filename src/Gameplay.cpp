@@ -102,6 +102,13 @@ void Gameplay::nextFrame() {
     int west = Input::state(Input::West) ? 1 : 0;
     int input_dx = east - west;
     int input_dy = south - north;
+    Entity::Direction direction = (Entity::Direction)((input_dx + 1) * 3 + (input_dy + 1));
+    if (direction == Entity::Center) {
+        m_player->setMovementMode(Entity::Stand);
+    } else {
+        m_player->setMovementMode(Entity::Run);
+        m_player->orient(direction);
+    }
     double speed = 5.0;
     double dx = speed * input_dx;
     double dy = speed * input_dy;
