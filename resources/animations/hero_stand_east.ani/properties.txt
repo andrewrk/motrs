@@ -1,2 +1,2 @@
 alphacolor=color=255,0,255
-fps=int=16
+fps=int=48

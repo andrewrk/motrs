@@ -8,7 +8,7 @@
 Entity::Entity(const char * buffer) :
     m_good(true),
     m_currentGraphic(NULL),
-    m_direction(Center),
+    m_direction(Center), m_movementMode(Stand),
     m_feetOffsetX(0.0), m_feetOffsetY(0.0), m_feetW(0.0), m_feetH(0.0),
     m_x(0.0), m_y(0.0), m_z(0),
     m_velX(0.0), m_velY(0.0)
@@ -54,13 +54,27 @@ void Entity::setPosition(double x, double y, int z, Direction direction) {
     m_z = z;
     m_direction = direction;
 }
+void Entity::setMovementMode(MovementMode movementMode) {
+    m_movementMode = movementMode;
+}
 
 void Entity::move(double dx, double dy) {
     m_x += dx;
     m_y += dy;
 }
 
+void Entity::orient(Direction direction) {
+    m_direction = direction;
+}
+
 void Entity::draw(double screenX, double screenY) {
-    m_standing[m_direction]->draw(Gameplay::instance()->screen(),(int)(m_x - screenX), (int)(m_y - screenY));
+    Graphic** graphicList;
+    switch (m_movementMode) {
+        case Stand: graphicList = m_standing; break;
+        case Walk: graphicList = m_walking; break;
+        case Run: graphicList = m_running; break;
+        default: Debug::assert(false, "unrecognized movementMode ");
+    }
+    graphicList[m_direction]->draw(Gameplay::instance()->screen(),(int)(m_x - screenX), (int)(m_y - screenY));
 }
 
