@@ -44,7 +44,6 @@ private:
 
     MouseState m_mouseState;
 
-    QString dataDir();
     void refreshArt();
     void refreshWorldList();
     void cleanupArt();

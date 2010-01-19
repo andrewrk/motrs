@@ -53,7 +53,7 @@ public:
     bool isGood();
     void draw(double screenX, double screenY);
 
-private:
+protected:
     /** don't use this constructor. It's for making the NullTile */
     Tile();
     bool m_good;

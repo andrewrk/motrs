@@ -1,9 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "settingsdialog.h"
+#include "editorutils.h"
 
 #include <QDir>
-#include <QSettings>
 #include <QGraphicsPixmapItem>
 #include <QListWidget>
 #include <QDebug>
@@ -52,18 +52,12 @@ void MainWindow::on_actionSettings_triggered()
     SettingsDialog::instance()->exec();
 }
 
-QString MainWindow::dataDir()
-{
-    QSettings settings;
-    return settings.value("paths/data", ".").toString();
-}
-
 void MainWindow::refreshWorldList()
 {
     ui->list_worlds->clear();
 
     // do a directory listing of data/worlds
-    QDir dir(dataDir());
+    QDir dir(EditorUtils::dataDir());
     dir.cd("worlds");
     QStringList filters;
     filters << "*.world";
@@ -78,7 +72,7 @@ void MainWindow::refreshArt()
     cleanupArt();
 
     // do a directory listing of data/art
-    QDir dir(dataDir());
+    QDir dir(EditorUtils::dataDir());
     dir.cd("art");
     QStringList filters;
     filters << "*.bmp" << "*.png" << "*.jpg";
@@ -87,7 +81,7 @@ void MainWindow::refreshArt()
     int paneWidth = 0, paneHeight = 0;
     for(int i=0; i<entries.size(); ++i) {
         // create item
-        QPixmap * pixmap = new QPixmap(entries[i]);
+        QPixmap * pixmap = new QPixmap(dir.absoluteFilePath(entries[i]));
         QGraphicsPixmapItem * item = m_scene->addPixmap(*pixmap);
 
         // position the item
@@ -127,7 +121,9 @@ void MainWindow::on_actionSetStartingPoint_triggered()
 void MainWindow::on_list_worlds_doubleClicked(QModelIndex index)
 {
     QListWidgetItem * item = ui->list_worlds->item(index.row());
-    openWorld(item->text());
+    QDir dir(EditorUtils::dataDir());
+    dir.cd("worlds");
+    openWorld(dir.absoluteFilePath(item->text()));
 }
 
 void MainWindow::openWorld(QString file)

@@ -13,6 +13,7 @@ class Map
 {
 public:
     Map(const char * buffer);
+    Map();
     ~Map();
 
     bool isGood();
@@ -24,7 +25,7 @@ public:
     inline double width(){ return m_width; }
     inline double height() { return m_height; }
 
-private:
+protected:
 
     enum LayerType {
         ltFull = 1,

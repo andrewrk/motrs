@@ -79,6 +79,18 @@ Map::Map(const char * buffer) :
     m_height = sizeY * Tile::size;
 }
 
+Map::Map() :
+    m_good(true),
+    m_palette(),
+    m_tiles(NULL),
+    m_submaps(),
+    m_triggers(),
+    m_entities(),
+    m_x(0.0), m_y(0.0)
+{
+
+}
+
 Map::~Map()
 {
     for (unsigned int i = 0; i < m_palette.size(); i++)

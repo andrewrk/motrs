@@ -43,35 +43,40 @@ void WorldView::paintEvent(QPaintEvent * e)
 
 
     if( m_world ) {
-        // select the tiles that are in range
-        // determine what tile the top left corner is
-        Universe::Location loc = m_world->locationOf(absoluteX(0), absoluteY(0));
-        double cursorX = loc.x;
-        while(screenX(cursorX) < this->width()) {
-            double cursorY = loc.y;
-            while(screenY(cursorY) < this->height()) {
-                Universe::Location thisLoc = m_world->locationOf(cursorX, cursorY);
+        if( m_world->isGood() ) {
+            // select the tiles that are in range
+            // determine what tile the top left corner is
+            Universe::Location loc = m_world->locationOf(absoluteX(0), absoluteY(0));
+            double cursorX = loc.x;
+            while(screenX(cursorX) < this->width()) {
+                double cursorY = loc.y;
+                while(screenY(cursorY) < this->height()) {
+                    Universe::Location thisLoc = m_world->locationOf(cursorX, cursorY);
 
-                int flooredX = std::floor(cursorX);
-                int flooredY = std::floor(cursorY);
-                double drawX = screenX(flooredX - (flooredX % Tile::sizeInt));
-                double drawY = screenY(flooredY - (flooredY % Tile::sizeInt));
+                    int flooredX = std::floor(cursorX);
+                    int flooredY = std::floor(cursorY);
+                    double drawX = screenX(flooredX - (flooredX % Tile::sizeInt));
+                    double drawY = screenY(flooredY - (flooredY % Tile::sizeInt));
 
-                if( thisLoc.map == NULL ) {
-                    // no Map covers this tile
-                    p.setBrush(QBrush(Qt::black, Qt::SolidPattern));
-                    p.drawRect(drawX, drawY, Tile::size, Tile::size);
-                } else {
-                    // draw tile
+                    if( thisLoc.map == NULL ) {
+                        // no Map covers this tile
+                        p.setBrush(QBrush(Qt::black, Qt::SolidPattern));
+                        p.drawRect(drawX, drawY, Tile::size, Tile::size);
+                    } else {
+                        // draw tile
 
-                    // draw grid box
-                    p.setBrush(QBrush(Qt::black, Qt::NoBrush));
-                    p.drawRect(drawX, drawY, Tile::size, Tile::size);
+                        // draw grid box
+                        p.setBrush(QBrush(Qt::black, Qt::NoBrush));
+                        p.drawRect(drawX, drawY, Tile::size, Tile::size);
+                    }
+
+                    cursorY += Tile::size;
                 }
-
-                cursorY += Tile::size;
+                cursorX += Tile::size;
             }
-            cursorX += Tile::size;
+        } else {
+            p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
+            tr("Error loading World."));
         }
     } else {
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
