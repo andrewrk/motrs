@@ -109,7 +109,7 @@ void Gameplay::nextFrame() {
         m_player->setMovementMode(Entity::Run);
         m_player->orient(direction);
     }
-    double speed = 5.0;
+    double speed = 3.0;
     double dx = speed * input_dx;
     double dy = speed * input_dy;
     m_player->move(dx, dy);

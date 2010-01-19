@@ -73,7 +73,7 @@ void Entity::draw(double screenX, double screenY) {
         case Stand: graphicList = m_standing; break;
         case Walk: graphicList = m_walking; break;
         case Run: graphicList = m_running; break;
-        default: Debug::assert(false, "unrecognized movementMode ");
+        default: Debug::assert(false, "unrecognized movementMode.");
     }
     graphicList[m_direction]->draw(Gameplay::instance()->screen(),(int)(m_x - screenX), (int)(m_y - screenY));
 }
