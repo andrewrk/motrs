@@ -1,8 +1,11 @@
 #ifndef _UNIVERSE_H_
 #define _UNIVERSE_H_
 
+#include <vector>
+
 class World;
 class Map;
+class Entity;
 
 /**
  * Universe - a list of all worlds.

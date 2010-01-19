@@ -112,8 +112,7 @@ SET(REUSABLE_CLASSES
     ${CMAKE_SOURCE_DIR}/src/Universe.cpp
     ${CMAKE_SOURCE_DIR}/src/Gameplay.cpp
     ${CMAKE_SOURCE_DIR}/src/Input.cpp
-    ${CMAKE_SOURCE_DIR}/src/Character.cpp
-    ${CMAKE_SOURCE_DIR}/src/PropertiesResource.cpp
+    ${CMAKE_SOURCE_DIR}/src/Entity.cpp
 )
 
 FILE(GLOB_RECURSE EDITOR_UI_FILES ${CMAKE_SOURCE_DIR}/tools/world-editor/*.ui)

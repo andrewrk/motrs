@@ -41,6 +41,7 @@ void WorldView::paintEvent(QPaintEvent * e)
     p.setBackground(QBrush(Qt::white));
     p.eraseRect(0, 0, this->width(), this->height());
 
+
     if( m_world ) {
         // select the tiles that are in range
         // determine what tile the top left corner is
