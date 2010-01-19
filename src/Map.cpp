@@ -72,6 +72,23 @@ Map::Map(const char * buffer) :
     // entities
     int entityCount = Utils::readInt(&cursor);
     Debug::assert(entityCount == 0, "TODO support entities");
+
+
+    // pre-calculations
+    m_width = sizeX * Tile::size;
+    m_height = sizeY * Tile::size;
+}
+
+Map::Map() :
+    m_good(true),
+    m_palette(),
+    m_tiles(NULL),
+    m_submaps(),
+    m_triggers(),
+    m_entities(),
+    m_x(0.0), m_y(0.0)
+{
+
 }
 
 Map::~Map()

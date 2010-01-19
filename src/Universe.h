@@ -1,10 +1,11 @@
 #ifndef _UNIVERSE_H_
 #define _UNIVERSE_H_
 
-#include "World.h"
 #include <vector>
 
 class World;
+class Map;
+class Entity;
 
 /**
  * Universe - a list of all worlds.
@@ -12,6 +13,14 @@ class World;
 class Universe
 {
 public:
+    typedef struct {
+        World * world;
+        double x,y; // absolute coordinates in the World
+        double mapX, mapY; // absolute coordinates of the Map in the World
+        Map * map;
+        int z; // layer
+    } Location;
+
     Universe(const char * buffer);
     ~Universe();
 

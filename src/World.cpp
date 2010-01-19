@@ -3,9 +3,11 @@
 #include "ResourceManager.h"
 
 #include "Utils.h"
+#include "ResourceManager.h"
 
 World::World(const char * buffer) :
-    m_good(true)
+    m_good(true),
+    m_maps()
 {
     const char * cursor = buffer;
     int version = Utils::readInt(&cursor);
@@ -29,10 +31,52 @@ World::World(const char * buffer) :
     }
 }
 
+World::World() :
+    m_good(true),
+    m_maps()
+{
+    m_maps.clear();
+}
+
+World::~World()
+{
+
+}
+
 bool World::isGood() {
     return m_good;
 }
 
 Map * World::getMap() {
     return m_maps[0].map;
+}
+
+Universe::Location World::locationOf(double absoluteX, double absoluteY)
+{
+    Universe::Location loc;
+
+    // the easy parts
+    loc.world = this;
+    loc.x = absoluteX;
+    loc.y = absoluteY;
+    loc.z = -1; // don't know
+
+    // find the map
+    for(unsigned int i=0; i<m_maps.size(); ++i){
+        WorldMap * wmap = &m_maps[i];
+        if( absoluteX >= wmap->x && absoluteX < wmap->x + wmap->map->width() &&
+            absoluteY >= wmap->y && absoluteY < wmap->y + wmap->map->height() )
+        {
+            loc.map = wmap->map;
+            loc.mapX = wmap->x;
+            loc.mapY = wmap->y;
+            return loc;
+        }
+    }
+
+    // can't find a map
+    loc.mapX = -1;
+    loc.mapY = -1;
+    loc.map = NULL;
+    return loc;
 }
