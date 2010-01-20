@@ -27,6 +27,7 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     m_screenX(0.0), m_screenY(0.0),
     m_universe(NULL),
     m_currentWorld(NULL),
+    m_loadedMaps(),
     m_player(NULL)
 {
     Debug::assert(s_inst == NULL, "only one Gameplay allowed");
@@ -42,6 +43,7 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
         return;
     }
     m_currentWorld = m_universe->startWorld();
+    m_loadedMaps.insert(m_currentWorld->getMap());
     m_player = m_universe->player();
 }
 
@@ -96,6 +98,8 @@ bool Gameplay::processEvents() {
 
 
 void Gameplay::nextFrame() {
+
+    // determin directional input
     int north = Input::state(Input::North) ? 1 : 0;
     int east = Input::state(Input::East) ? 1 : 0;
     int south = Input::state(Input::South) ? 1 : 0;
@@ -109,11 +113,25 @@ void Gameplay::nextFrame() {
         m_player->setMovementMode(Entity::Run);
         m_player->orient(direction);
     }
+
+    // apply the desired velocity
     double speed = 3.0;
     double dx = speed * input_dx;
     double dy = speed * input_dy;
     m_player->move(dx, dy);
 
+    // resolve collisions
+    //  collect intersecting tiles
+    double left = m_player->feetX(), top = m_player->feetY();
+    double width = m_player->feetWidth(), height = m_player->feetHeight();
+    int layer = m_player->feetLayer();
+    std::vector<Map::TileAndLocation> tiles;
+    tiles.reserve(30);
+    for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
+        (*iMap)->intersectingTiles(tiles, left, top, width, height, layer);
+    //  ask them where to go
+
+    // scroll the screen
     double marginNorth = m_player->feetY() - m_screenY;
     double marginEast =  m_screenX + screenWidth() - (m_player->feetX() + m_player->feetWidth());
     double marginSouth =  m_screenY + screenHeight() - (m_player->feetY() + m_player->feetHeight());

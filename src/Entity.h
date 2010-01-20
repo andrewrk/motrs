@@ -35,6 +35,7 @@ public:
     // returns the actual position in the world of the player's feet
     double feetX() { return m_x + m_feetOffsetX; }
     double feetY() { return m_y + m_feetOffsetY; }
+    int feetLayer() { return m_z; }
 
     // the width and height of the foot hit box area
     double feetWidth() { return m_feetW; }

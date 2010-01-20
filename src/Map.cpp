@@ -85,17 +85,23 @@ bool Map::isGood()
     return m_good;
 }
 
+void Map::intersectingTiles(std::vector<TileAndLocation>& tiles, double left, double top, double width, double height, int layer) {
+    int tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY;
+    tileRange(left, top, width, height,
+              tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY);
+
+    for (int tileIndexY = tileIndexStartY; tileIndexY < tileIndexEndY; tileIndexY++) {
+        for (int tileIndexX = tileIndexStartX; tileIndexX < tileIndexEndX; tileIndexX++) {
+            Tile * tile = m_palette[m_tiles->get(tileIndexX, tileIndexY, layer)];
+            tiles.push_back(TileAndLocation(tileIndexX * Tile::size + m_x, tileIndexY * Tile::size + m_y, tile));
+        }
+    }
+}
+
 void Map::draw(double screenX, double screenY, int layer) {
-    double localLeft =  screenX - m_x;
-    double localTop =  screenY - m_x;
-    int tileIndexLeft = (int)(localLeft / Tile::size);
-    int tileIndexTop = (int)(localTop / Tile::size);
-    int tileIndexRight = tileIndexLeft + (int)(Gameplay::instance()->screenWidth() / Tile::size) + 1;
-    int tileIndexBottom = tileIndexTop + (int)(Gameplay::instance()->screenHeight() / Tile::size) + 1;
-    int tileIndexStartX = Utils::max(tileIndexLeft, 0);
-    int tileIndexStartY = Utils::max(tileIndexTop, 0);
-    int tileIndexEndX = Utils::min(tileIndexRight, m_tiles->sizeX);
-    int tileIndexEndY = Utils::min(tileIndexBottom, m_tiles->sizeY);
+    int tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY;
+    tileRange(screenX, screenY, Gameplay::instance()->screenWidth(), Gameplay::instance()->screenHeight(),
+              tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY);
 
     for (int tileIndexY = tileIndexStartY; tileIndexY < tileIndexEndY; tileIndexY++) {
         for (int tileIndexX = tileIndexStartX; tileIndexX < tileIndexEndX; tileIndexX++) {
@@ -107,4 +113,20 @@ void Map::draw(double screenX, double screenY, int layer) {
 
     for (unsigned int i = 0; i < m_submaps.size(); i++)
         m_submaps[i]->draw(screenX, screenY, layer);
+}
+
+void Map::tileRange(double left, double top, double width, double height,
+                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom) {
+    double localLeft = left - m_x;
+    double localTop = top - m_y;
+    double localRight = localLeft + width;
+    double localBottom = localTop + height;
+    int tileIndexLeft = (int)(localLeft / Tile::size);
+    int tileIndexTop = (int)(localTop / Tile::size);
+    int tileIndexRight = (int)(localRight / Tile::size) + 1;
+    int tileIndexBottom = (int)(localBottom / Tile::size) + 1;
+    indexLeft = Utils::max(tileIndexLeft, 0);
+    indexTop = Utils::max(tileIndexTop, 0);
+    indexRight = Utils::min(tileIndexRight, m_tiles->sizeX);
+    indexBottom = Utils::min(tileIndexBottom, m_tiles->sizeY);
 }

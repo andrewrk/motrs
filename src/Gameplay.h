@@ -7,6 +7,8 @@
 #include "ResourceFile.h"
 #include "Debug.h"
 
+#include <set>
+
 class Gameplay
 {
 public:
@@ -43,6 +45,7 @@ private:
     Universe * m_universe;
 
     World * m_currentWorld;
+    std::set<Map*> m_loadedMaps;
     Entity * m_player;
 
     bool processEvents();

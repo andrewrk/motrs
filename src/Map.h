@@ -12,11 +12,20 @@
 class Map
 {
 public:
+    class TileAndLocation {
+    public:
+        double x, y;
+        Tile * tile;
+        TileAndLocation() {}
+        TileAndLocation(double x, double y, Tile * tile) : x(x), y(y), tile(tile) {}
+    };
+
     Map(const char * buffer);
     ~Map();
 
     bool isGood();
 
+    void intersectingTiles(std::vector<TileAndLocation>& tiles, double left, double top, double right, double bottom, int layer);
     void draw(double screenX, double screenY, int layer);
 
 private:
@@ -39,6 +48,9 @@ private:
     std::vector<Entity*> m_entities;
 
     double m_x, m_y;
+
+    void tileRange(double left, double top, double width, double height,
+                   int & indexLeft, int & indexTop, int & indexRight, int & indexBottom);
 };
 
 #endif
