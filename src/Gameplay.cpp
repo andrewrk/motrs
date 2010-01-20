@@ -122,7 +122,7 @@ void Gameplay::nextFrame() {
 
     // resolve collisions
     //  collect intersecting tiles
-    double left = m_player->feetX(), top = m_player->feetY();
+    double left = m_player->feetX() + dx, top = m_player->feetY() + dy;
     double width = m_player->feetWidth(), height = m_player->feetHeight();
     int layer = m_player->feetLayer();
     std::vector<Map::TileAndLocation> tiles;
@@ -130,6 +130,9 @@ void Gameplay::nextFrame() {
     for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
         (*iMap)->intersectingTiles(tiles, left, top, width, height, layer);
     //  ask them where to go
+    for (unsigned int i = 0; i < tiles.size(); i++)
+        tiles[i].tile->resolveCollision(tiles[i].x, tiles[i].y, left, top, width, height);
+    m_player->setPosition(left, top);
 
     // scroll the screen
     double marginNorth = m_player->feetY() - m_screenY;

@@ -41,6 +41,7 @@ public:
     double feetWidth() { return m_feetW; }
     double feetHeight() { return m_feetH; }
 
+    void setPosition(double x, double y);
     void setPosition(double x, double y, int z, Direction direction);
     void setMovementMode(MovementMode movementMode);
     void move(double dx, double dy);
