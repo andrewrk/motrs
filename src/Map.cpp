@@ -85,6 +85,19 @@ bool Map::isGood()
     return m_good;
 }
 
+void Map::tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, int layer) {
+    int tileIndexX = (int)((x - m_x) / Tile::size), tileIndexY = (int)((y - m_y) / Tile::size);
+    if (!(0 <= tileIndexX && tileIndexX < m_tiles->sizeX &&
+          0 <= tileIndexY && tileIndexY < m_tiles->sizeY)) {
+        double tileX = m_x + tileIndexX * Tile::size, tileY = m_y + tileIndexY * Tile::size;
+        Tile * tile = m_palette[m_tiles->get(tileIndexX, tileIndexY, layer)];
+        tiles.push_back(TileAndLocation(tileX, tileY, tile));
+    }
+
+    for (unsigned int i = 0; i < m_submaps.size(); i++)
+        m_submaps[i]->tilesAtPoint(tiles, x, y, layer);
+}
+
 void Map::intersectingTiles(std::vector<TileAndLocation>& tiles, double left, double top, double width, double height, int layer) {
     int tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY;
     tileRange(left, top, width, height,

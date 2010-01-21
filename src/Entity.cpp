@@ -49,8 +49,8 @@ Entity::~Entity()
 }
 
 void Entity::setPosition(double x, double y) {
-    m_x = x - m_feetOffsetX - m_feetW / 2.0;
-    m_y = y - m_feetOffsetY - m_feetH / 2.0;
+    m_x = x - m_feetOffsetX;
+    m_y = y - m_feetOffsetY;
 }
 
 void Entity::setPosition(double x, double y, int z, Direction direction) {

@@ -51,7 +51,9 @@ public:
 
     bool isGood();
     void draw(double screenX, double screenY);
-    void resolveCollision(double tileX, double tileY, double & objectLeft, double & objectTop, double objectWidth, double objectHeight);
+    void resolveCollision(double tileX, double tileY,
+                          double objectLeft, double objectTop, double objectWidth, double objectHeight,
+                          double & dx, double & dy);
 
 private:
     /** don't use this constructor. It's for making the NullTile */

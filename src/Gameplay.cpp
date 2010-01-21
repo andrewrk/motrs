@@ -118,21 +118,31 @@ void Gameplay::nextFrame() {
     double speed = 3.0;
     double dx = speed * input_dx;
     double dy = speed * input_dy;
-    m_player->move(dx, dy);
+
+    // iterate map set once
+    std::vector<Map*> maps;
+    maps.reserve(m_loadedMaps.size());
+    for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
+        maps.push_back(*iMap);
 
     // resolve collisions
-    //  collect intersecting tiles
-    double left = m_player->feetX() + dx, top = m_player->feetY() + dy;
+    double left = m_player->feetX(), top = m_player->feetY();
     double width = m_player->feetWidth(), height = m_player->feetHeight();
+    double centerX = left + width / 2.0, centerY = top + height / 2.0;
     int layer = m_player->feetLayer();
+    //  collect intersecting tiles
+    std::vector<Map::TileAndLocation> floorTiles;
+    for (unsigned int i = 0; i < maps.size(); i++)
+        maps[i]->tilesAtPoint(floorTiles, centerX, centerY, layer);
+
+
     std::vector<Map::TileAndLocation> tiles;
-    tiles.reserve(30);
-    for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
-        (*iMap)->intersectingTiles(tiles, left, top, width, height, layer);
+    for (unsigned int i = 0; i < maps.size(); i++)
+        maps[i]->intersectingTiles(tiles, left, top, width, height, layer);
     //  ask them where to go
     for (unsigned int i = 0; i < tiles.size(); i++)
-        tiles[i].tile->resolveCollision(tiles[i].x, tiles[i].y, left, top, width, height);
-    m_player->setPosition(left, top);
+        tiles[i].tile->resolveCollision(tiles[i].x, tiles[i].y, left, top, width, height, dx, dy);
+    m_player->move(dx, dy);
 
     // scroll the screen
     double marginNorth = m_player->feetY() - m_screenY;

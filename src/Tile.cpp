@@ -44,7 +44,10 @@ void Tile::draw(double screenX, double screenY) {
     m_graphic->draw(Gameplay::instance()->screen(), (int)screenX, (int)screenY);
 }
 
-void Tile::resolveCollision(double tileX, double tileY, double & objectLeft, double & objectTop, double objectWidth, double objectHeight) {
+void Tile::resolveCollision(double tileX, double tileY,
+                            double objectLeft, double objectTop, double objectWidth, double objectHeight,
+                            double & dx, double & dy)
+{
     switch (m_shape) {
     case tsSolidWall: {
             double tileCenterX = tileX + Tile::size / 2.0, tileCenterY = tileY + Tile::size / 2.0;
