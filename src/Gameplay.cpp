@@ -16,7 +16,7 @@ const char * Gameplay::ResourceFilePath = "resources.dat";
 const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
 #endif
 
-Gameplay * Gameplay::s_inst= NULL;
+Gameplay * Gameplay::s_inst = NULL;
 
 Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     m_good(true),
