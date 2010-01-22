@@ -50,7 +50,7 @@ void Tile::resolveCollision(double tileX, double tileY,
                             int & hitDirections)
 {
     switch (m_shape) {
-    case tsSolidWall:
+    case tsSolidWall: {
         // 0 1 2
         // 3 4 5
         // 6 7 8
@@ -98,6 +98,7 @@ void Tile::resolveCollision(double tileX, double tileY,
             hitDirections |= 1 << direction;
 
         break;
+    }
     case tsSolidFloor:
         // nothing
         break;
