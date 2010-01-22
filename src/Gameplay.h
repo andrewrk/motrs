@@ -32,6 +32,7 @@ public:
     double screenHeight() { return 600.0; }
 private:
 
+    static const int WingDirectionsMap[9];
     static const char * ResourceFilePath;
     static Gameplay * s_inst;
 

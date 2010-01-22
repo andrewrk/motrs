@@ -12,7 +12,7 @@ walk = hero_run_nw.ani,hero_run_north.ani,hero_run_ne.ani,hero_run_west.ani,hero
 run  = hero_run_nw.ani,hero_run_north.ani,hero_run_ne.ani,hero_run_west.ani,hero_run_south.ani,hero_run_east.ani,hero_run_sw.ani,hero_run_south.ani,hero_run_se.ani
 
 # contact=cx,cy,r
-contact=16,32,12
+contact=16,36,12
 
 # TODO: specs = speed, health, defense, stamina, more?
 # specs = 10,10,10,10, ???

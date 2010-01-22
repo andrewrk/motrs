@@ -58,15 +58,18 @@ void Tile::resolveCollision(double tileX, double tileY,
         int zoneY = 3 * ((objectCenterY > tileY) + (tileY + Tile::size < objectCenterY));
         int zone = zoneX + zoneY;
         double distance;
+        int direction = zone;
         switch (zone) {
         case 0:
             distance = Utils::distance(objectCenterX, objectCenterY, tileX, tileY);
+//            direction = tileX - objectCenterX < tileY - objectCenterY ? Entity::North : Entity::West;
             break;
         case 1:
             distance = tileY - objectCenterY;
             break;
         case 2:
             distance = Utils::distance(objectCenterX, objectCenterY, tileX + Tile::size, tileY);
+//            direction = objectCenterX - tileX <= tileY - objectCenterY ? Entity::North : Entity::East;
             break;
         case 3:
             distance = tileX - objectCenterX;
@@ -79,18 +82,20 @@ void Tile::resolveCollision(double tileX, double tileY,
             break;
         case 6:
             distance = Utils::distance(objectCenterX, objectCenterY, tileX, tileY + Tile::size);
+//            direction = tileX - objectCenterX <= objectCenterY - tileY ? Entity::South : Entity::West;
             break;
         case 7:
             distance = objectCenterY - (tileY + Tile::size);
             break;
         case 8:
             distance = Utils::distance(objectCenterX, objectCenterY, tileX + Tile::size, tileY + Tile::size);
+//            direction = objectCenterX - tileX < objectCenterY - tileY ? Entity::South : Entity::East;
             break;
         default:
             Debug::assert(false, "unknown zone");
         }
         if (distance <= objectRadius)
-            hitDirections |= 1 << zone;
+            hitDirections |= 1 << direction;
 
         break;
     case tsSolidFloor:
