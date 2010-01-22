@@ -109,19 +109,19 @@ void WorldView::drawGrid(QPainter &p)
         if( m_grid == Pretty ) {
             while(gridX < gameRight) {
                 double drawX = screenX(gridX);
-                p.drawLine(drawX, 0, drawX, this->height());
+                p.drawLine((int)drawX, 0, (int)drawX, this->height());
                 gridX += Tile::size;
             }
 
             while(gridY < gameBottom) {
                 double drawY = screenY(gridY);
-                p.drawLine(0, drawY, this->width(), drawY);
+                p.drawLine(0, (int)drawY, this->width(), (int)drawY);
                 gridY += Tile::size;
             }
         } else if( m_grid == Fast ) {
             for(double y = gridY; y < gameBottom; y+=Tile::size) {
                 for(double x = gridX; x < gameRight; x+=Tile::size)
-                    p.drawPoint(screenX(x), screenY(y));
+                    p.drawPoint((int)screenX(x), (int)screenY(y));
             }
         }
     }
