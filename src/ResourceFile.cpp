@@ -72,6 +72,8 @@ void ResourceFile::createNew(std::string fileName)
     // write all that padding until data start
     unsigned long int paddingSize = m_header.dataStart - sizeof(ResourceHeader);
     char * padding = new char[paddingSize];
+    std::memset(padding, 0, paddingSize);
+
     m_file.write(padding, paddingSize);
     delete[] padding;
 
@@ -200,8 +202,10 @@ void ResourceFile::addResource(std::string resourceName, const char * data,
     m_file.write(data, dataSize);
 
     // write the extra buffer space
-    char * trash = new char[record.bufferSize-dataSize];
-    m_file.write(trash, record.bufferSize-dataSize);
+    int trashSize = record.bufferSize-dataSize;
+    char * trash = new char[trashSize];
+    std::memset(trash, 0, trashSize);
+    m_file.write(trash, trashSize);
     delete[] trash;
     
     // sort the table

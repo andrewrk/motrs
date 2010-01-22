@@ -1,14 +1,14 @@
-#include "worldview.h"
+#include "WorldView.h"
 
-#include "mainwindow.h"
-#include "editormap.h"
+#include "MainWindow.h"
+#include "EditorMap.h"
 
 #include <QPainter>
 #include <QDebug>
 #include <cmath>
 
 
-#include "moc_worldview.cxx"
+#include "moc_WorldView.cxx"
 
 WorldView::WorldView(MainWindow * window, QWidget * parent) :
     QWidget(parent),

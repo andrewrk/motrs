@@ -1,4 +1,4 @@
-#include "editorutils.h"
+#include "EditorUtils.h"
 
 #include <QSettings>
 #include <QFile>
