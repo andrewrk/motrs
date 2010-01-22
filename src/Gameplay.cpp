@@ -98,6 +98,11 @@ bool Gameplay::processEvents() {
 
 
 void Gameplay::nextFrame() {
+    // iterate map set once
+    std::vector<Map*> maps;
+    maps.reserve(m_loadedMaps.size());
+    for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
+        maps.push_back(*iMap);
 
     // determin directional input
     int north = Input::state(Input::North) ? 1 : 0;
@@ -114,34 +119,31 @@ void Gameplay::nextFrame() {
         m_player->orient(direction);
     }
 
-    // apply the desired velocity
+    // calculate the desired location
     double speed = 3.0;
     double dx = speed * input_dx;
     double dy = speed * input_dy;
 
-    // iterate map set once
-    std::vector<Map*> maps;
-    maps.reserve(m_loadedMaps.size());
-    for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
-        maps.push_back(*iMap);
+    {
+        // resolve collisions
+        double left = m_player->feetX(), top = m_player->feetY();
+        double width = m_player->feetWidth(), height = m_player->feetHeight();
+        double centerX = left + width / 2.0, centerY = top + height / 2.0;
+        int layer = m_player->feetLayer();
 
-    // resolve collisions
-    double left = m_player->feetX(), top = m_player->feetY();
-    double width = m_player->feetWidth(), height = m_player->feetHeight();
-    double centerX = left + width / 2.0, centerY = top + height / 2.0;
-    int layer = m_player->feetLayer();
-    //  collect intersecting tiles
-    std::vector<Map::TileAndLocation> floorTiles;
-    for (unsigned int i = 0; i < maps.size(); i++)
-        maps[i]->tilesAtPoint(floorTiles, centerX, centerY, layer);
+        //  collect tiles under the feet
+        std::vector<Map::TileAndLocation> floorTiles;
+        for (unsigned int i = 0; i < maps.size(); i++)
+            maps[i]->tilesAtPoint(floorTiles, centerX, centerY, layer);
 
+        std::vector<Map::TileAndLocation> tiles;
+        for (unsigned int i = 0; i < maps.size(); i++)
+            maps[i]->intersectingTiles(tiles, left, top, width, height, layer);
+        //  ask them where to go
+        for (unsigned int i = 0; i < tiles.size(); i++)
+            tiles[i].tile->resolveCollision(tiles[i].x, tiles[i].y, left, top, width, height, dx, dy);
+    }
 
-    std::vector<Map::TileAndLocation> tiles;
-    for (unsigned int i = 0; i < maps.size(); i++)
-        maps[i]->intersectingTiles(tiles, left, top, width, height, layer);
-    //  ask them where to go
-    for (unsigned int i = 0; i < tiles.size(); i++)
-        tiles[i].tile->resolveCollision(tiles[i].x, tiles[i].y, left, top, width, height, dx, dy);
     m_player->move(dx, dy);
 
     // scroll the screen
