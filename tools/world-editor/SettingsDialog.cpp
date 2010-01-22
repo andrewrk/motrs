@@ -1,10 +1,10 @@
-#include "settingsdialog.h"
-#include "ui_settingsdialog.h"
+#include "SettingsDialog.h"
+#include "ui_SettingsDialog.h"
 
 #include <QSettings>
 
 
-#include "moc_settingsdialog.cxx"
+#include "moc_SettingsDialog.cxx"
 
 
 SettingsDialog * SettingsDialog::s_inst = NULL;
@@ -36,7 +36,7 @@ void SettingsDialog::changeEvent(QEvent *e)
 void SettingsDialog::showEvent(QShowEvent * e)
 {
     QSettings settings;
-    m_ui->txtDataFolder->setPlainText(settings.value("paths/data", ".").toString());
+    m_ui->txtDataFolder->setText(settings.value("paths/data", ".").toString());
 }
 
 SettingsDialog * SettingsDialog::instance()
@@ -46,15 +46,10 @@ SettingsDialog * SettingsDialog::instance()
     return s_inst;
 }
 
-
-
-
-
-
 void SettingsDialog::on_btnOK_clicked()
 {
     QSettings settings;
-    settings.setValue("paths/data", m_ui->txtDataFolder->toPlainText());
+    settings.setValue("paths/data", m_ui->txtDataFolder->text());
     accept();
 }
 

@@ -4,6 +4,7 @@
 #include "Tile.h"
 
 #include <QPixmap>
+#include <QPainter>
 
 class EditorTile : public Tile
 {
@@ -12,6 +13,8 @@ public:
     ~EditorTile();
 
     inline QPixmap * pixmap() { return m_pixmap; }
+    void draw(double screenX, double screenY);
+
 private:
     QPixmap * m_pixmap;
 };

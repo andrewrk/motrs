@@ -3,8 +3,6 @@
 #include "Utils.h"
 #include "Debug.h"
 
-#include "Gameplay.h"
-
 Map::Map(const char * buffer) :
     m_good(true),
     m_palette(),
@@ -102,13 +100,13 @@ bool Map::isGood()
     return m_good;
 }
 
-void Map::draw(double screenX, double screenY, int layer) {
+void Map::draw(double screenX, double screenY, double screenWidth, double screenHeight, int layer) {
     double localLeft =  screenX - m_x;
     double localTop =  screenY - m_x;
     int tileIndexLeft = (int)(localLeft / Tile::size);
     int tileIndexTop = (int)(localTop / Tile::size);
-    int tileIndexRight = tileIndexLeft + (int)(Gameplay::instance()->screenWidth() / Tile::size) + 1;
-    int tileIndexBottom = tileIndexTop + (int)(Gameplay::instance()->screenHeight() / Tile::size) + 1;
+    int tileIndexRight = tileIndexLeft + (int)(screenWidth / Tile::size) + 1;
+    int tileIndexBottom = tileIndexTop + (int)(screenHeight / Tile::size) + 1;
     int tileIndexStartX = Utils::max(tileIndexLeft, 0);
     int tileIndexStartY = Utils::max(tileIndexTop, 0);
     int tileIndexEndX = Utils::min(tileIndexRight, m_tiles->sizeX);
@@ -123,5 +121,5 @@ void Map::draw(double screenX, double screenY, int layer) {
     }
 
     for (unsigned int i = 0; i < m_submaps.size(); i++)
-        m_submaps[i]->draw(screenX, screenY, layer);
+        m_submaps[i]->draw(screenX, screenY, screenWidth, screenHeight, layer);
 }

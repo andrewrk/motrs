@@ -2,6 +2,7 @@
 #define _ARRAY3_
 
 #include "version.h"
+#include "Debug.h"
 
 #ifndef RELEASE
 #define RANGE_CHECK 1
@@ -75,10 +76,14 @@ int Array3<T>::getLinearIndex(int x, int y, int z) const {
 #if RANGE_CHECK
     template <class T>
     void Array3<T>::rangeCheck(int x, int y, int z) const {
-        if (!(0 <= x && x < sizeX &&
-              0 <= y && y < sizeY &&
-              0 <= z && z < sizeZ))
-            std::cerr << "range fail: " << x << "," << y << "," << z << " : " << sizeX << "," << sizeY << "," << sizeZ << std::endl;
+        if(! (0 <= x && x < sizeX &&
+            0 <= y && y < sizeY &&
+            0 <= z && z < sizeZ) )
+        {
+            std::cerr << "range fail: " << x << "," << y << "," << z
+                << " : " << sizeX << "," << sizeY << "," << sizeZ << std::endl;
+            Debug::assert(false, "(the above range fail)");
+        }
     }
 #endif
 

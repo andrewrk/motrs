@@ -6,7 +6,7 @@
 #include <QPaintEvent>
 #include <QResizeEvent>
 
-#include "editorworld.h"
+#include "EditorWorld.h"
 
 class MainWindow;
 

@@ -51,7 +51,8 @@ public:
     ~Tile();
 
     bool isGood();
-    void draw(double screenX, double screenY);
+    // screenX and screenY is the absolute coordinates of 0,0 on the screen
+    virtual void draw(double screenX, double screenY);
 
 protected:
     /** don't use this constructor. It's for making the NullTile */
