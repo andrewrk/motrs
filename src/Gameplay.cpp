@@ -116,41 +116,34 @@ void Gameplay::nextFrame() {
         m_player->setMovementMode(Entity::Stand);
     } else {
         m_player->setMovementMode(Entity::Run);
-        m_player->orient(direction);
+        m_player->setOrientation(direction);
     }
 
     // calculate the desired location
     double speed = 3.0;
     double dx = speed * input_dx;
     double dy = speed * input_dy;
+    double x = m_player->centerX() + dx, y = m_player->centerY() + dy;
+    double radius = m_player->radius();
+    int layer = m_player->layer();
 
+    // resolve collisions
     {
-        // resolve collisions
-        double left = m_player->feetX(), top = m_player->feetY();
-        double width = m_player->feetWidth(), height = m_player->feetHeight();
-        double centerX = left + width / 2.0, centerY = top + height / 2.0;
-        int layer = m_player->feetLayer();
-
-        //  collect tiles under the feet
-        std::vector<Map::TileAndLocation> floorTiles;
-        for (unsigned int i = 0; i < maps.size(); i++)
-            maps[i]->tilesAtPoint(floorTiles, centerX, centerY, layer);
-
         std::vector<Map::TileAndLocation> tiles;
         for (unsigned int i = 0; i < maps.size(); i++)
-            maps[i]->intersectingTiles(tiles, left, top, width, height, layer);
+            maps[i]->intersectingTiles(tiles, x, y, radius, layer);
         //  ask them where to go
-        for (unsigned int i = 0; i < tiles.size(); i++)
-            tiles[i].tile->resolveCollision(tiles[i].x, tiles[i].y, left, top, width, height, dx, dy);
+//        for (unsigned int i = 0; i < tiles.size(); i++)
+//            tiles[i].tile->resolveCollision(tiles[i].x, tiles[i].y, left, top, width, height, dx, dy);
     }
 
-    m_player->move(dx, dy);
+    m_player->setCenter(x, y);
 
     // scroll the screen
-    double marginNorth = m_player->feetY() - m_screenY;
-    double marginEast =  m_screenX + screenWidth() - (m_player->feetX() + m_player->feetWidth());
-    double marginSouth =  m_screenY + screenHeight() - (m_player->feetY() + m_player->feetHeight());
-    double marginWest = m_player->feetX() - m_screenX;
+    double marginNorth = m_player->centerY() - m_screenY;
+    double marginEast = m_screenX + screenWidth() - (m_player->centerX() + m_player->radius());
+    double marginSouth = m_screenY + screenHeight() - (m_player->centerY() + m_player->radius());
+    double marginWest = m_player->centerX() - m_screenX;
 
     if (marginNorth < minMarginNorth())
         m_screenY -= minMarginNorth() - marginNorth;

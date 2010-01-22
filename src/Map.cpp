@@ -113,9 +113,9 @@ void Map::tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, 
         m_submaps[i]->tilesAtPoint(tiles, x, y, layer);
 }
 
-void Map::intersectingTiles(std::vector<TileAndLocation>& tiles, double left, double top, double width, double height, int layer) {
+void Map::intersectingTiles(std::vector<TileAndLocation>& tiles, double x, double y, double apothem, int layer) {
     int tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY;
-    tileRange(left, top, width, height,
+    tileRange(x - apothem, y - apothem, apothem * 2.0, apothem * 2.0,
               tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY);
 
     for (int tileIndexY = tileIndexStartY; tileIndexY < tileIndexEndY; tileIndexY++) {

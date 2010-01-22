@@ -27,7 +27,7 @@ public:
     bool isGood();
 
     void tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, int layer);
-    void intersectingTiles(std::vector<TileAndLocation>& tiles, double left, double top, double right, double bottom, int layer);
+    void intersectingTiles(std::vector<TileAndLocation>& tiles, double x, double t, double apothem, int layer);
 
     // draw on screen
     virtual void draw(double screenX, double screenY, double screenWidth,

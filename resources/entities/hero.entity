@@ -1,4 +1,4 @@
-version=1
+version=2
 
 # walk, run, and stand define graphics for the following 9 directions:
 #  nw,w,sw,n,c,s,ne,e,se
@@ -11,8 +11,8 @@ stand = hero_stand_nw.ani,hero_stand_west.ani,hero_stand_sw.ani,hero_stand_north
 walk = hero_run_nw.ani,hero_run_west.ani,hero_run_sw.ani,hero_run_north.ani,hero_run_south.ani,hero_run_south.ani,hero_run_ne.ani,hero_run_east.ani,hero_run_se.ani
 run  = hero_run_nw.ani,hero_run_west.ani,hero_run_sw.ani,hero_run_north.ani,hero_run_south.ani,hero_run_south.ani,hero_run_ne.ani,hero_run_east.ani,hero_run_se.ani
 
-# feet=x,y,w,h
-feet=4,30,20,20
+# contact=cx,cy,r
+contact=16,32,12
 
 # TODO: specs = speed, health, defense, stamina, more?
 # specs = 10,10,10,10, ???
