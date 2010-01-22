@@ -19,7 +19,8 @@ public:
     bool isGood();
 
     // draw on screen
-    void draw(double screenX, double screenY, int layer);
+    virtual void draw(double screenX, double screenY, double screenWidth,
+              double screenHeight, int layer);
 
     // width and height accessors
     inline double width(){ return m_width; }

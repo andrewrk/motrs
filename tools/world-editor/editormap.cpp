@@ -6,6 +6,9 @@
 #include <QPixmap>
 #include <QDir>
 #include <QDebug>
+#include <QPainter>
+
+QPainter * EditorMap::m_painter = NULL;
 
 EditorMap::EditorMap(QString file)
 {
@@ -72,6 +75,13 @@ EditorMap::EditorMap(QString file)
             return;
         }
     }
+}
+
+void EditorMap::draw(QPainter * p, double screenX, double screenY,
+                     double screenWidth, double screenHeight, int layer)
+{
+    m_painter = p;
+    Map::draw(screenX, screenY, screenWidth, screenHeight, layer);
 }
 
 EditorMap::~EditorMap()

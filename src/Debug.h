@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstdlib>
 
 #ifdef assert
 // on windows, there is some macro named assert already.
@@ -17,7 +18,7 @@ namespace Debug
 #ifndef RELEASE
         if( ! value ) {
             std::cerr << message << std::endl;
-            throw 0;
+            std::exit(-1);
         }
 #endif
     }

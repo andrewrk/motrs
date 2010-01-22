@@ -1,5 +1,7 @@
 #include "editortile.h"
 
+#include "editormap.h"
+
 EditorTile::EditorTile(Shape shape, SurfaceType surfaceType, QPixmap * pixmap) :
     Tile(),
     m_pixmap(pixmap)
@@ -11,4 +13,8 @@ EditorTile::EditorTile(Shape shape, SurfaceType surfaceType, QPixmap * pixmap) :
 EditorTile::~EditorTile()
 {
 
+}
+
+void EditorTile::draw(double screenX, double screenY) {
+    EditorMap::m_painter->drawPixmap((int)screenX, (int)screenY, *pixmap() );
 }

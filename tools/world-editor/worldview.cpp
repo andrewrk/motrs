@@ -1,9 +1,12 @@
 #include "worldview.h"
 
 #include "mainwindow.h"
+#include "editormap.h"
+
 #include <QPainter>
 #include <QDebug>
 #include <cmath>
+
 
 #include "moc_worldview.cxx"
 
@@ -41,38 +44,27 @@ void WorldView::paintEvent(QPaintEvent * e)
     p.setBackground(QBrush(Qt::white));
     p.eraseRect(0, 0, this->width(), this->height());
 
-
     if( m_world ) {
         if( m_world->isGood() ) {
-            // select the tiles that are in range
-            // determine what tile the top left corner is
-            Universe::Location loc = m_world->locationOf(absoluteX(0), absoluteY(0));
-            double cursorX = loc.x;
-            while(screenX(cursorX) < this->width()) {
-                double cursorY = loc.y;
-                while(screenY(cursorY) < this->height()) {
-                    Universe::Location thisLoc = m_world->locationOf(cursorX, cursorY);
+            // select the maps that are in range
+            std::vector<World::WorldMap> * maps = m_world->maps();
+            double viewLeft = absoluteX(0);
+            double viewTop = absoluteY(0);
+            double viewRight = viewLeft + this->width() * m_zoom;
+            double viewBottom = viewTop + this->height() * m_zoom;
+            for(unsigned int i=0; i < maps->size(); ++i) {
+                // determine if the map is in range
+                World::WorldMap * wmap = &(maps->at(i));
+                EditorMap * map = (EditorMap *) maps->at(i).map;
 
-                    int flooredX = std::floor(cursorX);
-                    int flooredY = std::floor(cursorY);
-                    double drawX = screenX(flooredX - (flooredX % Tile::sizeInt));
-                    double drawY = screenY(flooredY - (flooredY % Tile::sizeInt));
-
-                    if( thisLoc.map == NULL ) {
-                        // no Map covers this tile
-                        p.setBrush(QBrush(Qt::black, Qt::SolidPattern));
-                        p.drawRect(drawX, drawY, Tile::size, Tile::size);
-                    } else {
-                        // draw tile
-
-                        // draw grid box
-                        p.setBrush(QBrush(Qt::black, Qt::NoBrush));
-                        p.drawRect(drawX, drawY, Tile::size, Tile::size);
-                    }
-
-                    cursorY += Tile::size;
+                if( !( wmap->x > viewRight || wmap->y > viewBottom ||
+                       wmap->x + map->width() < viewLeft || wmap->y + map->height() < viewTop ) )
+                {
+                    // draw the map
+                    // TODO support more layers than 1
+                    map->draw(&p, absoluteX(0), absoluteY(0),
+                              (double)this->width(), (double)this->height(), 0);
                 }
-                cursorX += Tile::size;
             }
         } else {
             p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
