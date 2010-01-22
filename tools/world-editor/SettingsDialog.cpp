@@ -1,10 +1,10 @@
-#include "settingsdialog.h"
-#include "ui_settingsdialog.h"
+#include "SettingsDialog.h"
+#include "ui_SettingsDialog.h"
 
 #include <QSettings>
 
 
-#include "moc_settingsdialog.cxx"
+#include "moc_SettingsDialog.cxx"
 
 
 SettingsDialog * SettingsDialog::s_inst = NULL;

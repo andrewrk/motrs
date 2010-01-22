@@ -1,7 +1,7 @@
-#include "editorworld.h"
+#include "EditorWorld.h"
 
-#include "editormap.h"
-#include "editorutils.h"
+#include "EditorMap.h"
+#include "EditorUtils.h"
 
 #include <QDebug>
 #include <QStringList>

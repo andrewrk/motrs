@@ -6,7 +6,7 @@
 #include <QMap>
 #include <QModelIndex>
 
-#include "worldview.h"
+#include "WorldView.h"
 
 namespace Ui
 {

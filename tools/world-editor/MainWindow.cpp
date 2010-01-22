@@ -1,14 +1,14 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include "settingsdialog.h"
-#include "editorutils.h"
+#include "MainWindow.h"
+#include "ui_MainWindow.h"
+#include "SettingsDialog.h"
+#include "EditorUtils.h"
 
 #include <QDir>
 #include <QGraphicsPixmapItem>
 #include <QListWidget>
 #include <QDebug>
 
-#include "moc_mainwindow.cxx"
+#include "moc_MainWindow.cxx"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),

@@ -1,6 +1,6 @@
-#include "editortile.h"
+#include "EditorTile.h"
 
-#include "editormap.h"
+#include "EditorMap.h"
 
 EditorTile::EditorTile(Shape shape, SurfaceType surfaceType, QPixmap * pixmap) :
     Tile(),

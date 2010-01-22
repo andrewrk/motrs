@@ -1,7 +1,7 @@
-#include "editormap.h"
+#include "EditorMap.h"
 
-#include "editorutils.h"
-#include "editortile.h"
+#include "EditorUtils.h"
+#include "EditorTile.h"
 
 #include <QPixmap>
 #include <QDir>
