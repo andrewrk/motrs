@@ -13,32 +13,6 @@
   <property name="windowTitle">
    <string>Settings</string>
   </property>
-  <widget class="QPushButton" name="btnBrowseDataFolder">
-   <property name="geometry">
-    <rect>
-     <x>360</x>
-     <y>40</y>
-     <width>92</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Browse</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>20</y>
-     <width>91</width>
-     <height>18</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Data Folder:</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="btnOK">
    <property name="geometry">
     <rect>
@@ -65,15 +39,93 @@
     <string>Cancel</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="txtDataFolder">
+  <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>40</y>
-     <width>341</width>
-     <height>26</height>
+     <y>80</y>
+     <width>441</width>
+     <height>71</height>
     </rect>
    </property>
+   <property name="title">
+    <string>Grid Display</string>
+   </property>
+   <widget class="QRadioButton" name="optGridOff">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>108</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Off</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="optGridFast">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>20</y>
+      <width>108</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Fast</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="optGridPretty">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>20</y>
+      <width>108</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Pretty</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>451</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Data Folder</string>
+   </property>
+   <widget class="QLineEdit" name="txtDataFolder">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>30</y>
+      <width>341</width>
+      <height>26</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnBrowseDataFolder">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>30</y>
+      <width>92</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Browse</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

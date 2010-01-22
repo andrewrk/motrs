@@ -1,3 +1,4 @@
+
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "SettingsDialog.h"
@@ -50,6 +51,7 @@ void MainWindow::showEvent(QShowEvent * e)
 void MainWindow::on_actionSettings_triggered()
 {
     SettingsDialog::instance()->exec();
+    m_view->readSettings();
 }
 
 void MainWindow::refreshWorldList()

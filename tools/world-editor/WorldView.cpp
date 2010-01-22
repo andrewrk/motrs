@@ -5,6 +5,7 @@
 
 #include <QPainter>
 #include <QDebug>
+#include <QSettings>
 #include <cmath>
 
 
@@ -22,12 +23,23 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
 {
     m_hsb->show();
     m_vsb->show();
+
+    readSettings();
 }
 
 WorldView::~WorldView()
 {
     if( m_world )
         delete m_world;
+}
+
+void WorldView::readSettings()
+{
+
+    QSettings settings;
+    m_grid = (GridRenderType)settings.value("editor/grid", Pretty).toInt();
+
+    this->update();
 }
 
 void WorldView::resizeEvent(QResizeEvent * e)
@@ -41,7 +53,7 @@ void WorldView::paintEvent(QPaintEvent * e)
 {
     QPainter p(this);
 
-    p.setBackground(QBrush(Qt::white));
+    p.setBackground(Qt::white);
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_world ) {
@@ -66,6 +78,8 @@ void WorldView::paintEvent(QPaintEvent * e)
                               (double)this->width(), (double)this->height(), 0);
                 }
             }
+
+            drawGrid(p);
         } else {
             p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
             tr("Error loading World."));
@@ -73,6 +87,43 @@ void WorldView::paintEvent(QPaintEvent * e)
     } else {
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
             tr("Double click a world to edit"));
+    }
+}
+
+void WorldView::drawGrid(QPainter &p)
+{
+    if( m_grid != None ) {
+        if( m_grid == Pretty )
+            p.setPen(QColor(128, 128, 128, 64));
+        else
+            p.setPen(QColor(128, 128, 128));
+
+        // vertical lines
+        double gameLeft = absoluteX(0);
+        double gameTop = absoluteY(0);
+        double gameRight = absoluteX(this->width());
+        double gameBottom = absoluteY(this->height());
+        double gridX = gameLeft - std::fmod(gameLeft, Tile::size);
+        double gridY = gameTop - std::fmod(gameTop, Tile::size);
+
+        if( m_grid == Pretty ) {
+            while(gridX < gameRight) {
+                double drawX = screenX(gridX);
+                p.drawLine(drawX, 0, drawX, this->height());
+                gridX += Tile::size;
+            }
+
+            while(gridY < gameBottom) {
+                double drawY = screenY(gridY);
+                p.drawLine(0, drawY, this->width(), drawY);
+                gridY += Tile::size;
+            }
+        } else if( m_grid == Fast ) {
+            for(double y = gridY; y < gameBottom; y+=Tile::size) {
+                for(double x = gridX; x < gameRight; x+=Tile::size)
+                    p.drawPoint(screenX(x), screenY(y));
+            }
+        }
     }
 }
 

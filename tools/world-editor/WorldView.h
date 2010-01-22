@@ -14,6 +14,12 @@ class WorldView : public QWidget
 {
     Q_OBJECT
 public:
+    enum GridRenderType {
+        None,
+        Fast,
+        Pretty,
+    };
+
     WorldView(MainWindow * window, QWidget * parent = NULL);
     ~WorldView();
 
@@ -23,6 +29,7 @@ protected:
     void paintEvent(QPaintEvent * e);
     void mousePressEvent(QMouseEvent * e);
 private:
+
     QScrollBar * m_hsb;
     QScrollBar * m_vsb;
 
@@ -34,12 +41,17 @@ private:
     double m_offsetX;
     double m_offsetY;
 
+    GridRenderType m_grid;
+
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);
     double screenY(double absoluteY);
     double absoluteX(double screenX);
     double absoluteY(double screenY);
 
+    void readSettings();
+
+    void drawGrid(QPainter &p);
 
     friend class MainWindow;
 };
