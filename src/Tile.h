@@ -7,6 +7,7 @@ class Tile
 {
 public:
     static const double size;
+    static const int sizeInt;
 
     /** It's not important to leave these values alone */
     enum PhysicalPresence {
@@ -55,7 +56,7 @@ public:
                           double objectLeft, double objectTop, double objectWidth, double objectHeight,
                           double & dx, double & dy);
 
-private:
+protected:
     /** don't use this constructor. It's for making the NullTile */
     Tile();
     bool m_good;

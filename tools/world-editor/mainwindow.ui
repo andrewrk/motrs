@@ -35,6 +35,8 @@
     </property>
     <addaction name="actionTest"/>
     <addaction name="separator"/>
+    <addaction name="actionSetStartingPoint"/>
+    <addaction name="separator"/>
     <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menu_Window">
@@ -70,7 +72,29 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_3"/>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QPlainTextEdit" name="plainTextEdit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>30</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QListWidget" name="list_worlds"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QDockWidget" name="dock_triggers">
    <property name="windowTitle">
@@ -137,7 +161,7 @@
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>35</height>
+          <height>30</height>
          </size>
         </property>
        </widget>
@@ -230,6 +254,11 @@
   <action name="actionObjectEditor">
    <property name="text">
     <string>O&amp;bject Editor</string>
+   </property>
+  </action>
+  <action name="actionSetStartingPoint">
+   <property name="text">
+    <string>Set Starting &amp;Point</string>
    </property>
   </action>
  </widget>

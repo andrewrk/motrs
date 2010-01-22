@@ -21,15 +21,22 @@ public:
     };
 
     Map(const char * buffer);
+    Map();
     ~Map();
 
     bool isGood();
 
     void tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, int layer);
     void intersectingTiles(std::vector<TileAndLocation>& tiles, double left, double top, double right, double bottom, int layer);
+
+    // draw on screen
     void draw(double screenX, double screenY, int layer);
 
-private:
+    // width and height accessors
+    inline double width(){ return m_width; }
+    inline double height() { return m_height; }
+
+protected:
 
     enum LayerType {
         ltFull = 1,
@@ -48,7 +55,9 @@ private:
     std::vector<Trigger*> m_triggers;
     std::vector<Entity*> m_entities;
 
+    // absolute coordinates
     double m_x, m_y;
+    double m_width, m_height; // computed
 
     void tileRange(double left, double top, double width, double height,
                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom);

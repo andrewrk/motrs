@@ -3,6 +3,10 @@
 #include "ResourceManager.h"
 
 #include "Utils.h"
+#include "Map.h"
+#include "World.h"
+#include "Entity.h"
+#include "ResourceManager.h"
 
 Universe::Universe(const char * buffer) :
     m_worlds(),

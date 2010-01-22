@@ -8,6 +8,7 @@
 #include <cmath>
 
 const double Tile::size = 16.0;
+const int Tile::sizeInt = 16;
 
 Tile::Tile(const char** cursor) :
     m_good(true),

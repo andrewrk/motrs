@@ -1,0 +1,6 @@
+ * work out how world/map interacts
+ * grid on the main form with outlining for world
+ * ability to resize the world and maps
+ * layers pane - same as before
+ * drag art from the art pane to the grid
+ * align the art and assign properties
