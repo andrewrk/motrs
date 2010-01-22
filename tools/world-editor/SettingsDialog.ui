@@ -11,18 +11,8 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Settings</string>
   </property>
-  <widget class="QPlainTextEdit" name="txtDataFolder">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>40</y>
-     <width>341</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QPushButton" name="btnBrowseDataFolder">
    <property name="geometry">
     <rect>
@@ -73,6 +63,16 @@
    </property>
    <property name="text">
     <string>Cancel</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="txtDataFolder">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>40</y>
+     <width>341</width>
+     <height>26</height>
+    </rect>
    </property>
   </widget>
  </widget>
