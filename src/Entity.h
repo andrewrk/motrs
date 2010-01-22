@@ -12,13 +12,13 @@ class Entity
 public:
     enum Direction {
         NorthWest,
-        West,
-        SouthWest,
         North,
-        Center,
-        South,
         NorthEast,
+        West,
+        Center,
         East,
+        SouthWest,
+        South,
         SouthEast,
     };
     enum MovementMode {

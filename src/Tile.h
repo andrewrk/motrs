@@ -54,8 +54,8 @@ public:
     bool isGood();
     virtual void draw(double screenX, double screenY);
     void resolveCollision(double tileX, double tileY,
-                          double objectLeft, double objectTop, double objectWidth, double objectHeight,
-                          double & dx, double & dy);
+                          double & objectCenterX, double & objectCenterY, double objectRadius,
+                          int & hitTest);
 
 protected:
     /** don't use this constructor. It's for making the NullTile */

@@ -19,7 +19,7 @@ Entity::Entity(const char * buffer) :
     const char * cursor = buffer;
 
     int version = Utils::readInt(&cursor);
-    if (version != 2) {
+    if (version != 3) {
         std::cerr << "Unsupport Entity version: " << version << std::endl;
         m_good = false;
         return;

@@ -46,19 +46,53 @@ void Tile::draw(double screenX, double screenY) {
 }
 
 void Tile::resolveCollision(double tileX, double tileY,
-                            double objectLeft, double objectTop, double objectWidth, double objectHeight,
-                            double & dx, double & dy)
+                            double & objectCenterX, double & objectCenterY, double objectRadius,
+                            int & hitDirections)
 {
     switch (m_shape) {
-    case tsSolidWall: {
-            double tileCenterX = tileX + Tile::size / 2.0, tileCenterY = tileY + Tile::size / 2.0;
-            double objectCenterX = objectLeft + objectWidth / 2.0, objectCenterY = objectTop + objectHeight / 2.0;
-            double distanceX = objectCenterX - tileCenterX, distanceY = objectCenterY - tileCenterY;
-            double absDistanceX = std::abs(distanceX), absDistanceY = std::abs(distanceY);
-            if (absDistanceX < (Tile::size + objectWidth) / 2.0)
-                objectLeft = tileCenterX + (distanceX < 0.0 ? -1.0 : 1.0) * objectWidth / 2.0;
+    case tsSolidWall:
+        // 0 1 2
+        // 3 4 5
+        // 6 7 8
+        int zoneX = 1 * ((objectCenterX > tileX) + (tileX + Tile::size < objectCenterX));
+        int zoneY = 3 * ((objectCenterY > tileY) + (tileY + Tile::size < objectCenterY));
+        int zone = zoneX + zoneY;
+        double distance;
+        switch (zone) {
+        case 0:
+            distance = Utils::distance(objectCenterX, objectCenterY, tileX, tileY);
             break;
+        case 1:
+            distance = tileY - objectCenterY;
+            break;
+        case 2:
+            distance = Utils::distance(objectCenterX, objectCenterY, tileX + Tile::size, tileY);
+            break;
+        case 3:
+            distance = tileX - objectCenterX;
+            break;
+        case 4:
+            distance = 0.0;
+            break;
+        case 5:
+            distance = objectCenterX - (tileX + Tile::size);
+            break;
+        case 6:
+            distance = Utils::distance(objectCenterX, objectCenterY, tileX, tileY + Tile::size);
+            break;
+        case 7:
+            distance = objectCenterY - (tileY + Tile::size);
+            break;
+        case 8:
+            distance = Utils::distance(objectCenterX, objectCenterY, tileX + Tile::size, tileY + Tile::size);
+            break;
+        default:
+            Debug::assert(false, "unknown zone");
         }
+        if (distance <= objectRadius)
+            hitDirections |= 1 << zone;
+
+        break;
     case tsSolidFloor:
         // nothing
         break;

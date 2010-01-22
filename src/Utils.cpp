@@ -1,7 +1,13 @@
 #include "Utils.h"
+#include <cmath>
 
-int Utils::stringToInt(std::string value)
-{
+double Utils::distance(double x1, double y1, double x2, double y2) {
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+    return std::sqrt(dx * dx + dy * dy);
+}
+
+int Utils::stringToInt(std::string value) {
     std::stringstream ss;
     ss << value;
     int out;
@@ -9,8 +15,7 @@ int Utils::stringToInt(std::string value)
     return out;
 }
 
-std::string Utils::intToString(int value)
-{
+std::string Utils::intToString(int value) {
     std::stringstream ss;
     ss << value;
     return ss.str();

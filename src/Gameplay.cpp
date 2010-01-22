@@ -111,7 +111,7 @@ void Gameplay::nextFrame() {
     int west = Input::state(Input::West) ? 1 : 0;
     int input_dx = east - west;
     int input_dy = south - north;
-    Entity::Direction direction = (Entity::Direction)((input_dx + 1) * 3 + (input_dy + 1));
+    Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
     if (direction == Entity::Center) {
         m_player->setMovementMode(Entity::Stand);
     } else {
@@ -128,13 +128,20 @@ void Gameplay::nextFrame() {
     int layer = m_player->layer();
 
     // resolve collisions
-    {
-        std::vector<Map::TileAndLocation> tiles;
-        for (unsigned int i = 0; i < maps.size(); i++)
-            maps[i]->intersectingTiles(tiles, x, y, radius, layer);
-        //  ask them where to go
-//        for (unsigned int i = 0; i < tiles.size(); i++)
-//            tiles[i].tile->resolveCollision(tiles[i].x, tiles[i].y, left, top, width, height, dx, dy);
+    std::vector<Map::TileAndLocation> tiles;
+    for (unsigned int i = 0; i < maps.size(); i++)
+        maps[i]->intersectingTiles(tiles, x, y, radius, layer);
+    //  ask them where to go
+    int hitDirections = 0;
+    for (unsigned int i = 0; i < tiles.size(); i++)
+        tiles[i].tile->resolveCollision(tiles[i].x, tiles[i].y, x, y, radius, hitDirections);
+    if (hitDirections != 0)
+        Debug::assert(true, "");
+    Entity::Direction fatalDirection = (Entity::Direction)(8 - direction);
+    if ((1 << fatalDirection) & hitDirections) {
+        // stopped
+        x = m_player->centerX();
+        y = m_player->centerY();
     }
 
     m_player->setCenter(x, y);

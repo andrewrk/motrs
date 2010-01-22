@@ -168,7 +168,7 @@ def compile_entity(in_path, out_path):
     declarations = read_declarations(in_path)
     assert(declarations[0][0] == "version")
     version_number = int(declarations[0][1])
-    assert(version_number == 2)
+    assert(version_number == 3)
     movement_kinds = ("stand", "walk", "run")
     movement_map = {}
     feet = None

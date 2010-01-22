@@ -12,6 +12,7 @@
 class Gameplay
 {
 public:
+
     static Gameplay * instance() {
         Debug::assert(s_inst != NULL, "Gameplay::instance() s_inst null");
         return s_inst;
