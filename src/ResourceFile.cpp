@@ -253,7 +253,54 @@ bool ResourceFile::deleteResource(std::string resourceName)
 
 void ResourceFile::squeeze()
 {
-    throw "TODO: get rid of extra buffer space";
+    // load the entire file into memory o.O
+    m_file.seekg(0, std::ios::end);
+    int dataSize = m_file.tellg();
+
+    char * data = new char[dataSize];
+    m_file.seekg(0, std::ios::beg);
+    m_file.read(data, dataSize);
+    
+    // close the file and open it as write-only and truncate
+    close();
+    m_file.open(m_fileName.c_str(),
+        std::fstream::out | std::fstream::binary | std::fstream::trunc);
+
+    // write the squeezed data
+    ResourceHeader header;
+    header.dataStart = sizeof(ResourceHeader) + m_records.size() * 
+        sizeof(ResourceRecord);
+    header.resourceCount = m_records.size();
+    m_file.write((char *) &header, sizeof(ResourceHeader));
+    int dataPos = header.dataStart;
+    m_file.seekp(dataPos, std::ios::beg);
+    for(std::map<std::string, CacheEntry>::iterator it = m_records.begin();
+        it != m_records.end(); ++it)
+    {
+        ResourceRecord * record = &(it->second.record);
+
+        int oldDataPos = record->offset;
+        record->offset = dataPos;
+        record->bufferSize = 0;
+
+        m_file.write(&data[oldDataPos], record->size);
+        dataPos += record->size;
+    }
+
+    // go back and write the header table
+    m_file.seekp(sizeof(ResourceHeader), std::ios::beg);
+    for(std::map<std::string, CacheEntry>::iterator it = m_records.begin();
+        it != m_records.end(); ++it)
+    {
+        ResourceRecord * record = &(it->second.record);
+        m_file.write((char *) record, sizeof(ResourceRecord));
+    }
+
+    // re-open normally
+    m_file.close();
+    m_file.clear();
+    open(m_fileName);
+
 }
 
 void ResourceFile::loadRecordTable(std::vector<ResourceRecord> & v)
