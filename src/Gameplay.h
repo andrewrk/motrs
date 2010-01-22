@@ -7,9 +7,12 @@
 #include "ResourceFile.h"
 #include "Debug.h"
 
+#include <set>
+
 class Gameplay
 {
 public:
+
     static Gameplay * instance() {
         Debug::assert(s_inst != NULL, "Gameplay::instance() s_inst null");
         return s_inst;
@@ -29,6 +32,7 @@ public:
     double screenHeight() { return 600.0; }
 private:
 
+    static const int WingDirectionsMap[9];
     static const char * ResourceFilePath;
     static Gameplay * s_inst;
 
@@ -43,6 +47,7 @@ private:
     Universe * m_universe;
 
     World * m_currentWorld;
+    std::set<Map*> m_loadedMaps;
     Entity * m_player;
 
     bool processEvents();

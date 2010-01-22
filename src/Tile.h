@@ -48,11 +48,14 @@ public:
 
 
     Tile(const char** cursor);
-    ~Tile();
+    virtual ~Tile();
 
-    bool isGood();
     // screenX and screenY is the absolute coordinates of 0,0 on the screen
+    bool isGood();
     virtual void draw(double screenX, double screenY);
+    void resolveCollision(double tileX, double tileY,
+                          double & objectCenterX, double & objectCenterY, double objectRadius,
+                          int & hitTest);
 
 protected:
     /** don't use this constructor. It's for making the NullTile */

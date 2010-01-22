@@ -6,19 +6,19 @@
 // entities are responsible for:
 //  * specs (health, speed, defense, etc.)
 //  * animations for moving
-//  * where they are in the world (why would an entity know what room it's in?)
+//  * where they are in the world
 class Entity
 {
 public:
     enum Direction {
         NorthWest,
-        West,
-        SouthWest,
         North,
-        Center,
-        South,
         NorthEast,
+        West,
+        Center,
         East,
+        SouthWest,
+        South,
         SouthEast,
     };
     enum MovementMode {
@@ -32,18 +32,16 @@ public:
 
     bool isGood() { return m_good; }
 
-    // returns the actual position in the world of the player's feet
-    double feetX() { return m_x + m_feetOffsetX; }
-    double feetY() { return m_y + m_feetOffsetY; }
+    // world location of the player's contact zone
+    double centerX() { return m_x + m_centerOffsetX; }
+    double centerY() { return m_y + m_centerOffsetY; }
+    double radius() { return m_radius; }
+    int layer() { return m_z; }
 
-    // the width and height of the foot hit box area
-    double feetWidth() { return m_feetW; }
-    double feetHeight() { return m_feetH; }
-
-    void setPosition(double x, double y, int z, Direction direction);
+    void setCenter(double x, double y);
+    void setLayer(int z);
+    void setOrientation(Direction direction);
     void setMovementMode(MovementMode movementMode);
-    void move(double dx, double dy);
-    void orient(Direction direction);
 
     void draw(double screenX, double screenY);
 private:
@@ -59,15 +57,11 @@ private:
     Direction m_direction;
     MovementMode m_movementMode;
 
-    // hit box
-    double m_feetOffsetX, m_feetOffsetY, m_feetW, m_feetH;
+    // hit box (actually a circle)
+    double m_centerOffsetX, m_centerOffsetY, m_radius;
 
-    double m_x;
-    double m_y;
+    double m_x, m_y;
     int m_z;
-
-    double m_velX;
-    double m_velY;
 };
 
 #endif

@@ -43,8 +43,9 @@ Universe::Universe(const char * buffer) :
     double startX = (double)Utils::readInt(&cursor);
     double startY = (double)Utils::readInt(&cursor);
     int startZ = Utils::readInt(&cursor);
-    m_player->setPosition(startX, startY, startZ, Entity::Center);
-
+    m_player->setCenter(startX, startY);
+    m_player->setLayer(startZ);
+    m_player->setOrientation(Entity::Center);
 }
 
 Universe::~Universe()

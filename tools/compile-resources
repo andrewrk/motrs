@@ -168,7 +168,7 @@ def compile_entity(in_path, out_path):
     declarations = read_declarations(in_path)
     assert(declarations[0][0] == "version")
     version_number = int(declarations[0][1])
-    assert(version_number == 1)
+    assert(version_number == 3)
     movement_kinds = ("stand", "walk", "run")
     movement_map = {}
     feet = None
@@ -179,10 +179,10 @@ def compile_entity(in_path, out_path):
             assert(len(graphic_ids) == 9)
             encoded_ids = "".join(encode_string(id) for id in graphic_ids)
             movement_map[kind] = encoded_ids
-        elif kind == "feet":
+        elif kind == "contact":
             assert(feet == None)
             dims = split_strip(value)
-            feet = pack("iiii", *[int(dim) for dim in dims])
+            feet = pack("iii", *[int(dim) for dim in dims])
         else:
             raise(Exception("unsupported kind: " + kind))
     assert(len(movement_map) == 3)

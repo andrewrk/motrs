@@ -125,6 +125,22 @@ int main(int argc, char * argv[])
         out.close();
 
         delete[] buffer;
+    } else if( command.compare("squeeze") == 0 ) {
+        if( argc != 3){
+            printUsage(argv[0]);
+            exit(1);
+        }
+
+        string datfile(argv[2]);
+
+        ResourceFile dat(datfile);
+        if( ! dat.isOpen() ) {
+            cerr << "Error opening " << datfile << endl;
+            exit(1);
+        }
+
+        dat.squeeze();
+
     } else {
         cout << "command not recognized: " << command << endl;
         printUsage(argv[0]);
@@ -142,10 +158,15 @@ void printUsage(char * arg0)
     cout << "Usage: \n\n";
     cout << arg0 << " update <resource-file> <file>\n";
     cout << "makes sure <file> is updated and in <resource-file>.\n\n";
+
     cout << arg0 << " extract <resource-file> <file>\n";
     cout << "extracts <file> from <resource-file>\n\n";
+
     cout << arg0 << " list <resource-file>\n";
     cout << "prints a list of the files in <resource-file>\n\n";
+
+    cout << arg0 << " squeeze <resource-file>\n";
+    cout << "removes all wasted buffer space from <resource-file>\n\n";
 }
 
 string fileTitle(string fullPath)

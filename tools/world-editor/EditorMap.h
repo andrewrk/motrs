@@ -11,7 +11,7 @@ class EditorMap : public Map
 public:
     // load a Map from a text format file
     EditorMap(QString file);
-    ~EditorMap();
+    virtual ~EditorMap();
 
     void draw(QPainter * p, double screenX, double screenY, double screenWidth,
               double screenHeight, int layer);
