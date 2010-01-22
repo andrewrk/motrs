@@ -3,8 +3,6 @@
 #include "Utils.h"
 #include "Debug.h"
 
-#include "Gameplay.h"
-
 Map::Map(const char * buffer) :
     m_good(true),
     m_palette(),
@@ -128,10 +126,9 @@ void Map::intersectingTiles(std::vector<TileAndLocation>& tiles, double left, do
     }
 }
 
-void Map::draw(double screenX, double screenY, int layer) {
+void Map::draw(double screenX, double screenY, double screenWidth, double screenHeight, int layer) {
     int tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY;
-    tileRange(screenX, screenY, Gameplay::instance()->screenWidth(), Gameplay::instance()->screenHeight(),
-              tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY);
+    tileRange(screenX, screenY, screenWidth, screenHeight, tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY);
 
     for (int tileIndexY = tileIndexStartY; tileIndexY < tileIndexEndY; tileIndexY++) {
         for (int tileIndexX = tileIndexStartX; tileIndexX < tileIndexEndX; tileIndexX++) {
@@ -142,7 +139,7 @@ void Map::draw(double screenX, double screenY, int layer) {
     }
 
     for (unsigned int i = 0; i < m_submaps.size(); i++)
-        m_submaps[i]->draw(screenX, screenY, layer);
+        m_submaps[i]->draw(screenX, screenY, screenWidth, screenHeight, layer);
 }
 
 void Map::tileRange(double left, double top, double width, double height,

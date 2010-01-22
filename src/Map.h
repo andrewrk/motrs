@@ -22,7 +22,7 @@ public:
 
     Map(const char * buffer);
     Map();
-    ~Map();
+    virtual ~Map();
 
     bool isGood();
 
@@ -30,7 +30,8 @@ public:
     void intersectingTiles(std::vector<TileAndLocation>& tiles, double left, double top, double right, double bottom, int layer);
 
     // draw on screen
-    void draw(double screenX, double screenY, int layer);
+    virtual void draw(double screenX, double screenY, double screenWidth,
+              double screenHeight, int layer);
 
     // width and height accessors
     inline double width(){ return m_width; }

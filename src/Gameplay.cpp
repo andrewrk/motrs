@@ -170,7 +170,7 @@ void Gameplay::updateDisplay() {
 
     //blit the map
     Map * map = m_currentWorld->getMap();
-    map->draw(m_screenX, m_screenY, 0);
+    map->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), 0);
 
     m_player->draw(m_screenX, m_screenY);
 }

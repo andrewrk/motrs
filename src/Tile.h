@@ -48,10 +48,11 @@ public:
 
 
     Tile(const char** cursor);
-    ~Tile();
+    virtual ~Tile();
 
+    // screenX and screenY is the absolute coordinates of 0,0 on the screen
     bool isGood();
-    void draw(double screenX, double screenY);
+    virtual void draw(double screenX, double screenY);
     void resolveCollision(double tileX, double tileY,
                           double objectLeft, double objectTop, double objectWidth, double objectHeight,
                           double & dx, double & dy);
