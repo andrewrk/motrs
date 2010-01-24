@@ -203,12 +203,14 @@ void Gameplay::nextFrame() {
 }
 
 void Gameplay::updateDisplay() {
-    //generic background color (delete this crap)
+    //generic background color
     SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, 0,0,0));
 
     //blit the map
     Map * map = m_currentWorld->getMap();
-    map->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), 0);
-
-    m_player->draw(m_screenX, m_screenY);
+    for (int layer = 0; layer < map->layerCount(); layer++) {
+        map->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
+        if (layer == m_player->layer())
+            m_player->draw(m_screenX, m_screenY);
+    }
 }

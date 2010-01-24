@@ -34,8 +34,9 @@ public:
               double screenHeight, int layer);
 
     // width and height accessors
-    inline double width(){ return m_width; }
-    inline double height() { return m_height; }
+    double width(){ return m_width; }
+    double height() { return m_height; }
+    int layerCount() { return m_tiles->sizeZ; }
 
 protected:
 

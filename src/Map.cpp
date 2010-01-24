@@ -38,6 +38,7 @@ Map::Map(const char * buffer) :
     // layers
     int layerCount = Utils::readInt(&cursor);
     m_tiles = new Array3<int>(sizeX, sizeY, layerCount);
+    m_tiles->clear(); // must be cleared for sparse layers
     for (int z = 0; z < layerCount; z++) {
         LayerType layerType = (LayerType)Utils::readInt(&cursor);
         switch (layerType) {
@@ -47,7 +48,6 @@ Map::Map(const char * buffer) :
                         m_tiles->set(x, y, z, Utils::readInt(&cursor));
                 break;
             case ltSparse: {
-                m_tiles->clear();
                 int tileCount = Utils::readInt(&cursor);
                 for (int i = 0; i < tileCount; i++) {
                     SparseTile * sparseTile = Utils::readStruct<SparseTile>(&cursor);
