@@ -86,7 +86,6 @@ Map::Map() :
     m_entities(),
     m_x(0.0), m_y(0.0)
 {
-
 }
 
 Map::~Map()
@@ -143,7 +142,8 @@ void Map::draw(double screenX, double screenY, double screenWidth, double screen
 }
 
 void Map::tileRange(double left, double top, double width, double height,
-                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom) {
+                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom)
+{
     double localLeft = left - m_x;
     double localTop = top - m_y;
     double localRight = localLeft + width;
