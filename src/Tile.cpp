@@ -73,7 +73,6 @@ void Tile::resolveCircleCollision(double tileX, double tileY, double & objectCen
     case tsSolidWall:
         resolveCircleOnSquare(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
         break;
-    }
     case tsSolidFloor:
         // nothing
         break;
@@ -132,47 +131,49 @@ void Tile::resolveCircleOnSquare(double tileX, double tileY, double & objectCent
     int zoneX = 1 * ((objectCenterX > tileX) + (tileX + Tile::size < objectCenterX));
     int zoneY = 3 * ((objectCenterY > tileY) + (tileY + Tile::size < objectCenterY));
     int zone = zoneX + zoneY;
-    double distance;
-    int direction = zone;
     switch (zone) {
     case 0:
-        distance = Utils::distance(objectCenterX, objectCenterY, tileX, tileY);
-//            direction = tileX - objectCenterX < tileY - objectCenterY ? Entity::North : Entity::West;
+        resolveCircleOnPoint(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
         break;
     case 1:
-        objectCenterY = tileY + objectRadius;
+        objectCenterY = Utils::min(objectCenterY, tileY - objectRadius);
         break;
     case 2:
-        distance = Utils::distance(objectCenterX, objectCenterY, tileX + Tile::size, tileY);
-//            direction = objectCenterX - tileX <= tileY - objectCenterY ? Entity::North : Entity::East;
+        resolveCircleOnPoint(tileX + Tile::size, tileY, objectCenterX, objectCenterY, objectRadius);
         break;
     case 3:
-        distance = tileX - objectCenterX;
+        objectCenterX = Utils::min(objectCenterX, tileX - objectRadius);
         break;
     case 4:
-        distance = 0.0;
+        // omg inside the wall!
         break;
     case 5:
-        distance = objectCenterX - (tileX + Tile::size);
+        objectCenterX = Utils::max(objectCenterX, tileX + Tile::size + objectRadius);
         break;
     case 6:
-        distance = Utils::distance(objectCenterX, objectCenterY, tileX, tileY + Tile::size);
-//            direction = tileX - objectCenterX <= objectCenterY - tileY ? Entity::South : Entity::West;
+        resolveCircleOnPoint(tileX, tileY + Tile::size, objectCenterX, objectCenterY, objectRadius);
         break;
     case 7:
-        distance = objectCenterY - (tileY + Tile::size);
+        objectCenterY = Utils::max(objectCenterY, tileY + Tile::size + objectRadius);
         break;
     case 8:
-        distance = Utils::distance(objectCenterX, objectCenterY, tileX + Tile::size, tileY + Tile::size);
-//            direction = objectCenterX - tileX < objectCenterY - tileY ? Entity::South : Entity::East;
+        resolveCircleOnPoint(tileX + Tile::size, tileY + Tile::size, objectCenterX, objectCenterY, objectRadius);
         break;
     default:
         Debug::assert(false, "unknown zone");
     }
-    if (distance <= objectRadius)
-        hitDirections |= 1 << direction;
-
 }
+
+void Tile::resolveCircleOnPoint(double pointX, double pointY, double & objectCenterX, double & objectCenterY, double objectRadius) {
+    double distance = Utils::distance(objectCenterX, objectCenterY, pointX, pointY);
+    if (distance < objectRadius) {
+        double normX = (objectCenterX - pointX) / distance;
+        double normY = (objectCenterY - pointY) / distance;
+        objectCenterX = pointX + normX * objectRadius;
+        objectCenterY = pointY + normY * objectRadius;
+    }
+}
+
 Tile * Tile::nullTile() {
     static Tile * s_nullTile = new Tile();
     return s_nullTile;
