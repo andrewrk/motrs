@@ -53,21 +53,21 @@ public:
     // screenX and screenY is the absolute coordinates of 0,0 on the screen
     bool isGood();
     virtual void draw(double screenX, double screenY);
-    void resolveCollision(double tileX, double tileY,
-                          double & objectCenterX, double & objectCenterY, double objectRadius,
-                          int & hitTest);
+    bool hasMinPresence(PhysicalPresence minPresence);
+    void resolveCircleCollision(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
 
 protected:
-    /** don't use this constructor. It's for making the NullTile */
-    Tile();
+    static void resolveCircleCollision(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
+
     bool m_good;
 
     Shape m_shape;
     SurfaceType m_surfaceType;
 
     Graphic * m_graphic;
-    // TODO int offset
-    //
+
+    /** don't use this constructor. It's for making the NullTile */
+    Tile();
 };
 
 #endif

@@ -16,6 +16,7 @@ public:
     public:
         double x, y;
         Tile * tile;
+        double proximity; // used when sorting tiles by proximity
         TileAndLocation() {}
         TileAndLocation(double x, double y, Tile * tile) : x(x), y(y), tile(tile) {}
     };
@@ -27,7 +28,8 @@ public:
     bool isGood();
 
     void tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, int layer);
-    void intersectingTiles(std::vector<TileAndLocation>& tiles, double x, double t, double apothem, int layer);
+    void intersectingTiles(std::vector<TileAndLocation>& tiles, double centerX, double centerY, double apothem,
+                           int layer, Tile::PhysicalPresence minPresence);
 
     // draw on screen
     virtual void draw(double screenX, double screenY, double screenWidth,

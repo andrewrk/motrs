@@ -3,8 +3,9 @@
 #include "ResourceManager.h"
 #include "Input.h"
 #include "Tile.h"
-#include "Debug.h"
 #include "os_config.h"
+#include "Debug.h"
+#include "Utils.h"
 
 #include <cmath>
 
@@ -142,45 +143,12 @@ void Gameplay::nextFrame() {
     // resolve collisions
     std::vector<Map::TileAndLocation> tiles;
     for (unsigned int i = 0; i < maps.size(); i++)
-        maps[i]->intersectingTiles(tiles, x, y, radius, layer);
-    //  ask them where to go
-    int hitDirections = 0;
+        maps[i]->intersectingTiles(tiles, x, y, radius, layer, Tile::ppRail);
+    // sort by proximity
+    sortByProximity(x, y, tiles);
+    // resolve collisions
     for (unsigned int i = 0; i < tiles.size(); i++)
-        tiles[i].tile->resolveCollision(tiles[i].x, tiles[i].y, x, y, radius, hitDirections);
-    if (hitDirections != 0) {
-        // head on collisions
-        Entity::Direction fatalDirection = (Entity::Direction)(8 - direction);
-        if ((1 << fatalDirection) & hitDirections) {
-            // stopped
-            x = m_player->centerX();
-            y = m_player->centerY();
-        } else {
-            // diagonal collisions
-            int wingDirections = WingDirectionsMap[direction];
-            if ((hitDirections & wingDirections) == wingDirections) {
-                // stopped
-                x = m_player->centerX();
-                y = m_player->centerY();
-            } else if ((hitDirections & wingDirections) != 0) {
-                // diagonal push
-                int oppositeWay = (wingDirections & ~hitDirections);
-                switch (oppositeWay) {
-                case 1 << Entity::NorthWest: dx =  speed; dy =  speed; break;
-                case 1 << Entity::North:     dx =  0.0;   dy =  speed; break;
-                case 1 << Entity::NorthEast: dx = -speed; dy =  speed; break;
-                case 1 << Entity::West:      dx =  speed; dy =  0.0;   break;
-                case 1 << Entity::Center: Debug::assert(false, "bad wingDirection computation"); break;
-                case 1 << Entity::East:      dx = -speed; dy =  0.0;   break;
-                case 1 << Entity::SouthWest: dx =  speed; dy = -speed; break;
-                case 1 << Entity::South:     dx =  0.0;   dy = -speed; break;
-                case 1 << Entity::SouthEast: dx = -speed; dy = -speed; break;
-                default: Debug::assert(false, "bad wingDirection computation"); break;
-                }
-                x = m_player->centerX() + dx;
-                y = m_player->centerY() + dy;
-            }
-        }
-    }
+        tiles[i].tile->resolveCircleCollision(tiles[i].x, tiles[i].y, x, y, radius);
 
     m_player->setCenter(x, y);
 
@@ -200,6 +168,26 @@ void Gameplay::nextFrame() {
         m_screenX += minMarginEast() - marginEast;
 
     m_frameCount++;
+}
+
+void Gameplay::sortByProximity(double x, double y, std::vector<Map::TileAndLocation> & tiles) {
+    if (tiles.size() == 0)
+        return; // we have to check for this because of stupid unsigned int size;
+    for (unsigned int i = 0; i < tiles.size(); i++)
+        tiles[i].proximity = Utils::distance(x, y, tiles[i].x, tiles[i].y);
+    // selection sort
+    for (unsigned int i = 0; i < tiles.size() - 1; i++) {
+        unsigned int minIndex = i;
+        for (unsigned int j = i + 1; j < tiles.size(); j++) {
+            if (tiles[j].proximity < tiles[minIndex].proximity)
+                minIndex = j;
+        }
+        if (minIndex != i) {
+            Map::TileAndLocation tmp = tiles[i];
+            tiles[i] = tiles[minIndex];
+            tiles[minIndex] = tmp;
+        }
+    }
 }
 
 void Gameplay::updateDisplay() {

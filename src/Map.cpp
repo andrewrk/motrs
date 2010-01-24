@@ -112,15 +112,18 @@ void Map::tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, 
         m_submaps[i]->tilesAtPoint(tiles, x, y, layer);
 }
 
-void Map::intersectingTiles(std::vector<TileAndLocation>& tiles, double x, double y, double apothem, int layer) {
+void Map::intersectingTiles(std::vector<TileAndLocation>& tiles, double centerX, double centerY, double apothem,
+                            int layer, Tile::PhysicalPresence minPresence)
+{
     int tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY;
-    tileRange(x - apothem, y - apothem, apothem * 2.0, apothem * 2.0,
+    tileRange(centerX - apothem, centerY - apothem, apothem * 2.0, apothem * 2.0,
               tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY);
 
     for (int tileIndexY = tileIndexStartY; tileIndexY < tileIndexEndY; tileIndexY++) {
         for (int tileIndexX = tileIndexStartX; tileIndexX < tileIndexEndX; tileIndexX++) {
             Tile * tile = m_palette[m_tiles->get(tileIndexX, tileIndexY, layer)];
-            tiles.push_back(TileAndLocation(tileIndexX * Tile::size + m_x, tileIndexY * Tile::size + m_y, tile));
+            if (tile->hasMinPresence(minPresence))
+                tiles.push_back(TileAndLocation(tileIndexX * Tile::size + m_x, tileIndexY * Tile::size + m_y, tile));
         }
     }
 }

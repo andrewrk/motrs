@@ -7,6 +7,8 @@
 #include "ResourceFile.h"
 #include "Debug.h"
 
+#include "Map.h"
+
 #include <set>
 
 class Gameplay
@@ -35,6 +37,8 @@ private:
     static const int WingDirectionsMap[9];
     static const char * ResourceFilePath;
     static Gameplay * s_inst;
+
+    static void sortByProximity(double x, double y, std::vector<Map::TileAndLocation> & tiles);
 
     bool m_good;
     SDL_Surface * m_screen;
