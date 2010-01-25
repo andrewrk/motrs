@@ -4,11 +4,9 @@
 #include "SDL.h"
 #include <vector>
 
-/* Graphics are things that are displayed. it can be an animation
- * or a still image.
- */
-class Graphic
-{
+// Graphics are things that are displayed. it can be an animation
+// or a still image.
+class Graphic {
 public:
     // create an animation or bitmap from memory
     Graphic(const char * buffer);
