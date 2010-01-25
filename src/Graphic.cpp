@@ -23,7 +23,7 @@ Graphic::Graphic(const char * buffer) :
     m_frameCount = header->frameCount;
     m_fps = header->framesPerSecond;
 
-    if (graphicType == gtImage && m_frameCount != 0) {
+    if (graphicType == gtImage && m_frameCount != 1) {
         std::cerr << "still images can't have more than 1 frame." << std::endl;
         return;
     }
