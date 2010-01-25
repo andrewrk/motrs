@@ -62,6 +62,7 @@ private:
 
     double m_x, m_y;
     int m_z;
+    double m_altitude;
 };
 
 #endif

@@ -10,7 +10,7 @@ Entity::Entity(const char * buffer) :
     m_currentGraphic(NULL),
     m_direction(Center), m_movementMode(Stand),
     m_centerOffsetX(0.0), m_centerOffsetY(0.0), m_radius(1.0),
-    m_x(0.0), m_y(0.0), m_z(0)
+    m_x(0.0), m_y(0.0), m_z(0), m_altitude(0.0)
 {
     memset(m_standing, 0, sizeof(m_standing));
     memset(m_walking, 0, sizeof(m_walking));
