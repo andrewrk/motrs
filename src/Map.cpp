@@ -132,11 +132,12 @@ void Map::draw(double screenX, double screenY, double screenWidth, double screen
     int tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY;
     tileRange(screenX, screenY, screenWidth, screenHeight, tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY);
 
+    int mapX = (int)(m_x - screenX), mapY = (int)(m_y - screenY);
     for (int tileIndexY = tileIndexStartY; tileIndexY < tileIndexEndY; tileIndexY++) {
         for (int tileIndexX = tileIndexStartX; tileIndexX < tileIndexEndX; tileIndexX++) {
             int tileIndex = m_tiles->get(tileIndexX, tileIndexY, layer);
             Tile * tile = m_palette[tileIndex];
-            tile->draw(m_x + tileIndexX * Tile::size - screenX, m_y + tileIndexY * Tile::size - screenY);
+            tile->draw(mapX + tileIndexX * (int)Tile::size, mapY + tileIndexY * (int)Tile::size);
         }
     }
 
