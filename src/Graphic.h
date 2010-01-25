@@ -34,13 +34,13 @@ class Graphic
         */
 
         enum GraphicType {
-            Animation = 0, // spritesheet
-            Image = 1, // still frame
+            gtAnimation = 0, // spritesheet
+            gtImage = 1, // still frame
         };
 
         enum StorageType {
-            BMP = 0,
-            PNG = 1,
+            stBMP = 0,
+            stPNG = 1,
         };
 
         typedef struct {
