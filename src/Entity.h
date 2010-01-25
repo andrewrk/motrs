@@ -61,8 +61,9 @@ private:
     double m_centerOffsetX, m_centerOffsetY, m_radius;
 
     double m_x, m_y;
+    double m_velocityX, m_velocityY;
     int m_z;
-    double m_altitude;
+    double m_altitude, m_altitudeVelocity;
 };
 
 #endif
