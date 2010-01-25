@@ -11,8 +11,7 @@ Entity::Entity(const char * buffer) :
     m_direction(Center), m_movementMode(Stand),
     m_centerOffsetX(0.0), m_centerOffsetY(0.0), m_radius(1.0),
     m_x(0.0), m_y(0.0), m_velocityX(0.0), m_velocityY(0.0),
-    m_z(0),
-    m_altitude(0.0), m_altitudeVelocity(0.0)
+    m_z(0), m_altitude(0.0), m_altitudeVelocity(0.0)
 {
     memset(m_standing, 0, sizeof(m_standing));
     memset(m_walking, 0, sizeof(m_walking));
@@ -44,27 +43,6 @@ Entity::Entity(const char * buffer) :
     m_radius = (double)Utils::readInt(&cursor);
 }
 
-Entity::~Entity()
-{
-}
-
-void Entity::setCenter(double x, double y) {
-    m_x = x - m_centerOffsetX;
-    m_y = y - m_centerOffsetY;
-}
-
-void Entity::setLayer(int z) {
-    m_z = z;
-}
-
-void Entity::setOrientation(Direction direction) {
-    m_direction = direction;
-}
-
-void Entity::setMovementMode(MovementMode movementMode) {
-    m_movementMode = movementMode;
-}
-
 void Entity::draw(double screenX, double screenY) {
     Graphic** graphicList;
     switch (m_movementMode) {
@@ -73,6 +51,6 @@ void Entity::draw(double screenX, double screenY) {
         case Run: graphicList = m_running; break;
         default: Debug::assert(false, "unrecognized movementMode.");
     }
-    graphicList[m_direction]->draw(Gameplay::instance()->screen(),(int)(m_x - screenX), (int)(m_y - m_altitude - screenY));
+    graphicList[m_direction]->draw(Gameplay::instance()->screen(), (int)(m_x - screenX), (int)(m_y - m_altitude - screenY));
 }
 

@@ -8,7 +8,7 @@
 #include <cmath>
 
 const double Tile::size = 16.0;
-const int Tile::sizeInt = 16;
+const int Tile::sizeInt = (int)Tile::size;
 
 Tile::Tile(const char** cursor) :
     m_good(true),
@@ -41,10 +41,10 @@ bool Tile::isGood() {
     return m_good;
 }
 
-void Tile::draw(double screenX, double screenY) {
+void Tile::draw(int screenX, int screenY) {
     if (m_graphic == NULL)
         return;
-    m_graphic->draw(Gameplay::instance()->screen(), (int)screenX, (int)screenY);
+    m_graphic->draw(Gameplay::instance()->screen(), screenX, screenY);
 }
 
 bool Tile::hasMinPresence(PhysicalPresence minPresence) {

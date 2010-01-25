@@ -118,24 +118,37 @@ void Gameplay::nextFrame() {
         maps.push_back(*iMap);
 
     // determin directional input
-    int north = Input::state(Input::North) ? 1 : 0;
-    int east = Input::state(Input::East) ? 1 : 0;
-    int south = Input::state(Input::South) ? 1 : 0;
-    int west = Input::state(Input::West) ? 1 : 0;
-    int input_dx = east - west;
-    int input_dy = south - north;
-    Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
-    if (direction == Entity::Center) {
-        m_player->setMovementMode(Entity::Stand);
-    } else {
-        m_player->setMovementMode(Entity::Run);
-        m_player->setOrientation(direction);
+    double dx = m_player->velocityX();
+    double dy = m_player->velocityY();
+
+    switch (m_player->movementMode()) {
+    case Entity::Stand:
+    case Entity::Walk:
+    case Entity::Run: {
+            int north = Input::state(Input::North) ? 1 : 0;
+            int east = Input::state(Input::East) ? 1 : 0;
+            int south = Input::state(Input::South) ? 1 : 0;
+            int west = Input::state(Input::West) ? 1 : 0;
+            int input_dx = east - west;
+            int input_dy = south - north;
+            Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
+            if (direction == Entity::Center) {
+                m_player->setMovementMode(Entity::Stand);
+            } else {
+                m_player->setMovementMode(Entity::Run);
+                m_player->setOrientation(direction);
+            }
+            double speed = 3.0;
+            dx = speed * input_dx;
+            dy = speed * input_dy;
+        }
+        break;
+    case Entity::Jump:
+        break;
+    default: Debug::assert(false, "bad movement mode");
     }
 
     // calculate the desired location
-    double speed = 3.0;
-    double dx = speed * input_dx;
-    double dy = speed * input_dy;
     double x = m_player->centerX() + dx, y = m_player->centerY() + dy;
     double radius = m_player->radius();
     int layer = m_player->layer();

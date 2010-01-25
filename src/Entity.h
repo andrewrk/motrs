@@ -25,23 +25,32 @@ public:
         Stand,
         Walk,
         Run,
+        Jump,
     };
 
     Entity(const char * buffer);
-    ~Entity();
+    ~Entity() {}
 
     bool isGood() { return m_good; }
+
+    Direction orientation() { return m_direction; }
+    void setOrientation(Direction direction) { m_direction = direction; }
+
+    MovementMode movementMode() { return m_movementMode; }
+    void setMovementMode(MovementMode movementMode) { m_movementMode = movementMode; }
 
     // world location of the player's contact zone
     double centerX() { return m_x + m_centerOffsetX; }
     double centerY() { return m_y + m_centerOffsetY; }
     double radius() { return m_radius; }
-    int layer() { return m_z; }
+    void setCenter(double x, double y) { m_x = x - m_centerOffsetX; m_y = y - m_centerOffsetY; }
 
-    void setCenter(double x, double y);
-    void setLayer(int z);
-    void setOrientation(Direction direction);
-    void setMovementMode(MovementMode movementMode);
+    double velocityX() { return m_velocityX; }
+    double velocityY() { return m_velocityY; }
+    void setVelocity(double x, double y) { m_velocityX = x; m_velocityY = y; }
+
+    int layer() { return m_z; }
+    void setLayer(int z) { m_z = z; }
 
     void draw(double screenX, double screenY);
 private:

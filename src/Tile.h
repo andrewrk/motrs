@@ -52,7 +52,7 @@ public:
 
     // screenX and screenY is the absolute coordinates of 0,0 on the screen
     bool isGood();
-    virtual void draw(double screenX, double screenY);
+    virtual void draw(int screenX, int screenY);
     bool hasMinPresence(PhysicalPresence minPresence);
     void resolveCircleCollision(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
 
