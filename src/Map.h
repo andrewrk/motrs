@@ -16,10 +16,12 @@ public:
     public:
         double x, y;
         Tile * tile;
+        double proximity; // used when sorting tiles by proximity
         TileAndLocation() {}
         TileAndLocation(double x, double y, Tile * tile) : x(x), y(y), tile(tile) {}
     };
 
+    static Map * load(const char * buffer);
     Map(const char * buffer);
     Map();
     virtual ~Map();
@@ -27,15 +29,17 @@ public:
     bool isGood();
 
     void tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, int layer);
-    void intersectingTiles(std::vector<TileAndLocation>& tiles, double x, double t, double apothem, int layer);
+    void intersectingTiles(std::vector<TileAndLocation>& tiles, double centerX, double centerY, double apothem,
+                           int layer, Tile::PhysicalPresence minPresence);
 
     // draw on screen
     virtual void draw(double screenX, double screenY, double screenWidth,
               double screenHeight, int layer);
 
     // width and height accessors
-    inline double width(){ return m_width; }
-    inline double height() { return m_height; }
+    double width(){ return m_width; }
+    double height() { return m_height; }
+    int layerCount() { return m_tiles->sizeZ; }
 
 protected:
 

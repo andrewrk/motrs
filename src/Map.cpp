@@ -3,6 +3,10 @@
 #include "Utils.h"
 #include "Debug.h"
 
+Map * Map::load(const char *buffer) {
+    return new Map(buffer);
+}
+
 Map::Map(const char * buffer) :
     m_good(true),
     m_palette(),
@@ -38,6 +42,7 @@ Map::Map(const char * buffer) :
     // layers
     int layerCount = Utils::readInt(&cursor);
     m_tiles = new Array3<int>(sizeX, sizeY, layerCount);
+    m_tiles->clear(); // must be cleared for sparse layers
     for (int z = 0; z < layerCount; z++) {
         LayerType layerType = (LayerType)Utils::readInt(&cursor);
         switch (layerType) {
@@ -47,7 +52,6 @@ Map::Map(const char * buffer) :
                         m_tiles->set(x, y, z, Utils::readInt(&cursor));
                 break;
             case ltSparse: {
-                m_tiles->clear();
                 int tileCount = Utils::readInt(&cursor);
                 for (int i = 0; i < tileCount; i++) {
                     SparseTile * sparseTile = Utils::readStruct<SparseTile>(&cursor);
@@ -86,7 +90,6 @@ Map::Map() :
     m_entities(),
     m_x(0.0), m_y(0.0)
 {
-
 }
 
 Map::~Map()
@@ -113,15 +116,18 @@ void Map::tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, 
         m_submaps[i]->tilesAtPoint(tiles, x, y, layer);
 }
 
-void Map::intersectingTiles(std::vector<TileAndLocation>& tiles, double x, double y, double apothem, int layer) {
+void Map::intersectingTiles(std::vector<TileAndLocation>& tiles, double centerX, double centerY, double apothem,
+                            int layer, Tile::PhysicalPresence minPresence)
+{
     int tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY;
-    tileRange(x - apothem, y - apothem, apothem * 2.0, apothem * 2.0,
+    tileRange(centerX - apothem, centerY - apothem, apothem * 2.0, apothem * 2.0,
               tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY);
 
     for (int tileIndexY = tileIndexStartY; tileIndexY < tileIndexEndY; tileIndexY++) {
         for (int tileIndexX = tileIndexStartX; tileIndexX < tileIndexEndX; tileIndexX++) {
             Tile * tile = m_palette[m_tiles->get(tileIndexX, tileIndexY, layer)];
-            tiles.push_back(TileAndLocation(tileIndexX * Tile::size + m_x, tileIndexY * Tile::size + m_y, tile));
+            if (tile->hasMinPresence(minPresence))
+                tiles.push_back(TileAndLocation(tileIndexX * Tile::size + m_x, tileIndexY * Tile::size + m_y, tile));
         }
     }
 }
@@ -130,11 +136,12 @@ void Map::draw(double screenX, double screenY, double screenWidth, double screen
     int tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY;
     tileRange(screenX, screenY, screenWidth, screenHeight, tileIndexStartX, tileIndexStartY, tileIndexEndX, tileIndexEndY);
 
+    int mapX = (int)(m_x - screenX), mapY = (int)(m_y - screenY);
     for (int tileIndexY = tileIndexStartY; tileIndexY < tileIndexEndY; tileIndexY++) {
         for (int tileIndexX = tileIndexStartX; tileIndexX < tileIndexEndX; tileIndexX++) {
             int tileIndex = m_tiles->get(tileIndexX, tileIndexY, layer);
             Tile * tile = m_palette[tileIndex];
-            tile->draw(m_x + tileIndexX * Tile::size - screenX, m_y + tileIndexY * Tile::size - screenY);
+            tile->draw(mapX + tileIndexX * Tile::sizeInt, mapY + tileIndexY * Tile::sizeInt);
         }
     }
 
@@ -143,7 +150,8 @@ void Map::draw(double screenX, double screenY, double screenWidth, double screen
 }
 
 void Map::tileRange(double left, double top, double width, double height,
-                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom) {
+                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom)
+{
     double localLeft = left - m_x;
     double localTop = top - m_y;
     double localRight = localLeft + width;

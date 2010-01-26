@@ -1,4 +1,11 @@
-version=3
+version=4
+
+# contact=cx,cy,r
+# experimentally, it seems a minimum radius of 4 is required
+contact=16,36,12
+
+# TODO: specs = speed, health, defense, stamina, more?
+# specs = 10,10,10,10, ???
 
 # walk, run, and stand define graphics for the following 9 directions:
 #  nw,w,sw,n,c,s,ne,e,se
@@ -10,9 +17,3 @@ version=3
 stand = hero_stand_nw.ani,hero_stand_north.ani,hero_stand_ne.ani,hero_stand_west.ani,hero_stand_south.ani,hero_stand_east.ani,hero_stand_sw.ani,hero_stand_south.ani,hero_stand_se.ani
 walk = hero_run_nw.ani,hero_run_north.ani,hero_run_ne.ani,hero_run_west.ani,hero_run_south.ani,hero_run_east.ani,hero_run_sw.ani,hero_run_south.ani,hero_run_se.ani
 run  = hero_run_nw.ani,hero_run_north.ani,hero_run_ne.ani,hero_run_west.ani,hero_run_south.ani,hero_run_east.ani,hero_run_sw.ani,hero_run_south.ani,hero_run_se.ani
-
-# contact=cx,cy,r
-contact=16,36,12
-
-# TODO: specs = speed, health, defense, stamina, more?
-# specs = 10,10,10,10, ???

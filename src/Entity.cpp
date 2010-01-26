@@ -5,72 +5,60 @@
 
 #include "Utils.h"
 
-Entity::Entity(const char * buffer) :
-    m_good(true),
-    m_currentGraphic(NULL),
+Entity::Entity(double radius, double centerOffsetX, double centerOffsetY) :
+    m_centerX(0.0), m_centerY(0.0), m_radius(radius),
+    m_velocityX(0.0), m_velocityY(0.0),
+    m_layer(0),
+    m_altitude(0.0), m_altitudeVelocity(0.0),
     m_direction(Center), m_movementMode(Stand),
-    m_centerOffsetX(0.0), m_centerOffsetY(0.0), m_radius(1.0),
-    m_x(0.0), m_y(0.0), m_z(0)
+    m_centerOffsetX(centerOffsetX), m_centerOffsetY(centerOffsetY)
 {
     memset(m_standing, 0, sizeof(m_standing));
     memset(m_walking, 0, sizeof(m_walking));
     memset(m_running, 0, sizeof(m_running));
+}
 
+Entity * Entity::load(const char *buffer) {
     const char * cursor = buffer;
 
     int version = Utils::readInt(&cursor);
-    if (version != 3) {
-        std::cerr << "Unsupport Entity version: " << version << std::endl;
-        m_good = false;
-        return;
+    if (version != 4) {
+        std::cerr << "Unsupported Entity version: " << version << std::endl;
+        return NULL;
     }
 
-    Graphic** movement_graphics[] = {m_standing, m_walking, m_running};
+    double centerOffsetX = (double)Utils::readInt(&cursor);
+    double centerOffsetY = (double)Utils::readInt(&cursor);
+    double radius = (double)Utils::readInt(&cursor);
+
+    Entity * entity = new Entity(radius, centerOffsetX, centerOffsetY);
+    Graphic** movementGraphics[] = { entity->m_standing, entity->m_walking, entity->m_running };
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 9; j++) {
-            Graphic * graphic = ResourceManager::getGraphic(Utils::readString(&cursor));
+            std::string graphicId = Utils::readString(&cursor);
+            Graphic * graphic = ResourceManager::getGraphic(graphicId);
             if (graphic == NULL) {
-                m_good = false;
-                return;
+                delete entity;
+                return NULL;
             }
-            movement_graphics[i][j] = graphic;
+            movementGraphics[i][j] = graphic;
         }
     }
-
-    m_centerOffsetX = (double)Utils::readInt(&cursor);
-    m_centerOffsetY = (double)Utils::readInt(&cursor);
-    m_radius = (double)Utils::readInt(&cursor);
-}
-
-Entity::~Entity()
-{
-}
-
-void Entity::setCenter(double x, double y) {
-    m_x = x - m_centerOffsetX;
-    m_y = y - m_centerOffsetY;
-}
-
-void Entity::setLayer(int z) {
-    m_z = z;
-}
-
-void Entity::setOrientation(Direction direction) {
-    m_direction = direction;
-}
-
-void Entity::setMovementMode(MovementMode movementMode) {
-    m_movementMode = movementMode;
+    return entity;
 }
 
 void Entity::draw(double screenX, double screenY) {
     Graphic** graphicList;
     switch (m_movementMode) {
-        case Stand: graphicList = m_standing; break;
-        case Walk: graphicList = m_walking; break;
-        case Run: graphicList = m_running; break;
-        default: Debug::assert(false, "unrecognized movementMode.");
+    case Stand: graphicList = m_standing; break;
+    case Walk: graphicList = m_walking; break;
+    case Run: graphicList = m_running; break;
+    case JumpUp: graphicList = m_running; break;
+    case JumpDown: graphicList = m_standing; break;
+    default: Debug::assert(false, "unrecognized movementMode.");
     }
-    graphicList[m_direction]->draw(Gameplay::instance()->screen(),(int)(m_x - screenX), (int)(m_y - screenY));
+    graphicList[m_direction]->draw(Gameplay::instance()->screen(),
+                                   (int)(m_centerX - m_centerOffsetX - screenX),
+                                   (int)(m_centerY - m_centerOffsetY - m_altitude - screenY));
 }
 

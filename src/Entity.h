@@ -10,6 +10,10 @@
 class Entity
 {
 public:
+    // directions:
+    // 0 1 2
+    // 3 4 5
+    // 6 7 8
     enum Direction {
         NorthWest,
         North,
@@ -25,43 +29,61 @@ public:
         Stand,
         Walk,
         Run,
+        JumpUp,
+        JumpDown,
     };
 
-    Entity(const char * buffer);
-    ~Entity();
-
-    bool isGood() { return m_good; }
+    static Entity * load(const char * buffer);
 
     // world location of the player's contact zone
-    double centerX() { return m_x + m_centerOffsetX; }
-    double centerY() { return m_y + m_centerOffsetY; }
+    double centerX() { return m_centerX; }
+    double centerY() { return m_centerY; }
+    void setCenter(double x, double y) { m_centerX = x; m_centerY = y; }
+    // radius of the hitbox (actually a circle)
     double radius() { return m_radius; }
-    int layer() { return m_z; }
 
-    void setCenter(double x, double y);
-    void setLayer(int z);
-    void setOrientation(Direction direction);
-    void setMovementMode(MovementMode movementMode);
+    double velocityX() { return m_velocityX; }
+    double velocityY() { return m_velocityY; }
+    void setVelocity(double x, double y) { m_velocityX = x; m_velocityY = y; }
+
+    int layer() { return m_layer; }
+    void setLayer(int layer) { m_layer = layer; }
+
+    // altitude is for jumping and is equivalent to negative y
+    double altitude() { return m_altitude; }
+    void setAltitude(double value) { m_altitude = value; }
+    double altitudeVelocity() { return m_altitudeVelocity; }
+    void setAltitudeVelocity(double value) { m_altitudeVelocity = value; }
+    void applyAltitudeVelocity() { m_altitude += m_altitudeVelocity; }
+
+    Direction orientation() { return m_direction; }
+    void setOrientation(Direction direction) { m_direction = direction; }
+
+    MovementMode movementMode() { return m_movementMode; }
+    void setMovementMode(MovementMode movementMode) { m_movementMode = movementMode; }
 
     void draw(double screenX, double screenY);
-private:
-    bool m_good;
 
-    Graphic * m_currentGraphic;
+private:
+    double m_centerX, m_centerY;
+    double m_radius;
+    double m_velocityX, m_velocityY;
+    int m_layer;
+    double m_altitude, m_altitudeVelocity;
+
+    Direction m_direction;
+    MovementMode m_movementMode;
+
+    // hit box (actually a circle)
+    double m_centerOffsetX, m_centerOffsetY;
 
     // animations for walking, running, and standing, indexed by direction
     Graphic * m_standing[9];
     Graphic * m_walking[9];
     Graphic * m_running[9];
 
-    Direction m_direction;
-    MovementMode m_movementMode;
-
-    // hit box (actually a circle)
-    double m_centerOffsetX, m_centerOffsetY, m_radius;
-
-    double m_x, m_y;
-    int m_z;
+    Entity(double radius, double centerOffsetX, double centerOffsetY);
+    ~Entity() {}
 };
 
 #endif

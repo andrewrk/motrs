@@ -53,7 +53,7 @@ private:
                 delete buffer;
                 return NULL;
             }
-            resource = new T(buffer + sizeof(char));
+            resource = T::load(buffer + sizeof(char));
             delete[] buffer;
         }
         return resource;

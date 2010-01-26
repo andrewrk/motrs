@@ -8,7 +8,7 @@
 #include <cmath>
 
 const double Tile::size = 16.0;
-const int Tile::sizeInt = 16;
+const int Tile::sizeInt = (int)Tile::size;
 
 Tile::Tile(const char** cursor) :
     m_good(true),
@@ -41,64 +41,38 @@ bool Tile::isGood() {
     return m_good;
 }
 
-void Tile::draw(double screenX, double screenY) {
-    m_graphic->draw(Gameplay::instance()->screen(), (int)screenX, (int)screenY);
+void Tile::draw(int screenX, int screenY) {
+    if (m_graphic == NULL)
+        return;
+    m_graphic->draw(Gameplay::instance()->screen(), screenX, screenY);
 }
 
-void Tile::resolveCollision(double tileX, double tileY,
-                            double & objectCenterX, double & objectCenterY, double objectRadius,
-                            int & hitDirections)
-{
+bool Tile::hasMinPresence(PhysicalPresence minPresence) {
     switch (m_shape) {
-    case tsSolidWall: {
-        // 0 1 2
-        // 3 4 5
-        // 6 7 8
-        int zoneX = 1 * ((objectCenterX > tileX) + (tileX + Tile::size < objectCenterX));
-        int zoneY = 3 * ((objectCenterY > tileY) + (tileY + Tile::size < objectCenterY));
-        int zone = zoneX + zoneY;
-        double distance;
-        int direction = zone;
-        switch (zone) {
-        case 0:
-            distance = Utils::distance(objectCenterX, objectCenterY, tileX, tileY);
-//            direction = tileX - objectCenterX < tileY - objectCenterY ? Entity::North : Entity::West;
-            break;
-        case 1:
-            distance = tileY - objectCenterY;
-            break;
-        case 2:
-            distance = Utils::distance(objectCenterX, objectCenterY, tileX + Tile::size, tileY);
-//            direction = objectCenterX - tileX <= tileY - objectCenterY ? Entity::North : Entity::East;
-            break;
-        case 3:
-            distance = tileX - objectCenterX;
-            break;
-        case 4:
-            distance = 0.0;
-            break;
-        case 5:
-            distance = objectCenterX - (tileX + Tile::size);
-            break;
-        case 6:
-            distance = Utils::distance(objectCenterX, objectCenterY, tileX, tileY + Tile::size);
-//            direction = tileX - objectCenterX <= objectCenterY - tileY ? Entity::South : Entity::West;
-            break;
-        case 7:
-            distance = objectCenterY - (tileY + Tile::size);
-            break;
-        case 8:
-            distance = Utils::distance(objectCenterX, objectCenterY, tileX + Tile::size, tileY + Tile::size);
-//            direction = objectCenterX - tileX < objectCenterY - tileY ? Entity::South : Entity::East;
-            break;
-        default:
-            Debug::assert(false, "unknown zone");
-        }
-        if (distance <= objectRadius)
-            hitDirections |= 1 << direction;
-
-        break;
+    case tsSolidWall: return minPresence <= ppWall;
+    case tsSolidFloor: return minPresence <= ppFloor;
+    case tsSolidHole: return minPresence <= ppHole;
+    case tsDiagFloorWallNW: return minPresence <= ppWall;
+    case tsDiagFloorWallNE: return minPresence <= ppWall;
+    case tsDiagFloorWallSE: return minPresence <= ppWall;
+    case tsDiagFloorWallSW: return minPresence <= ppWall;
+    case tsFloorRailN: return minPresence <= ppRail;
+    case tsFloorRailE: return minPresence <= ppRail;
+    case tsFloorRailS: return minPresence <= ppRail;
+    case tsFloorRailW: return minPresence <= ppRail;
+    case tsFloorRailNE: return minPresence <= ppRail;
+    case tsFloorRailSE: return minPresence <= ppRail;
+    case tsFloorRailSW: return minPresence <= ppRail;
+    case tsFloorRailNW: return minPresence <= ppRail;
+    default: Debug::assert(false, "Bad physical presence value"); return false;
     }
+}
+
+void Tile::resolveCircleCollision(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius) {
+    switch (m_shape) {
+    case tsSolidWall:
+        resolveCircleOnSquare(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
+        break;
     case tsSolidFloor:
         // nothing
         break;
@@ -146,6 +120,57 @@ void Tile::resolveCollision(double tileX, double tileY,
     default:
         Debug::assert(false, "unknown tile shape");
         break;
+    }
+}
+
+void Tile::resolveCircleOnSquare(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius) {
+    // zones:
+    // 0 1 2
+    // 3 4 5
+    // 6 7 8
+    int zoneX = 1 * ((objectCenterX > tileX) + (tileX + Tile::size < objectCenterX));
+    int zoneY = 3 * ((objectCenterY > tileY) + (tileY + Tile::size < objectCenterY));
+    int zone = zoneX + zoneY;
+    switch (zone) {
+    case 0:
+        resolveCircleOnPoint(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
+        break;
+    case 1:
+        objectCenterY = Utils::min(objectCenterY, tileY - objectRadius);
+        break;
+    case 2:
+        resolveCircleOnPoint(tileX + Tile::size, tileY, objectCenterX, objectCenterY, objectRadius);
+        break;
+    case 3:
+        objectCenterX = Utils::min(objectCenterX, tileX - objectRadius);
+        break;
+    case 4:
+        // omg inside the wall!
+        break;
+    case 5:
+        objectCenterX = Utils::max(objectCenterX, tileX + Tile::size + objectRadius);
+        break;
+    case 6:
+        resolveCircleOnPoint(tileX, tileY + Tile::size, objectCenterX, objectCenterY, objectRadius);
+        break;
+    case 7:
+        objectCenterY = Utils::max(objectCenterY, tileY + Tile::size + objectRadius);
+        break;
+    case 8:
+        resolveCircleOnPoint(tileX + Tile::size, tileY + Tile::size, objectCenterX, objectCenterY, objectRadius);
+        break;
+    default:
+        Debug::assert(false, "unknown zone");
+    }
+}
+
+void Tile::resolveCircleOnPoint(double pointX, double pointY, double & objectCenterX, double & objectCenterY, double objectRadius) {
+    double distance = Utils::distance(objectCenterX, objectCenterY, pointX, pointY);
+    if (distance < objectRadius) {
+        double normX = (objectCenterX - pointX) / distance;
+        double normY = (objectCenterY - pointY) / distance;
+        objectCenterX = pointX + normX * objectRadius;
+        objectCenterY = pointY + normY * objectRadius;
     }
 }
 
