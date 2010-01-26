@@ -108,7 +108,6 @@ bool Gameplay::processEvents() {
     return true;
 }
 
-
 void Gameplay::nextFrame() {
     // refresh the input state
     Input::refresh();
@@ -157,6 +156,9 @@ void Gameplay::nextFrame() {
         break;
     case Entity::JumpUp: {
             bool keepJumping = Input::state(Input::Jump);
+            double maxAltidue = 30.0;
+            if (keepJumping)
+                keepJumping = m_player->altitude() < maxAltidue;
             if (!keepJumping)
                 m_player->setMovementMode(Entity::JumpDown);
             m_player->applyAltitudeVelocity();
