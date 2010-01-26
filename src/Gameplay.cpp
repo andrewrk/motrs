@@ -144,6 +144,7 @@ void Gameplay::nextFrame() {
         }
         break;
     case Entity::Jump:
+
         break;
     default: Debug::assert(false, "bad movement mode");
     }

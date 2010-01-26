@@ -34,7 +34,7 @@ Universe::Universe(const char * buffer) :
     }
 
     m_player = ResourceManager::getEntity(Utils::readString(&cursor));
-    if (m_player == NULL || !m_player->isGood()) {
+    if (m_player == NULL) {
         m_good = false;
         return;
     }

@@ -6,7 +6,6 @@
 #include "Utils.h"
 
 Entity::Entity(double radius, double centerOffsetX, double centerOffsetY) :
-    m_good(true),
     m_centerX(0.0), m_centerY(0.0), m_radius(radius),
     m_velocityX(0.0), m_velocityY(0.0),
     m_layer(0),

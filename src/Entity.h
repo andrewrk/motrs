@@ -34,8 +34,6 @@ public:
 
     static Entity * load(const char * buffer);
 
-    bool isGood() { return m_good; }
-
     Direction orientation() { return m_direction; }
     void setOrientation(Direction direction) { m_direction = direction; }
 
@@ -59,8 +57,6 @@ public:
     void draw(double screenX, double screenY);
 
 private:
-    bool m_good;
-
     double m_centerX, m_centerY;
     const double m_radius;
     double m_velocityX, m_velocityY;
