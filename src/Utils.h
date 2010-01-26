@@ -6,6 +6,8 @@
 
 namespace Utils
 {
+    const double RadHalf = 0.70710678118654757;
+
     template <class T>
     T min(T x, T y)
     {

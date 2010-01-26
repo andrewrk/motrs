@@ -147,11 +147,14 @@ void Gameplay::nextFrame() {
                 else
                     m_player->setMovementMode(Entity::Run);
             }
-
-            // TODO radHalf
-            double speed = 3.0;
+            double speed = 3.3;
             dx = speed * input_dx;
             dy = speed * input_dy;
+            if (input_dx != 0 && input_dy != 0) {
+                // scale down by sqrt(1/2)
+                dx *= Utils::RadHalf;
+                dy *= Utils::RadHalf;
+            }
         }
         break;
     case Entity::JumpUp: {
