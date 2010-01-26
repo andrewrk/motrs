@@ -126,6 +126,7 @@ void Gameplay::nextFrame() {
     case Entity::Stand:
     case Entity::Walk:
     case Entity::Run: {
+            // TODO code duplication
             int north = Input::state(Input::North) ? 1 : 0;
             int east = Input::state(Input::East) ? 1 : 0;
             int south = Input::state(Input::South) ? 1 : 0;
@@ -168,6 +169,17 @@ void Gameplay::nextFrame() {
         }
         break;
     case Entity::JumpDown: {
+            // TODO code duplication
+            int north = Input::state(Input::North) ? 1 : 0;
+            int east = Input::state(Input::East) ? 1 : 0;
+            int south = Input::state(Input::South) ? 1 : 0;
+            int west = Input::state(Input::West) ? 1 : 0;
+            int input_dx = east - west;
+            int input_dy = south - north;
+            Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
+            if (direction != Entity::Center)
+                m_player->setOrientation(direction);
+
             double altitudeVelocity = m_player->altitudeVelocity();
             double gravity = 1.0;
             altitudeVelocity -= gravity;
