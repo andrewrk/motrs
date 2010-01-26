@@ -28,9 +28,9 @@ Entity * Entity::load(const char *buffer) {
         return NULL;
     }
 
-    double radius = (double)Utils::readInt(&cursor);
     double centerOffsetX = (double)Utils::readInt(&cursor);
     double centerOffsetY = (double)Utils::readInt(&cursor);
+    double radius = (double)Utils::readInt(&cursor);
 
     Entity * entity = new Entity(radius, centerOffsetX, centerOffsetY);
     Graphic** movementGraphics[] = { entity->m_standing, entity->m_walking, entity->m_running };
