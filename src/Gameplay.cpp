@@ -104,13 +104,15 @@ bool Gameplay::processEvents() {
                 return false;
         }
     }
-    Input::refresh();
 
     return true;
 }
 
 
 void Gameplay::nextFrame() {
+    // refresh the input state
+    Input::refresh();
+
     // iterate map set once
     std::vector<Map*> maps;
     maps.reserve(m_loadedMaps.size());
@@ -132,19 +134,46 @@ void Gameplay::nextFrame() {
             int input_dx = east - west;
             int input_dy = south - north;
             Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
-            if (direction == Entity::Center) {
-                m_player->setMovementMode(Entity::Stand);
-            } else {
-                m_player->setMovementMode(Entity::Run);
+            if (direction != Entity::Center)
                 m_player->setOrientation(direction);
+
+            bool jump = Input::justPressed(Input::Jump);
+            if (jump) {
+                m_player->setMovementMode(Entity::JumpUp);
+                double jumpingSpeed = 5.0;
+                m_player->setAltitudeVelocity(jumpingSpeed);
+            } else {
+                if (direction == Entity::Center)
+                    m_player->setMovementMode(Entity::Stand);
+                else
+                    m_player->setMovementMode(Entity::Run);
             }
+
+            // TODO radHalf
             double speed = 3.0;
             dx = speed * input_dx;
             dy = speed * input_dy;
         }
         break;
-    case Entity::Jump:
-
+    case Entity::JumpUp: {
+            bool keepJumping = Input::state(Input::Jump);
+            if (!keepJumping)
+                m_player->setMovementMode(Entity::JumpDown);
+            m_player->applyAltitudeVelocity();
+        }
+        break;
+    case Entity::JumpDown: {
+            double altitudeVelocity = m_player->altitudeVelocity();
+            double gravity = 1.0;
+            altitudeVelocity -= gravity;
+            m_player->setAltitudeVelocity(altitudeVelocity);
+            m_player->applyAltitudeVelocity();
+            if (m_player->altitude() <= 0.0) {
+                // hit the floor
+                m_player->setMovementMode(Entity::Stand);
+                m_player->setAltitude(0.0);
+            }
+        }
         break;
     default: Debug::assert(false, "bad movement mode");
     }
@@ -164,7 +193,13 @@ void Gameplay::nextFrame() {
     for (unsigned int i = 0; i < tiles.size(); i++)
         tiles[i].tile->resolveCircleCollision(tiles[i].x, tiles[i].y, x, y, radius);
 
+    // calculate real dx, dy
+    dx = x - m_player->centerX();
+    dy = y - m_player->centerY();
+    // apply new location
     m_player->setCenter(x, y);
+    // store velocity for next fram
+    m_player->setVelocity(dx, dy);
 
     // scroll the screen
     double marginNorth = m_player->centerY() - m_screenY;

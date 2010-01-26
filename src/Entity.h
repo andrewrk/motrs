@@ -29,16 +29,11 @@ public:
         Stand,
         Walk,
         Run,
-        Jump,
+        JumpUp,
+        JumpDown,
     };
 
     static Entity * load(const char * buffer);
-
-    Direction orientation() { return m_direction; }
-    void setOrientation(Direction direction) { m_direction = direction; }
-
-    MovementMode movementMode() { return m_movementMode; }
-    void setMovementMode(MovementMode movementMode) { m_movementMode = movementMode; }
 
     // world location of the player's contact zone
     double centerX() { return m_centerX; }
@@ -54,11 +49,24 @@ public:
     int layer() { return m_layer; }
     void setLayer(int layer) { m_layer = layer; }
 
+    // altitude is for jumping and is equivalent to negative y
+    double altitude() { return m_altitude; }
+    void setAltitude(double value) { m_altitude = value; }
+    double altitudeVelocity() { return m_altitudeVelocity; }
+    void setAltitudeVelocity(double value) { m_altitudeVelocity = value; }
+    void applyAltitudeVelocity() { m_altitude += m_altitudeVelocity; }
+
+    Direction orientation() { return m_direction; }
+    void setOrientation(Direction direction) { m_direction = direction; }
+
+    MovementMode movementMode() { return m_movementMode; }
+    void setMovementMode(MovementMode movementMode) { m_movementMode = movementMode; }
+
     void draw(double screenX, double screenY);
 
 private:
     double m_centerX, m_centerY;
-    const double m_radius;
+    double m_radius;
     double m_velocityX, m_velocityY;
     int m_layer;
     double m_altitude, m_altitudeVelocity;
@@ -67,7 +75,7 @@ private:
     MovementMode m_movementMode;
 
     // hit box (actually a circle)
-    const double m_centerOffsetX, m_centerOffsetY;
+    double m_centerOffsetX, m_centerOffsetY;
 
     // animations for walking, running, and standing, indexed by direction
     Graphic * m_standing[9];

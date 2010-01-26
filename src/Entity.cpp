@@ -50,10 +50,12 @@ Entity * Entity::load(const char *buffer) {
 void Entity::draw(double screenX, double screenY) {
     Graphic** graphicList;
     switch (m_movementMode) {
-        case Stand: graphicList = m_standing; break;
-        case Walk: graphicList = m_walking; break;
-        case Run: graphicList = m_running; break;
-        default: Debug::assert(false, "unrecognized movementMode.");
+    case Stand: graphicList = m_standing; break;
+    case Walk: graphicList = m_walking; break;
+    case Run: graphicList = m_running; break;
+    case JumpUp: graphicList = m_running; break;
+    case JumpDown: graphicList = m_standing; break;
+    default: Debug::assert(false, "unrecognized movementMode.");
     }
     graphicList[m_direction]->draw(Gameplay::instance()->screen(),
                                    (int)(m_centerX - m_centerOffsetX - screenX),
