@@ -19,7 +19,7 @@ public:
             : x(x), y(y), z(z), map(map) {}
     };
 
-    // create a world from data in memory
+    static World * load(const char * buffer);
     World(const char * buffer);
     // create an empty world
     World();

@@ -8,7 +8,7 @@
 // or a still image.
 class Graphic {
 public:
-    // create an animation or bitmap from memory
+    static Graphic * load(const char * buffer);
     Graphic(const char * buffer);
 
     // create an animation from memory and offset the animation

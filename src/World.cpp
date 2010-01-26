@@ -5,6 +5,10 @@
 #include "Utils.h"
 #include "ResourceManager.h"
 
+World * World::load(const char * buffer) {
+    return new World(buffer);
+}
+
 World::World(const char * buffer) :
     m_good(true),
     m_maps()

@@ -5,6 +5,10 @@
 
 #include <cmath>
 
+Graphic * Graphic::load(const char * buffer) {
+    return new Graphic(buffer);
+}
+
 Graphic::Graphic(const char * buffer) :
     m_spriteSheet(NULL),
     m_spriteBounds()

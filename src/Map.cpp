@@ -3,6 +3,10 @@
 #include "Utils.h"
 #include "Debug.h"
 
+Map * Map::load(const char *buffer) {
+    return new Map(buffer);
+}
+
 Map::Map(const char * buffer) :
     m_good(true),
     m_palette(),

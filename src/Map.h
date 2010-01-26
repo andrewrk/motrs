@@ -21,6 +21,7 @@ public:
         TileAndLocation(double x, double y, Tile * tile) : x(x), y(y), tile(tile) {}
     };
 
+    static Map * load(const char * buffer);
     Map(const char * buffer);
     Map();
     virtual ~Map();
