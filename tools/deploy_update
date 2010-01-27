@@ -49,8 +49,3 @@ rsync -avzu motrs-$VERSION/* web:www/motrs/release/newest/
 rm -rf $BUILD
 cd $SOURCE
 
-# commit the revision increment to git
-git add CMakeLists.txt
-git commit -m "deploying project version $VERSION"
-
-echo "\n\nDon't forget to git push the new version\n"
