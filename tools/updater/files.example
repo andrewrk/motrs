@@ -1,0 +1,10 @@
+619a585d53d30226de794b0a09115472 ../motrs/motrs.exe
+cb8d15cb2b7fa4269fad4270cc26469d ../motrs/resources.dat
+67acd10f873a6f1997b17e629e1dbdfe ../motrs/SDL.dll
+c4b4409f186da70fcf2bcc60d5f05489 ../world-editor/libgcc_s_dw2-1.dll
+dbda60d92e774b4acb3b1cd71f909426 ../world-editor/mingwm10.dll
+60841f9396cb87e296044660ca1a70e7 ../world-editor/QtCore4.dll
+4d26229a496babb7cf6b2a75af12410e ../world-editor/QtGui4.dll
+7e9dfa0f92ce1d7e739eafae6f4ab72a ../world-editor/world-editor.exe
+67acd10f873a6f1997b17e629e1dbdfe ../world-editor/SDL.dll
+00000000000000000000000000000000 ../world-editor/updater.exe

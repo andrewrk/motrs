@@ -1,0 +1,56 @@
+#!/bin/bash
+
+set -e
+
+SOURCE=$(pwd)
+
+# get the version number
+MAJOR=$(awk '/^SET\(VERSION_MAJOR [0-9]+\)$/ {print $2}' <CMakeLists.txt | sed 's/[^0-9]*//g')
+MINOR=$(awk '/^SET\(VERSION_MINOR [0-9]+\)$/ {print $2}' <CMakeLists.txt | sed 's/[^0-9]*//g')
+PATCH=$(awk '/^SET\(VERSION_PATCH [0-9]+\)$/ {print $2}' <CMakeLists.txt | sed 's/[^0-9]*//g')
+REVISION=$(awk '/^SET\(VERSION_REVISION [0-9]+\)$/ {print $2}' <CMakeLists.txt | sed 's/[^0-9]*//g')
+
+# increment the revision number
+REVISION=$(expr $REVISION + 1)
+VERSION="$MAJOR.$MINOR.$PATCH-$REVISION"
+
+# update the CMakeLists.txt file
+TMP=$(mktemp)
+sed "s/^SET(VERSION_REVISION [0-9][0-9]*)\$/SET(VERSION_REVISION $REVISION)/" <CMakeLists.txt >$TMP
+cp $TMP CMakeLists.txt
+rm -f $TMP
+
+# build resource-edit
+LINUX=$(mktemp -d)
+cd $LINUX
+cmake $SOURCE -DRELEASE=1
+make resource-edit
+
+# copy resource-edit to windows
+BUILD=$(mktemp -d)
+cp $LINUX/resource-edit $BUILD
+
+# build for windows
+RELEASE=$BUILD/motrs-$VERSION
+cd $BUILD
+cmake $SOURCE -DCMAKE_TOOLCHAIN_FILE=$SOURCE/cmake/win32-toolchain.cmake -DCMAKE_INSTALL_PREFIX=$RELEASE -DRELEASE=1
+make
+make install
+
+# generate the md5sum file list
+FILE_INDEX=$(mktemp)
+$SOURCE/tools/generate-file-index motrs-$VERSION/world-editor $FILE_INDEX
+scp $FILE_INDEX web:www/motrs/files
+
+# copy the other files
+rsync -avzu motrs-$VERSION/* web:www/motrs/release/newest/
+
+# clean up
+rm -rf $BUILD
+cd $SOURCE
+
+# commit the revision increment to git
+git add CMakeLists.txt
+git commit -m "deploying project version $VERSION"
+
+echo "\n\nDon't forget to git push the new version\n"
