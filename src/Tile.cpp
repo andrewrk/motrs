@@ -81,16 +81,16 @@ void Tile::resolveCircleCollision(double tileX, double tileY, double & objectCen
         break;
     // floor + wall diagonals. tsDiag(pp1)(pp2)(where-pp2-is)
     case tsDiagFloorWallNW:
-        Debug::assert(false, "TODO: tile shapes");
+        resolveCircleOnTriangleNW(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
         break;
     case tsDiagFloorWallNE:
-        Debug::assert(false, "TODO: tile shapes");
+        resolveCircleOnTriangleNE(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
         break;
     case tsDiagFloorWallSE:
-        Debug::assert(false, "TODO: tile shapes");
+        resolveCircleOnTriangleSE(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
         break;
     case tsDiagFloorWallSW:
-        Debug::assert(false, "TODO: tile shapes");
+        resolveCircleOnTriangleSW(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
         break;
     // floor + rail orientations
     case tsFloorRailN:
@@ -161,6 +161,162 @@ void Tile::resolveCircleOnSquare(double tileX, double tileY, double & objectCent
         break;
     default:
         Debug::assert(false, "unknown zone");
+    }
+}
+
+void Tile::resolveCircleOnTriangleNW(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius) {
+    // thing = rectilinear distance of object's center from the right-angle vertex
+    double thing = objectCenterX - tileX + objectCenterY - tileY;
+    bool pastTheBar = thing > Tile::size;
+    if (!pastTheBar) {
+        // from here, it's the same as a square.
+        resolveCircleOnSquare(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
+    } else {
+        // regions:
+        // +-, 0
+        // |/ \    (don't warn me about multi-line comments)
+        // ' 1
+        //  \      (don't warn me about multi-line comments)
+        // 2
+        double thing1 = -(objectCenterX - (tileX + Tile::size)) + (objectCenterY - tileY);
+        double thing2 = -(objectCenterX - tileX) + (objectCenterY - (tileY + Tile::size));
+        int zone = (thing1 > 0.0) + (thing2 > 0.0);
+        switch (zone) {
+        case 0:
+            resolveCircleOnPoint(tileX + Tile::size, tileY, objectCenterX, objectCenterY, objectRadius);
+            break;
+        case 1:
+            {
+                double rectDistance = thing - Tile::size;
+                double rectRadius = objectRadius / Utils::RadHalf;
+                double rectOverlap = rectRadius - rectDistance;
+                if (rectOverlap > 0.0) {
+                    objectCenterX += rectOverlap * 0.5;
+                    objectCenterY += rectOverlap * 0.5;
+                }
+            }
+            break;
+        case 2:
+            resolveCircleOnPoint(tileX, tileY + Tile::size, objectCenterX, objectCenterY, objectRadius);
+            break;
+        }
+    }
+}
+
+void Tile::resolveCircleOnTriangleNE(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius) {
+    // thing = rectilinear distance of object's center from the right-angle vertex
+    double thing = -(objectCenterX - (tileX + Tile::size)) + (objectCenterY - tileY);
+    bool pastTheBar = thing > Tile::size;
+    if (!pastTheBar) {
+        // from here, it's the same as a square.
+        resolveCircleOnSquare(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
+    } else {
+        // regions:
+        // 0 .-+
+        //  / \|
+        //   1 '
+        //    /
+        //     2
+        double thing1 = (objectCenterX - tileX) + (objectCenterY - tileY);
+        double thing2 = (objectCenterX - (tileX + Tile::size)) + (objectCenterY - (tileY + Tile::size));
+        int zone = (thing1 > 0.0) + (thing2 > 0.0);
+        switch (zone) {
+        case 0:
+            resolveCircleOnPoint(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
+            break;
+        case 1:
+            {
+                double rectDistance = thing - Tile::size;
+                double rectRadius = objectRadius / Utils::RadHalf;
+                double rectOverlap = rectRadius - rectDistance;
+                if (rectOverlap > 0.0) {
+                    objectCenterX -= rectOverlap * 0.5;
+                    objectCenterY += rectOverlap * 0.5;
+                }
+            }
+            break;
+        case 2:
+            resolveCircleOnPoint(tileX + Tile::size, tileY + Tile::size, objectCenterX, objectCenterY, objectRadius);
+            break;
+        }
+    }
+}
+
+void Tile::resolveCircleOnTriangleSE(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius) {
+    // thing = rectilinear distance of object's center from the right-angle vertex
+    double thing = -(objectCenterX - (tileX + Tile::size)) - (objectCenterY - (tileY + Tile::size));
+    bool pastTheBar = thing > Tile::size;
+    if (!pastTheBar) {
+        // from here, it's the same as a square.
+        resolveCircleOnSquare(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
+    } else {
+        // regions:
+        //     0
+        //    \    (don't warn me about multi-line comments)
+        //   1 .
+        //  \ /|
+        // 2 `-+
+        double thing1 = -(objectCenterX - (tileX + Tile::size)) + (objectCenterY - tileY);
+        double thing2 = -(objectCenterX - tileX) + (objectCenterY - (tileY + Tile::size));
+        int zone = (thing1 > 0.0) + (thing2 > 0.0);
+        switch (zone) {
+        case 0:
+            resolveCircleOnPoint(tileX + Tile::size, tileY, objectCenterX, objectCenterY, objectRadius);
+            break;
+        case 1:
+            {
+                double rectDistance = thing - Tile::size;
+                double rectRadius = objectRadius / Utils::RadHalf;
+                double rectOverlap = rectRadius - rectDistance;
+                if (rectOverlap > 0.0) {
+                    objectCenterX -= rectOverlap * 0.5;
+                    objectCenterY -= rectOverlap * 0.5;
+                }
+            }
+            break;
+        case 2:
+            resolveCircleOnPoint(tileX, tileY + Tile::size, objectCenterX, objectCenterY, objectRadius);
+            break;
+        }
+    }
+}
+
+void Tile::resolveCircleOnTriangleSW(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius) {
+    // thing = rectilinear distance of object's center from the right-angle vertex
+    double thing = (objectCenterX - tileX) - (objectCenterY - (tileY + Tile::size));
+    bool pastTheBar = thing > Tile::size;
+    if (!pastTheBar) {
+        // from here, it's the same as a square.
+        resolveCircleOnSquare(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
+    } else {
+        // regions:
+        // 0
+        //  /
+        // . 1
+        // |\ /
+        // +-` 2
+        double thing1 = (objectCenterX - tileX) + (objectCenterY - tileY);
+        double thing2 = (objectCenterX - (tileX + Tile::size)) + (objectCenterY - (tileY + Tile::size));
+        int zone = (thing1 > 0.0) + (thing2 > 0.0);
+        switch (zone) {
+        case 0:
+            resolveCircleOnPoint(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
+            break;
+        case 1:
+            {
+                double rectDistance = thing - Tile::size;
+                double rectRadius = objectRadius / Utils::RadHalf;
+                double rectOverlap = rectRadius - rectDistance;
+                if (rectOverlap > 0.0) {
+                    objectCenterX += rectOverlap * 0.5;
+                    objectCenterY -= rectOverlap * 0.5;
+                }
+            }
+            break;
+        case 2:
+            resolveCircleOnPoint(tileX + Tile::size, tileY + Tile::size, objectCenterX, objectCenterY, objectRadius);
+            break;
+        }
     }
 }
 
