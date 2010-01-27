@@ -137,6 +137,7 @@ void UpdaterDialog::updateScreen()
                     m_state = Done;
                     m_ui->lblStatus->setText(tr("Successful update."));
                     m_ui->btnCancel->setText(tr("&Close"));
+                    m_ui->pgbStatus->hide();
                 }
             }
             break;
