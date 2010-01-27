@@ -10,15 +10,7 @@ MINOR=$(awk '/^SET\(VERSION_MINOR [0-9]+\)$/ {print $2}' <CMakeLists.txt | sed '
 PATCH=$(awk '/^SET\(VERSION_PATCH [0-9]+\)$/ {print $2}' <CMakeLists.txt | sed 's/[^0-9]*//g')
 REVISION=$(awk '/^SET\(VERSION_REVISION [0-9]+\)$/ {print $2}' <CMakeLists.txt | sed 's/[^0-9]*//g')
 
-# increment the revision number
-REVISION=$(expr $REVISION + 1)
 VERSION="$MAJOR.$MINOR.$PATCH-$REVISION"
-
-# update the CMakeLists.txt file
-TMP=$(mktemp)
-sed "s/^SET(VERSION_REVISION [0-9][0-9]*)\$/SET(VERSION_REVISION $REVISION)/" <CMakeLists.txt >$TMP
-cp $TMP CMakeLists.txt
-rm -f $TMP
 
 # build resource-edit
 LINUX=$(mktemp -d)
