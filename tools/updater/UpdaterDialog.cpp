@@ -120,6 +120,13 @@ void UpdaterDialog::updateScreen()
             if( m_downloadFinished ) {
                 if( m_queue.size() > 0 ) {
                     DownloadQueueItem & item = m_queue.last();
+
+                    if( item.destination.compare("../world-editor/updater.exe") == 0 ) {
+                        // can't update itself
+                        // world-editor will replace the updater if it sees this
+                        item.destination = "../world-editor/updater.exe.new";
+                    }
+
                     downloadFile(item.url, item.destination);
                     m_queue.remove(m_queue.size()-1);
                     m_ui->lblStatus->setText(
