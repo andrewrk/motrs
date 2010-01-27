@@ -66,6 +66,7 @@ IF(WIN32)
         ${MINGW_DLL_PATH}/QtGui4.dll
         ${MINGW_DLL_PATH}/libgcc_s_dw2-1.dll
         ${MINGW_DLL_PATH}/mingwm10.dll
+        ${MINGW_DLL_PATH}/SDL.dll
     )
 
     SET(ALL_DLL_FILES ${DLL_FILES} ${EDITOR_DLL_FILES})
