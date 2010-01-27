@@ -2,9 +2,13 @@
 #include <cmath>
 
 double Utils::distance(double x1, double y1, double x2, double y2) {
+    return std::sqrt(Utils::distance2(x1, y1, x2, y2));
+}
+
+double Utils::distance2(double x1, double y1, double x2, double y2) {
     double dx = x2 - x1;
     double dy = y2 - y1;
-    return std::sqrt(dx * dx + dy * dy);
+    return dx * dx + dy * dy;
 }
 
 int Utils::stringToInt(std::string value) {

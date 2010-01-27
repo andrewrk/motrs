@@ -16,7 +16,7 @@ public:
     public:
         double x, y;
         Tile * tile;
-        double proximity; // used when sorting tiles by proximity
+        double proximity2; // used when sorting tiles by proximity
         TileAndLocation() {}
         TileAndLocation(double x, double y, Tile * tile) : x(x), y(y), tile(tile) {}
     };
