@@ -1,6 +1,7 @@
- * work out how world/map interacts
- * grid on the main form with outlining for world
- * ability to resize the world and maps
  * layers pane - same as before
- * drag art from the art pane to the grid
- * align the art and assign properties
+ * implement animations as a display type
+ * outline maps in the world view
+ * ability to resize the world and maps
+ * make the art a better gui interface - caption, margin, alignment
+ * ability to drag art from the art pane to the grid
+ * ability to break the art into objects
