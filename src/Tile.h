@@ -58,6 +58,10 @@ public:
 
 protected:
     static void resolveCircleOnSquare(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
+    static void resolveCircleOnTriangleNW(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
+    static void resolveCircleOnTriangleNE(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
+    static void resolveCircleOnTriangleSE(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
+    static void resolveCircleOnTriangleSW(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
     static void resolveCircleOnPoint(double pointX, double pointY, double & objectCenterX, double & objectCenterY, double objectRadius);
 
     bool m_good;
