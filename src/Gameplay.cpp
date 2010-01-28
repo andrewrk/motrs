@@ -220,10 +220,12 @@ void Gameplay::nextFrame() {
         }
         break;
     case Entity::Sword:
-        int sequencePosition = m_player->incrementSequencePosition();
-        if (sequencePosition >= 10)
-            m_player->setCurrentSequence(Entity::None);
-        break;
+        {
+            int sequencePosition = m_player->incrementSequencePosition();
+            if (sequencePosition >= 10)
+                m_player->setCurrentSequence(Entity::None);
+            break;
+        }
     default: Debug::assert(false, "unrecognized Sequence.");
     }
 
