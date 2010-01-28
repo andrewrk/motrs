@@ -49,6 +49,8 @@ private:
     // highest number of layers of all visible maps
     int m_maxLayer;
 
+    EditorMap * m_selectedMap;
+
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);
     double screenY(double absoluteY);
@@ -60,6 +62,8 @@ private:
     void drawGrid(QPainter &p);
 
     void updateViewCache();
+
+    void selectMap(EditorMap * map);
 
     friend class MainWindow;
 };

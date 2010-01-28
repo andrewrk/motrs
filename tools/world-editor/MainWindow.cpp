@@ -15,8 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_view(new WorldView(this, this)),
-    m_scene(new QGraphicsScene()),
-    m_mouseState(Normal)
+    m_scene(new QGraphicsScene())
 {
     ui->setupUi(this);
 
@@ -24,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->dock_art->setWidget(ui->widget_art);
     ui->view_art->setScene(m_scene);
+    ui->dock_layers->setWidget(ui->list_layers);
 }
 
 MainWindow::~MainWindow()
@@ -114,12 +114,6 @@ void MainWindow::cleanupArt()
     m_art.clear();
 }
 
-void MainWindow::on_actionSetStartingPoint_triggered()
-{
-    m_mouseState = SetStartingPoint;
-}
-
-
 void MainWindow::on_list_worlds_doubleClicked(QModelIndex index)
 {
     QListWidgetItem * item = ui->list_worlds->item(index.row());
@@ -131,4 +125,9 @@ void MainWindow::on_list_worlds_doubleClicked(QModelIndex index)
 void MainWindow::openWorld(QString file)
 {
     m_view->setWorld(new EditorWorld(file));
+}
+
+QListWidget * MainWindow::layersList()
+{
+    return ui->list_layers;
 }

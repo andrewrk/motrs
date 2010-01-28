@@ -5,8 +5,8 @@
 #include <QPainter>
 #include <QDebug>
 #include <QSettings>
+#include <QListWidget>
 #include <cmath>
-
 
 #include "moc_WorldView.cxx"
 
@@ -19,7 +19,8 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
     m_zoom(1.0),
     m_offsetX(0),
     m_offsetY(0),
-    m_mapCache()
+    m_mapCache(),
+    m_selectedMap(NULL)
 {
     m_hsb->show();
     m_vsb->show();
@@ -170,20 +171,66 @@ double WorldView::absoluteY(double screenY)
 
 void WorldView::mousePressEvent(QMouseEvent * e)
 {
-    switch( m_window->m_mouseState ) {
-        case MainWindow::Normal:
+    MainWindow::MouseTool tool = MainWindow::Nothing;
+    MainWindow * parent = (MainWindow *) this->parent();
+
+    if( e->button() == Qt::LeftButton )
+        tool = parent->m_toolLeftClick;
+    else if( e->button() == Qt::MidButton )
+        tool = parent->m_toolMiddleClick;
+    else if( e->button() == Qt::RightButton )
+        tool = parent->m_toolRightClick;
+
+    switch( tool ){
+        case MainWindow::Nothing:
+            break;
+        case MainWindow::Arrow:
+
+            break;
+        case MainWindow::Erasor:
+
+            break;
+        case MainWindow::Pan:
+
+            break;
+        case MainWindow::Center:
+
+            break;
+        case MainWindow::Pencil:
+
+            break;
+        case MainWindow::Brush:
 
             break;
         case MainWindow::SetStartingPoint:
+
             break;
-        default:
-            qDebug() << "Unrecognized mouse state: " << m_window->m_mouseState;
     }
 }
 
 void WorldView::setWorld(EditorWorld * world)
 {
     m_world = world;
+    selectMap(NULL);
 
     updateViewCache();
+}
+
+void WorldView::selectMap(EditorMap * map)
+{
+    m_selectedMap = map;
+    MainWindow * parent = (MainWindow *) this->parent();
+    QListWidget * list = parent->layersList();
+    list->clear();
+    if( m_selectedMap ) {
+        // add the layers from that map
+        for(int i=0; i<m_selectedMap->layerCount(); ++i){
+            QListWidgetItem * newItem = new QListWidgetItem(tr("Layer %1").arg(i+1), list);
+            newItem->setFlags(Qt::ItemIsUserCheckable);
+            newItem->setCheckState(Qt::Checked);
+            list->addItem(newItem);
+        }
+    } else {
+        list->addItem(tr("Click a map to select it and view layers"));
+    }
 }
