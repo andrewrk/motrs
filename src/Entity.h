@@ -33,6 +33,7 @@ public:
         Falling,
     };
     enum Sequence {
+        None,
         Sword,
     };
 
@@ -65,8 +66,10 @@ public:
     MovementMode movementMode() { return m_movementMode; }
     void setMovementMode(MovementMode movementMode) { m_movementMode = movementMode; }
 
-    // returns the next position
+    Sequence currentSequence() { return m_currentSequence; }
+    void setCurrentSequence(Sequence value) { m_currentSequence = value; }
     void resetSequencePosition() { m_sequencePosition = 0; }
+    // returns the next position
     int incrementSequencePosition() { return ++m_sequencePosition; }
 
     void draw(double screenX, double screenY);
@@ -85,6 +88,7 @@ private:
     double m_centerOffsetX, m_centerOffsetY;
 
     // used for counting the frames in a sequence, like a sword swing
+    Sequence m_currentSequence;
     int m_sequencePosition;
 
     // animations for various visible activities indexed by direction

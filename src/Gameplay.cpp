@@ -139,10 +139,12 @@ void Gameplay::nextFrame() {
         break;
     case Entity::JumpUp:
         canKeepJumping = true;
+        canSwingSword = true;
         break;
     case Entity::Falling:
         canChangeDirections = true;
         isFalling = true;
+        canSwingSword = true;
         break;
     default: Debug::assert(false, "bad movement mode");
     }
@@ -206,6 +208,25 @@ void Gameplay::nextFrame() {
             m_player->setAltitude(0.0);
         }
     }
+
+    switch (m_player->currentSequence()) {
+    case Entity::None:
+        if (canSwingSword) {
+            bool swingSword = Input::justPressed(Input::Attack_1);
+            if (swingSword) {
+                m_player->setCurrentSequence(Entity::Sword);
+                m_player->resetSequencePosition();
+            }
+        }
+        break;
+    case Entity::Sword:
+        int sequencePosition = m_player->incrementSequencePosition();
+        if (sequencePosition >= 10)
+            m_player->setCurrentSequence(Entity::None);
+        break;
+    default: Debug::assert(false, "unrecognized Sequence.");
+    }
+
 
     // calculate the desired location
     double x = m_player->centerX() + dx, y = m_player->centerY() + dy;
