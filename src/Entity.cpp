@@ -16,13 +16,14 @@ Entity::Entity(double radius, double centerOffsetX, double centerOffsetY) :
     memset(m_standing, 0, sizeof(m_standing));
     memset(m_walking, 0, sizeof(m_walking));
     memset(m_running, 0, sizeof(m_running));
+    memset(m_sword, 0, sizeof(m_running));
 }
 
 Entity * Entity::load(const char *buffer) {
     const char * cursor = buffer;
 
     int version = Utils::readInt(&cursor);
-    if (version != 4) {
+    if (version != 5) {
         std::cerr << "Unsupported Entity version: " << version << std::endl;
         return NULL;
     }
@@ -32,8 +33,8 @@ Entity * Entity::load(const char *buffer) {
     double radius = (double)Utils::readInt(&cursor);
 
     Entity * entity = new Entity(radius, centerOffsetX, centerOffsetY);
-    Graphic** movementGraphics[] = { entity->m_standing, entity->m_walking, entity->m_running };
-    for (int i = 0; i < 3; i++) {
+    Graphic** movementGraphics[] = { entity->m_standing, entity->m_walking, entity->m_running, entity->m_sword };
+    for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 9; j++) {
             std::string graphicId = Utils::readString(&cursor);
             Graphic * graphic = ResourceManager::getGraphic(graphicId);

@@ -168,8 +168,8 @@ def compile_entity(in_path, out_path):
     declarations = read_declarations(in_path)
     assert(declarations[0][0] == "version")
     version_number = int(declarations[0][1])
-    assert(version_number == 4)
-    movement_kinds = ("stand", "walk", "run")
+    assert(version_number == 5)
+    movement_kinds = ("stand", "walk", "run", "sword")
     movement_map = {}
     contact = None
     for (kind, value) in declarations[1:]:
@@ -185,7 +185,7 @@ def compile_entity(in_path, out_path):
             contact = pack("iii", *[int(dim) for dim in dims])
         else:
             raise(Exception("unsupported kind: " + kind))
-    assert(len(movement_map) == 3)
+    assert(len(movement_map) == len(movement_kinds))
 
     out_handle = open_output(out_path)
     out_handle.write("E" + pack("i", version_number))

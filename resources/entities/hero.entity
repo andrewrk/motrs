@@ -20,7 +20,7 @@ run  = hero_run_nw.ani,hero_run_north.ani,hero_run_ne.ani,hero_run_west.ani,hero
 
 # specify the sword swinging animations. i'm sure this will change later
 sword = \
-01_hero_swing_nw.bmp, 01_hero_swing_n.bmp, 01_hero_swing_ne.bmp, \
-01_hero_swing_w.bmp,  01_hero_swing_s.bmp, 01_hero_swing_e.bmp,  \
-01_hero_swing_sw.bmp, 01_hero_swing_s.bmp, 01_hero_swing_se.bmp
+hero_swing_nw.bmp, hero_swing_n.bmp, hero_swing_ne.bmp, \
+hero_swing_w.bmp,  hero_swing_s.bmp, hero_swing_e.bmp,  \
+hero_swing_sw.bmp, hero_swing_s.bmp, hero_swing_se.bmp
 
