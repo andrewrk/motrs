@@ -30,7 +30,7 @@ public:
         Walk,
         Run,
         JumpUp,
-        JumpDown,
+        Falling,
     };
     enum Sequence {
         Sword,

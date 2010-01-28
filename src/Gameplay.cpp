@@ -122,35 +122,47 @@ void Gameplay::nextFrame() {
     double dx = m_player->velocityX();
     double dy = m_player->velocityY();
 
+    bool canChangeDirections = false, canMoveAround = false;
+    bool canStartJump = false;
+    bool canKeepJumping = false;
+    bool canSwingSword = false;
+    bool isFalling = false;
+
     switch (m_player->movementMode()) {
     case Entity::Stand:
     case Entity::Walk:
-    case Entity::Run: {
-            // TODO code duplication
-            int north = Input::state(Input::North) ? 1 : 0;
-            int east = Input::state(Input::East) ? 1 : 0;
-            int south = Input::state(Input::South) ? 1 : 0;
-            int west = Input::state(Input::West) ? 1 : 0;
-            int input_dx = east - west;
-            int input_dy = south - north;
-            Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
-            if (direction != Entity::Center)
-                m_player->setOrientation(direction);
+    case Entity::Run:
+        canChangeDirections = true;
+        canStartJump = true;
+        canSwingSword = true;
+        canMoveAround = true;
+        break;
+    case Entity::JumpUp:
+        canKeepJumping = true;
+        break;
+    case Entity::Falling:
+        canChangeDirections = true;
+        isFalling = true;
+        break;
+    default: Debug::assert(false, "bad movement mode");
+    }
 
-            bool jump = Input::justPressed(Input::Jump);
-            bool sword = Input::justPressed(Input::Attack_1);
-            if (jump) {
-                m_player->setMovementMode(Entity::JumpUp);
-                double jumpingSpeed = 5.0;
-                m_player->setAltitudeVelocity(jumpingSpeed);
-            } else if (sword) {
-                m_player->setMovementMode(Entity::Sword);
-            } else {
-                if (direction == Entity::Center)
-                    m_player->setMovementMode(Entity::Stand);
-                else
-                    m_player->setMovementMode(Entity::Run);
-            }
+    if (canChangeDirections) {
+        int north = Input::state(Input::North) ? 1 : 0;
+        int east = Input::state(Input::East) ? 1 : 0;
+        int south = Input::state(Input::South) ? 1 : 0;
+        int west = Input::state(Input::West) ? 1 : 0;
+        int input_dx = east - west;
+        int input_dy = south - north;
+        Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
+        if (direction != Entity::Center)
+            m_player->setOrientation(direction);
+
+        if (canMoveAround) {
+            if (direction == Entity::Center)
+                m_player->setMovementMode(Entity::Stand);
+            else
+                m_player->setMovementMode(Entity::Run);
             double speed = 3.3;
             dx = speed * input_dx;
             dy = speed * input_dy;
@@ -160,42 +172,39 @@ void Gameplay::nextFrame() {
                 dy *= Utils::RadHalf;
             }
         }
-        break;
-    case Entity::JumpUp: {
-            bool keepJumping = Input::state(Input::Jump);
-            double maxAltidue = 30.0;
-            if (keepJumping)
-                keepJumping = m_player->altitude() < maxAltidue;
-            if (!keepJumping)
-                m_player->setMovementMode(Entity::JumpDown);
-            m_player->applyAltitudeVelocity();
-        }
-        break;
-    case Entity::JumpDown: {
-            // TODO code duplication
-            int north = Input::state(Input::North) ? 1 : 0;
-            int east = Input::state(Input::East) ? 1 : 0;
-            int south = Input::state(Input::South) ? 1 : 0;
-            int west = Input::state(Input::West) ? 1 : 0;
-            int input_dx = east - west;
-            int input_dy = south - north;
-            Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
-            if (direction != Entity::Center)
-                m_player->setOrientation(direction);
+    }
 
-            double altitudeVelocity = m_player->altitudeVelocity();
-            double gravity = 1.0;
-            altitudeVelocity -= gravity;
-            m_player->setAltitudeVelocity(altitudeVelocity);
-            m_player->applyAltitudeVelocity();
-            if (m_player->altitude() <= 0.0) {
-                // hit the floor
-                m_player->setMovementMode(Entity::Stand);
-                m_player->setAltitude(0.0);
-            }
+    if (canStartJump) {
+        bool jump = Input::justPressed(Input::Jump);
+        if (jump) {
+            m_player->setMovementMode(Entity::JumpUp);
+            double jumpingSpeed = 5.0;
+            m_player->setAltitudeVelocity(jumpingSpeed);
         }
-        break;
-    default: Debug::assert(false, "bad movement mode");
+    }
+
+    if (canKeepJumping) {
+        bool keepJumping = Input::state(Input::Jump);
+        double maxAltidue = 30.0;
+        if (keepJumping)
+            keepJumping = m_player->altitude() < maxAltidue;
+        if (!keepJumping)
+            m_player->setMovementMode(Entity::Falling);
+        m_player->applyAltitudeVelocity();
+    }
+
+    if (isFalling) {
+        double altitudeVelocity = m_player->altitudeVelocity();
+        double gravity = 1.0;
+        altitudeVelocity -= gravity;
+        // TODO: terminal velocity
+        m_player->setAltitudeVelocity(altitudeVelocity);
+        m_player->applyAltitudeVelocity();
+        if (m_player->altitude() <= 0.0) {
+            // hit the floor
+            m_player->setMovementMode(Entity::Stand);
+            m_player->setAltitude(0.0);
+        }
     }
 
     // calculate the desired location

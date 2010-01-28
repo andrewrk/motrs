@@ -56,8 +56,7 @@ void Entity::draw(double screenX, double screenY) {
     case Walk: graphicList = m_walking; break;
     case Run: graphicList = m_running; break;
     case JumpUp: graphicList = m_running; break;
-    case JumpDown: graphicList = m_standing; break;
-    case Sword: graphicList = m_sword; break;
+    case Falling: graphicList = m_standing; break;
     default: Debug::assert(false, "unrecognized movementMode.");
     }
     graphicList[m_direction]->draw(Gameplay::instance()->screen(),
