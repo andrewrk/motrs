@@ -11,7 +11,8 @@ Entity::Entity(double radius, double centerOffsetX, double centerOffsetY) :
     m_layer(0),
     m_altitude(0.0), m_altitudeVelocity(0.0),
     m_direction(Center), m_movementMode(Stand),
-    m_centerOffsetX(centerOffsetX), m_centerOffsetY(centerOffsetY)
+    m_centerOffsetX(centerOffsetX), m_centerOffsetY(centerOffsetY),
+    m_sequencePosition(0)
 {
     memset(m_standing, 0, sizeof(m_standing));
     memset(m_walking, 0, sizeof(m_walking));
@@ -56,6 +57,7 @@ void Entity::draw(double screenX, double screenY) {
     case Run: graphicList = m_running; break;
     case JumpUp: graphicList = m_running; break;
     case JumpDown: graphicList = m_standing; break;
+    case Sword: graphicList = m_sword; break;
     default: Debug::assert(false, "unrecognized movementMode.");
     }
     graphicList[m_direction]->draw(Gameplay::instance()->screen(),

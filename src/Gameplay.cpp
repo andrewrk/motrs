@@ -138,10 +138,13 @@ void Gameplay::nextFrame() {
                 m_player->setOrientation(direction);
 
             bool jump = Input::justPressed(Input::Jump);
+            bool sword = Input::justPressed(Input::Attack_1);
             if (jump) {
                 m_player->setMovementMode(Entity::JumpUp);
                 double jumpingSpeed = 5.0;
                 m_player->setAltitudeVelocity(jumpingSpeed);
+            } else if (sword) {
+                m_player->setMovementMode(Entity::Sword);
             } else {
                 if (direction == Entity::Center)
                     m_player->setMovementMode(Entity::Stand);
@@ -152,7 +155,7 @@ void Gameplay::nextFrame() {
             dx = speed * input_dx;
             dy = speed * input_dy;
             if (input_dx != 0 && input_dy != 0) {
-                // scale down by sqrt(1/2)
+                // for diagonal motion, scale both axes down by sqrt(1/2)
                 dx *= Utils::RadHalf;
                 dy *= Utils::RadHalf;
             }

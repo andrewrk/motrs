@@ -32,6 +32,9 @@ public:
         JumpUp,
         JumpDown,
     };
+    enum Sequence {
+        Sword,
+    };
 
     static Entity * load(const char * buffer);
 
@@ -62,6 +65,10 @@ public:
     MovementMode movementMode() { return m_movementMode; }
     void setMovementMode(MovementMode movementMode) { m_movementMode = movementMode; }
 
+    // returns the next position
+    void resetSequencePosition() { m_sequencePosition = 0; }
+    int incrementSequencePosition() { return ++m_sequencePosition; }
+
     void draw(double screenX, double screenY);
 
 private:
@@ -76,6 +83,9 @@ private:
 
     // hit box (actually a circle)
     double m_centerOffsetX, m_centerOffsetY;
+
+    // used for counting the frames in a sequence, like a sword swing
+    int m_sequencePosition;
 
     // animations for various visible activities indexed by direction
     Graphic * m_standing[9];
