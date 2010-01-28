@@ -250,7 +250,7 @@ void Gameplay::nextFrame() {
     dy = y - m_player->centerY();
     // apply new location
     m_player->setCenter(x, y);
-    // store velocity for next fram
+    // store velocity for next frame
     m_player->setVelocity(dx, dy);
 
     // scroll the screen
