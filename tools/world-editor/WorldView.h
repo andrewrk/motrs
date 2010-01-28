@@ -7,6 +7,7 @@
 #include <QResizeEvent>
 
 #include "EditorWorld.h"
+#include "EditorMap.h"
 
 class MainWindow;
 
@@ -43,6 +44,11 @@ private:
 
     GridRenderType m_grid;
 
+    // saved list of maps that are visible for fast rendering
+    QVector<EditorMap *> m_mapCache;
+    // highest number of layers of all visible maps
+    int m_maxLayer;
+
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);
     double screenY(double absoluteY);
@@ -52,6 +58,8 @@ private:
     void readSettings();
 
     void drawGrid(QPainter &p);
+
+    void updateViewCache();
 
     friend class MainWindow;
 };

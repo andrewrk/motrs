@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>740</width>
+    <width>959</width>
     <height>641</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>740</width>
+     <width>959</width>
      <height>25</height>
     </rect>
    </property>
@@ -75,20 +75,7 @@
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QPlainTextEdit" name="plainTextEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>30</height>
-        </size>
-       </property>
-      </widget>
+      <widget class="QLineEdit" name="txtFilterWorld"/>
      </item>
      <item>
       <widget class="QListWidget" name="list_worlds"/>
@@ -143,28 +130,15 @@
     <widget class="QWidget" name="widget_art" native="true">
      <property name="geometry">
       <rect>
-       <x>23</x>
-       <y>27</y>
+       <x>20</x>
+       <y>10</y>
        <width>181</width>
        <height>391</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QPlainTextEdit" name="text_artFilter">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>30</height>
-         </size>
-        </property>
-       </widget>
+       <widget class="QLineEdit" name="txtFilterArt"/>
       </item>
       <item>
        <widget class="QGraphicsView" name="view_art"/>

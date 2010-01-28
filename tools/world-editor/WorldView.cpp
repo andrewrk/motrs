@@ -1,7 +1,6 @@
 #include "WorldView.h"
 
 #include "MainWindow.h"
-#include "EditorMap.h"
 
 #include <QPainter>
 #include <QDebug>
@@ -19,12 +18,14 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
     m_world(NULL),
     m_zoom(1.0),
     m_offsetX(0),
-    m_offsetY(0)
+    m_offsetY(0),
+    m_mapCache()
 {
     m_hsb->show();
     m_vsb->show();
 
     readSettings();
+    updateViewCache();
 }
 
 WorldView::~WorldView()
@@ -47,42 +48,62 @@ void WorldView::resizeEvent(QResizeEvent * e)
     // move the scroll bars into position
     m_hsb->setGeometry(0, this->height()-m_hsb->height(), this->width()-m_vsb->width(), m_hsb->height());
     m_vsb->setGeometry(this->width()-m_vsb->width(), 0, m_vsb->width(), this->height()-m_hsb->height());
+
+    updateViewCache();
+    update();
+}
+
+void WorldView::updateViewCache()
+{
+    // when the scroll or zoom changes, we need to recalculate which maps
+    // need to be drawn.
+    m_mapCache.clear();
+    if( m_world && m_world->isGood() ) {
+        // select the maps that are in range
+        std::vector<World::WorldMap> * maps = m_world->maps();
+        double viewLeft = absoluteX(0);
+        double viewTop = absoluteY(0);
+        double viewRight = viewLeft + this->width() * m_zoom;
+        double viewBottom = viewTop + this->height() * m_zoom;
+        m_maxLayer = 0;
+        for(unsigned int i=0; i < maps->size(); ++i) {
+            // determine if the map is in range
+            World::WorldMap * wmap = &(maps->at(i));
+            EditorMap * map = (EditorMap *) maps->at(i).map;
+
+            if( !( wmap->x > viewRight || wmap->y > viewBottom ||
+                   wmap->x + map->width() < viewLeft || wmap->y + map->height() < viewTop ) )
+            {
+                if( map->layerCount() > m_maxLayer )
+                    m_maxLayer = map->layerCount();
+
+                m_mapCache.append(map);
+            }
+        }
+    }
+
+    this->update();
 }
 
 void WorldView::paintEvent(QPaintEvent * e)
 {
     QPainter p(this);
-
     p.setBackground(Qt::white);
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_world ) {
         if( m_world->isGood() ) {
-            // select the maps that are in range
-            std::vector<World::WorldMap> * maps = m_world->maps();
-            double viewLeft = absoluteX(0);
-            double viewTop = absoluteY(0);
-            double viewRight = viewLeft + this->width() * m_zoom;
-            double viewBottom = viewTop + this->height() * m_zoom;
-            for(unsigned int i=0; i < maps->size(); ++i) {
-                // determine if the map is in range
-                World::WorldMap * wmap = &(maps->at(i));
-                EditorMap * map = (EditorMap *) maps->at(i).map;
-
-                if( !( wmap->x > viewRight || wmap->y > viewBottom ||
-                       wmap->x + map->width() < viewLeft || wmap->y + map->height() < viewTop ) )
-                {
-                    // draw the map
-                    // TODO support more layers than 1
-                    map->draw(&p, absoluteX(0), absoluteY(0),
-                              (double)this->width(), (double)this->height(), 0);
+            for(int layer=0; layer<m_maxLayer; ++layer) {
+                for(int i=0; i<m_mapCache.size(); ++i) {
+                    if( layer < m_mapCache[i]->layerCount() )
+                        m_mapCache[i]->draw(&p, absoluteX(0), absoluteY(0),
+                            (double)this->width(), (double)this->height(), layer);
                 }
             }
-
             drawGrid(p);
         } else {
             p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
-            tr("Error loading World."));
+                tr("Error loading World."));
         }
     } else {
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
@@ -164,5 +185,5 @@ void WorldView::setWorld(EditorWorld * world)
 {
     m_world = world;
 
-    this->update();
+    updateViewCache();
 }

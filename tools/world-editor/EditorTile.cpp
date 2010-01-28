@@ -15,6 +15,6 @@ EditorTile::~EditorTile()
 
 }
 
-void EditorTile::draw(double screenX, double screenY) {
-    EditorMap::m_painter->drawPixmap((int)screenX, (int)screenY, *pixmap() );
+void EditorTile::draw(int screenX, int screenY) {
+    EditorMap::m_painter->drawPixmap((int)screenX, (int)screenY, *m_pixmap );
 }
