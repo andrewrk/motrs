@@ -27,6 +27,7 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
 
     readSettings();
     updateViewCache();
+
 }
 
 WorldView::~WorldView()

@@ -6,6 +6,7 @@
 #include <QGraphicsScene>
 #include <QMap>
 #include <QModelIndex>
+#include <QComboBox>
 
 #include "WorldView.h"
 
@@ -19,6 +20,15 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    MainWindow(QWidget *parent = 0);
+    ~MainWindow();
+
+protected:
+    void resizeEvent(QResizeEvent * e);
+    void showEvent(QShowEvent * e);
+    void closeEvent(QCloseEvent * e);
+
+private:
     enum MouseTool {
         Nothing,
         Arrow,
@@ -30,14 +40,6 @@ public:
         SetStartingPoint,
     };
 
-    MainWindow(QWidget *parent = 0);
-    ~MainWindow();
-
-protected:
-    void resizeEvent(QResizeEvent * e);
-    void showEvent(QShowEvent * e);
-
-private:
     typedef struct {
         QGraphicsPixmapItem * graphicsPixmapItem;
         QPixmap * pixmap;
@@ -53,12 +55,14 @@ private:
     MouseTool m_toolMiddleClick;
     MouseTool m_toolRightClick;
 
+    QStringList m_toolNames;
 
     void refreshArt();
     void refreshWorldList();
     void cleanupArt();
     void openWorld(QString file);
     QListWidget * layersList();
+    void fillToolComboBox(QComboBox & comboBox);
 
 private slots:
     void on_list_worlds_doubleClicked(QModelIndex index);
