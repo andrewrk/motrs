@@ -51,10 +51,8 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
 
     m_player = m_universe->player();
 
-    if (!Input::init()) {
-        m_good = false;
-        return;
-    }
+    if (!Input::init())
+        std::cerr << "Warning: Input did not initialize properly." << std::endl;
 }
 
 Gameplay::~Gameplay() {

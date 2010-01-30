@@ -48,6 +48,7 @@ bool Input::init() {
             return false;
         }
         Key key = searchResult->second;
+        // TODO: check for integer parse errors
         SDLKey parsedValue = (SDLKey)Utils::stringToInt(value);
         s_map[key] = parsedValue;
     }
