@@ -17,18 +17,6 @@ const char * Gameplay::ResourceFilePath = "resources.dat";
 const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
 #endif
 
-const int Gameplay::WingDirectionsMap[] = {
-    1 << Entity::East | 1 << Entity::South,
-    1 << Entity::SouthEast | 1 << Entity::SouthWest,
-    1 << Entity::South | 1 << Entity::West,
-    1 << Entity::NorthEast | 1 << Entity::SouthEast,
-    0,
-    1 << Entity::SouthWest | 1 << Entity::NorthWest,
-    1 << Entity::North | 1 << Entity::East,
-    1 << Entity::NorthWest | 1 << Entity::NorthEast,
-    1 << Entity::West | 1 << Entity::North,
-};
-
 Gameplay * Gameplay::s_inst = NULL;
 
 Gameplay::Gameplay(SDL_Surface * screen, int fps) :
@@ -77,8 +65,17 @@ void Gameplay::mainLoop() {
         Uint32 now = SDL_GetTicks();
         if (now >= next_time) {
             SDL_Flip(m_screen); //show the frame that is already drawn
-            nextFrame(); //main gameplay loop
-            updateDisplay(); //begin drawing next frame
+
+            // cache loaded maps
+            m_loadedMapsCache.clear();
+            for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
+                m_loadedMapsCache.push_back(*iMap);
+
+            //main gameplay loop
+            nextFrame();
+
+            // draw next frame
+            updateDisplay();
 
             next_time = now + m_interval;
         }
@@ -111,12 +108,6 @@ bool Gameplay::processEvents() {
 void Gameplay::nextFrame() {
     // refresh the input state
     Input::refresh();
-
-    // iterate map set once
-    std::vector<Map*> maps;
-    maps.reserve(m_loadedMaps.size());
-    for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
-        maps.push_back(*iMap);
 
     // determin directional input
     double dx = m_player->velocityX();
@@ -237,8 +228,8 @@ void Gameplay::nextFrame() {
 
     // resolve collisions
     std::vector<Map::TileAndLocation> tiles;
-    for (unsigned int i = 0; i < maps.size(); i++)
-        maps[i]->intersectingTiles(tiles, x, y, radius, layer, Tile::ppRail);
+    for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++)
+        m_loadedMapsCache[i]->intersectingTiles(tiles, x, y, radius, layer, Tile::ppRail);
     // sort by proximity
     sortByProximity(x, y, tiles);
     // resolve collisions
@@ -296,10 +287,12 @@ void Gameplay::updateDisplay() {
     SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, 0,0,0));
 
     //blit the map
-    Map * map = m_currentWorld->getMap();
-    for (int layer = 0; layer < map->layerCount(); layer++) {
-        map->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
-        if (layer == m_player->layer())
-            m_player->draw(m_screenX, m_screenY);
+    int layerCount = 2; // TODO: hax
+    for (int layer = 0; layer < layerCount; layer++) {
+        for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++) {
+            m_loadedMapsCache[i]->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
+            if (layer == m_player->layer())
+                m_player->draw(m_screenX, m_screenY);
+        }
     }
 }
