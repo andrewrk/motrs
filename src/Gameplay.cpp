@@ -50,6 +50,11 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
         m_loadedMaps.insert((*allMaps)[i]);
 
     m_player = m_universe->player();
+
+    if (!Input::init()) {
+        m_good = false;
+        return;
+    }
 }
 
 Gameplay::~Gameplay() {

@@ -72,6 +72,10 @@ std::string Utils::rtrim(std::string s) {
 
 bool Utils::loadProperties(std::string path, std::map<std::string, std::string> & propsMap) {
     std::ifstream in(path.c_str());
+    if (!in.good()) {
+        std::cerr << "file not found: \"" << path << "\"." << std::endl;
+        return false;
+    }
     std::string line;
     int lineNumber = 0;
     while (std::getline(in, line)) {

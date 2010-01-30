@@ -1,32 +1,42 @@
 #include "Input.h"
 
-bool Input::m_state[] = {false};
-bool Input::m_lastState[] = {false};
-SDLKey Input::m_map[] = {SDLK_UNKNOWN};
+#include "Utils.h"
+
+bool Input::s_state[] = {false};
+bool Input::s_lastState[] = {false};
+SDLKey Input::s_map[] = {SDLK_UNKNOWN};
 
 
 bool Input::state(Key key) {
-    return m_state[key];
+    return s_state[key];
 }
 
 bool Input::justPressed(Key key) {
-    return m_state[key] && !m_lastState[key];
+    return s_state[key] && !s_lastState[key];
+}
+
+bool Input::init() {
+    std::map<std::string, std::string> props;
+    if (!Utils::loadProperties("input.config", props))
+        return false;
+
+    return true;
 }
 
 void Input::refresh() {
     SDL_PumpEvents();
 
     // tmp:
-    m_map[North] = SDLK_w;
-    m_map[East] = SDLK_d;
-    m_map[South] = SDLK_s;
-    m_map[West] = SDLK_a;
-    m_map[Jump] = SDLK_SPACE;
-    m_map[Attack_1] = SDLK_j;
+    s_map[North] = SDLK_w;
+    s_map[East] = SDLK_d;
+    s_map[South] = SDLK_s;
+    s_map[West] = SDLK_a;
+    s_map[Jump] = SDLK_SPACE;
+    s_map[Attack_1] = SDLK_j;
 
     Uint8 * keystate = SDL_GetKeyState(NULL);
     for (int k = 0; k < Key_size; k++) {
-        m_lastState[k] = m_state[k];
-        m_state[k] = keystate[m_map[k]];
+        s_lastState[k] = s_state[k];
+        s_state[k] = keystate[s_map[k]];
     }
 }
