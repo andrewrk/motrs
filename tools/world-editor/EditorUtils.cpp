@@ -5,6 +5,8 @@
 #include <QTextStream>
 #include <QStringList>
 #include <QDebug>
+#include <QFileInfo>
+#include <QDir>
 
 bool EditorUtils::loadTextFile(QString filename, QVector< QPair<QString, QString> > & v)
 {
@@ -60,4 +62,28 @@ QString EditorUtils::dataDir()
 {
     QSettings settings;
     return settings.value("paths/data", ".").toString();
+}
+
+QPixmap * EditorUtils::pixmapForGraphic(QString graphicName)
+{
+    // check if it exists as a static image
+    QDir dir(EditorUtils::dataDir());
+    dir.cd("bitmaps");
+    QString bitmapFile = dir.absoluteFilePath(graphicName);
+    if( QFileInfo(bitmapFile).exists() )
+        return new QPixmap(bitmapFile);
+
+    // check if it exists as an animation
+    dir.cdUp();
+    dir.cd("animations");
+    QString animationDir = dir.absoluteFilePath(graphicName);
+    if( QFileInfo(animationDir).exists() ) {
+        // grab the first frame from the animation
+        dir.cd(animationDir);
+        QStringList frames = dir.entryList(QDir::NoDotAndDotDot|QDir::Files, QDir::Name);
+        QString firstFrame = frames.first();
+        return new QPixmap(dir.absoluteFilePath(firstFrame));
+    }
+
+    return NULL;
 }

@@ -48,10 +48,8 @@ EditorMap::EditorMap(QString file)
         } else if( props[i].first.compare("tile", Qt::CaseInsensitive) == 0 ) {
             // tile=shape,surface,graphicId
             QStringList tileProps = props[i].second.split(",");
-            QDir dir(EditorUtils::dataDir());
-            dir.cd("bitmaps");
-            QString pixmapFile = dir.absoluteFilePath(tileProps.at(2));
-            QPixmap * pixmap = new QPixmap(pixmapFile);
+            QString graphicFile = tileProps.at(2);
+            QPixmap * pixmap = EditorUtils::pixmapForGraphic(graphicFile);
             EditorTile * tile = new EditorTile(
                 (EditorTile::Shape)tileProps.at(0).toInt(),
                 (EditorTile::SurfaceType)tileProps.at(1).toInt(),
