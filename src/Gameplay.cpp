@@ -297,7 +297,7 @@ void Gameplay::updateDisplay() {
     for (int layer = 0; layer < layerCount; layer++) {
         for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++) {
             Map * map = m_loadedMapsCache[i];
-            if (i < map->layerCount())
+            if (i < (unsigned int)map->layerCount())
                 map->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
             if (layer == m_player->layer())
                 m_player->draw(m_screenX, m_screenY);
