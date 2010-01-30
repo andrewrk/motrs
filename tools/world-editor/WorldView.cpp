@@ -10,6 +10,8 @@
 
 #include "moc_WorldView.cxx"
 
+const int WorldView::s_lineSelectRadius = 4;
+
 WorldView::WorldView(MainWindow * window, QWidget * parent) :
     QWidget(parent),
     m_hsb(new QScrollBar(Qt::Horizontal, this)),
@@ -30,6 +32,8 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
 
     readSettings();
     updateViewCache();
+
+    this->setMouseTracking(true);
 }
 
 WorldView::~WorldView()
@@ -193,9 +197,88 @@ double WorldView::absoluteY(double screenY)
     return (screenY / m_zoom) + m_offsetY;
 }
 
+EditorMap * WorldView::mapWithLeftAt(int x, int y)
+{
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+    for( int i=0; i<m_mapCache.size(); ++i) {
+        EditorMap * map = m_mapCache[i];
+        if( absX > map->left() - s_lineSelectRadius &&
+            absX < map->left() + s_lineSelectRadius &&
+            absY > map->top() && absY < map->top() + map->height() )
+        {
+            return map;
+        }
+    }
+    return NULL;
+}
+EditorMap * WorldView::mapWithTopAt(int x, int y)
+{
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+    for( int i=0; i<m_mapCache.size(); ++i) {
+        EditorMap * map = m_mapCache[i];
+        if( absX > map->left() && absX < map->left() + map->width() &&
+            absY > map->top() - s_lineSelectRadius &&
+            absY < map->top() + s_lineSelectRadius )
+        {
+            return map;
+        }
+    }
+    return NULL;
+}
+EditorMap * WorldView::mapWithRightAt(int x, int y)
+{
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+    for( int i=0; i<m_mapCache.size(); ++i) {
+        EditorMap * map = m_mapCache[i];
+        if( absX > map->left() + map->width() - s_lineSelectRadius &&
+            absX < map->left() + map->width() + s_lineSelectRadius &&
+            absY > map->top() && absY < map->top() + map->height() )
+        {
+            return map;
+        }
+    }
+    return NULL;
+}
+EditorMap * WorldView::mapWithBottomAt(int x, int y)
+{
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+    for( int i=0; i<m_mapCache.size(); ++i) {
+        EditorMap * map = m_mapCache[i];
+        if( absX > map->left() && absX < map->left() + map->width() &&
+            absY > map->top() + map->height() - s_lineSelectRadius &&
+            absY < map->top() + map->height() + s_lineSelectRadius )
+        {
+            return map;
+        }
+    }
+    return NULL;
+}
+
 void WorldView::mouseMoveEvent(QMouseEvent * e)
 {
+    // change mouse cursor to sizers if over map boundaries
+    // if the user could use the arrow tool
+    if( m_window->m_toolLeftClick == MainWindow::Arrow ||
+        m_window->m_toolMiddleClick == MainWindow::Arrow ||
+        m_window->m_toolRightClick == MainWindow::Arrow )
+    {
+        EditorMap * mapLeft = mapWithLeftAt(e->x(), e->y());
+        EditorMap * mapRight = mapWithRightAt(e->x(), e->y());
+        EditorMap * mapTop = mapWithTopAt(e->x(), e->y());
+        EditorMap * mapBottom = mapWithBottomAt(e->x(), e->y());
 
+        // left boundary
+        if( mapLeft || mapRight )
+            this->setCursor(Qt::SizeHorCursor);
+        else if( mapTop || mapBottom )
+            this->setCursor(Qt::SizeVerCursor);
+        else
+            this->setCursor(Qt::ArrowCursor);
+    }
 }
 
 void WorldView::mousePressEvent(QMouseEvent * e)

@@ -32,6 +32,8 @@ protected:
     void mousePressEvent(QMouseEvent * e);
     void mouseMoveEvent(QMouseEvent * e);
 private:
+    // how far away from border lines can you be to be able to use stretch tools
+    static const int s_lineSelectRadius;
 
     QScrollBar * m_hsb;
     QScrollBar * m_vsb;
@@ -68,6 +70,12 @@ private:
 
     void selectMap(EditorMap * map);
     EditorMap * mapAt(int x, int y);
+
+    // determining if cursor is in range of resizing maps
+    EditorMap * mapWithLeftAt(int x, int y);
+    EditorMap * mapWithRightAt(int x, int y);
+    EditorMap * mapWithTopAt(int x, int y);
+    EditorMap * mapWithBottomAt(int x, int y);
 
 
 private slots:

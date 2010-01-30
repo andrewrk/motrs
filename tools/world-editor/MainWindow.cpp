@@ -21,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    m_view->setFocusPolicy(Qt::StrongFocus);
+
     setCentralWidget(m_view);
 
     ui->dock_art->setWidget(ui->widget_art);
