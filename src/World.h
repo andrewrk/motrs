@@ -33,13 +33,25 @@ public:
 
     inline std::vector<WorldMap> * maps() { return &m_maps; }
 
-    //hax
+    //TODO:hax
     Map * getMap();
+
+    // Position of the world
+    double left() { return m_left;}
+    double top() {return m_top;}
+    double width() {return m_width;}
+    double height() {return m_height;}
 
 protected:
 
     bool m_good;
     std::vector<WorldMap> m_maps;
+
+    double m_width;
+    double m_height;
+    double m_top;
+    double m_left;
+    void calculateBoundaries();
 };
 
 #endif

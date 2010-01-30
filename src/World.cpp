@@ -33,6 +33,8 @@ World::World(const char * buffer) :
         }
         m_maps.push_back(WorldMap(x, y, z, map));
     }
+
+    calculateBoundaries();
 }
 
 World::World() :
@@ -83,4 +85,41 @@ Universe::Location World::locationOf(double absoluteX, double absoluteY)
     loc.mapY = -1;
     loc.map = NULL;
     return loc;
+}
+
+void World::calculateBoundaries()
+{
+    if ( m_maps.size() == 0)
+    {
+        m_width = 0;
+        m_height = 0;
+        m_top = 0;
+        m_left = 0;
+        return;
+    }
+
+    // Calculate width
+    double left = m_maps[0].x;
+    double top = m_maps[0].y;
+    double right = left + m_maps[0].map->width();
+    double bottom = top + m_maps[0].map->height();
+
+    for( unsigned int i = 1; i < m_maps.size(); i++)
+    {
+        if( left > m_maps[i].x )
+            left = m_maps[i].x;
+
+        if( top > m_maps[i].y )
+            top = m_maps[i].y;
+
+        if( right < m_maps[i].x + m_maps[i].map->width() )
+            right = m_maps[i].x + m_maps[i].map->width();
+
+        if( bottom < m_maps[i].y + m_maps[i].map->height() )
+            bottom = m_maps[i].y + m_maps[i].map->height();
+    }
+    m_left = left;
+    m_top = top;
+    m_height = bottom - top;
+    m_width = right - left;
 }

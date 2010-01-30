@@ -19,7 +19,8 @@ EditorMap::EditorMap(QString file)
     if( ! m_good )
         return;
 
-    int sizeX, sizeY;
+    int sizeX, sizeY, layerCount;
+    int layerIndex = 0;
 
     // implicit null tile
     m_palette.clear();
@@ -41,10 +42,9 @@ EditorMap::EditorMap(QString file)
             QStringList size = props[i].second.split(",");
             sizeX = size.at(0).toInt();
             sizeY = size.at(1).toInt();
+            layerCount = size.at(2).toInt();
 
-            // TODO: there is a discrepency between the file format, which specifies
-            // a 2d array of tiles, and Map class, which has an Array3 for tiles
-            m_tiles = new Array3<int>(sizeX, sizeY, 1);
+            m_tiles = new Array3<int>(sizeX, sizeY, layerCount);
         } else if( props[i].first.compare("tile", Qt::CaseInsensitive) == 0 ) {
             // tile=shape,surface,graphicId
             QStringList tileProps = props[i].second.split(",");
@@ -61,20 +61,24 @@ EditorMap::EditorMap(QString file)
             // layer=0,0,...
             QStringList layer = props[i].second.split(",");
             int index = 0;
-            for(int z = 0; z < 1; ++z ) {
-                for(int y = 0; y < sizeY; ++y) {
-                    for(int x = 0; x < sizeX; ++x) {
-                        m_tiles->set(x,y,z,layer[index].toInt());
-                        ++index;
-                    }
+            for(int y = 0; y < sizeY; ++y) {
+                for(int x = 0; x < sizeX; ++x) {
+                    m_tiles->set(x,y,layerIndex,layer[index].toInt());
+                    ++index;
                 }
             }
+            ++layerIndex;
+
         } else {
             qDebug() << "Unrecognized Map property: " << props[i].first;
             this->m_good = false;
             return;
         }
     }
+
+    // pre-calculations
+    m_width = sizeX * Tile::size;
+    m_height = sizeY * Tile::size;
 }
 
 void EditorMap::draw(QPainter * p, double screenX, double screenY,

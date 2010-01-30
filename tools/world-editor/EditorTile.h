@@ -13,7 +13,7 @@ public:
     ~EditorTile();
 
     inline QPixmap * pixmap() { return m_pixmap; }
-    void draw(double screenX, double screenY);
+    void draw(int screenX, int screenY);
 
 private:
     QPixmap * m_pixmap;
