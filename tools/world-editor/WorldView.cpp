@@ -170,6 +170,11 @@ double WorldView::absoluteY(double screenY)
     return (screenY / m_zoom) + m_offsetY;
 }
 
+void WorldView::mouseMoveEvent(QMouseEvent * e)
+{
+
+}
+
 void WorldView::mousePressEvent(QMouseEvent * e)
 {
     MainWindow::MouseTool tool = MainWindow::Nothing;
@@ -186,9 +191,10 @@ void WorldView::mousePressEvent(QMouseEvent * e)
         case MainWindow::Nothing:
             break;
         case MainWindow::Arrow:
-
+            // if they clicked inside a map, select it
+            selectMap(mapAt(e->x(), e->y()));
             break;
-        case MainWindow::Erasor:
+        case MainWindow::Eraser:
 
             break;
         case MainWindow::Pan:
@@ -206,7 +212,24 @@ void WorldView::mousePressEvent(QMouseEvent * e)
         case MainWindow::SetStartingPoint:
 
             break;
+        default:
+            qDebug() << "Invalid tool selected in mousePressEvent";
     }
+}
+
+EditorMap * WorldView::mapAt(int x, int y)
+{
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+    for(int i=0; i<m_mapCache.size(); ++i) {
+        EditorMap * map = m_mapCache[i];
+        if( absX > map->left() && absX < map->left() + map->width() &&
+            absY > map->top() && absY < map->top() + map->height() )
+        {
+            return map;
+        }
+    }
+    return NULL;
 }
 
 void WorldView::setWorld(EditorWorld * world)
@@ -235,3 +258,5 @@ void WorldView::selectMap(EditorMap * map)
         list->addItem(tr("Click a map to select it and view layers"));
     }
 }
+
+

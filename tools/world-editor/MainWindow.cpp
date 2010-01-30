@@ -45,6 +45,23 @@ MainWindow::MainWindow(QWidget *parent) :
     this->restoreState(settings.value("windowState",
         haveDefaultLayout ? defaultLayout : QVariant()).toByteArray());
     this->restoreGeometry(settings.value("windowGeometry").toByteArray());
+
+    ui->cboLeftClick->setCurrentIndex(settings.value("state/tool/left", Arrow).toInt());
+    ui->cboMiddleClick->setCurrentIndex(settings.value("state/tool/middle", Pan).toInt());
+    ui->cboRightClick->setCurrentIndex(settings.value("state/tool/right", Eraser).toInt());
+}
+
+void MainWindow::on_cboLeftClick_currentIndexChanged(int index)
+{
+    m_toolLeftClick = (MouseTool) index;
+}
+void MainWindow::on_cboMiddleClick_currentIndexChanged(int index)
+{
+    m_toolMiddleClick = (MouseTool) index;
+}
+void MainWindow::on_cboRightClick_currentIndexChanged(int index)
+{
+    m_toolRightClick = (MouseTool) index;
 }
 
 void MainWindow::closeEvent(QCloseEvent * e)
@@ -52,6 +69,10 @@ void MainWindow::closeEvent(QCloseEvent * e)
     QSettings settings;
     settings.setValue("windowState", this->saveState());
     settings.setValue("windowGeometry", this->saveGeometry());
+
+    settings.setValue("state/tool/left", m_toolLeftClick);
+    settings.setValue("state/tool/middle", m_toolMiddleClick);
+    settings.setValue("state/tool/right", m_toolRightClick);
 }
 
 void MainWindow::fillToolComboBox(QComboBox & cbo)

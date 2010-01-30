@@ -75,6 +75,10 @@ EditorMap::EditorMap(QString file)
             return;
         }
     }
+
+    // pre-calculations
+    m_width = sizeX * Tile::size;
+    m_height = sizeY * Tile::size;
 }
 
 void EditorMap::draw(QPainter * p, double screenX, double screenY,

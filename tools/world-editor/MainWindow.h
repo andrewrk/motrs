@@ -32,7 +32,7 @@ private:
     enum MouseTool {
         Nothing,
         Arrow,
-        Erasor,
+        Eraser,
         Pan,
         Center,
         Pencil,
@@ -67,6 +67,10 @@ private:
 private slots:
     void on_list_worlds_doubleClicked(QModelIndex index);
     void on_actionSettings_triggered();
+
+    void on_cboLeftClick_currentIndexChanged(int index);
+    void on_cboMiddleClick_currentIndexChanged(int index);
+    void on_cboRightClick_currentIndexChanged(int index);
 
     friend class WorldView;
 };

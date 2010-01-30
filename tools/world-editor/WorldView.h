@@ -29,6 +29,7 @@ protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
     void mousePressEvent(QMouseEvent * e);
+    void mouseMoveEvent(QMouseEvent * e);
 private:
 
     QScrollBar * m_hsb;
@@ -64,6 +65,7 @@ private:
     void updateViewCache();
 
     void selectMap(EditorMap * map);
+    EditorMap * mapAt(int x, int y);
 
     friend class MainWindow;
 };
