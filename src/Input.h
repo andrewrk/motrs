@@ -3,6 +3,8 @@
 
 #include "SDL.h"
 
+#include <map>
+
 
 // No mouse support yet. Also, if you want to type your name, too bad.
 class Input {
@@ -33,6 +35,8 @@ private:
     static bool s_state[Key_size];
     static bool s_lastState[Key_size];
     static SDLKey s_map[Key_size];
+
+    static std::map<std::string, Key> s_namesToKeys;
 };
 
 #endif
