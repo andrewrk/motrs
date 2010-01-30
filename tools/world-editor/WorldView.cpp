@@ -30,7 +30,6 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
 
     readSettings();
     updateViewCache();
-
 }
 
 WorldView::~WorldView()
@@ -65,7 +64,7 @@ void WorldView::updateViewCache()
     m_mapCache.clear();
     if( m_world && m_world->isGood() ) {
         // select the maps that are in range
-        std::vector<World::WorldMap> * maps = m_world->maps();
+        std::vector<Map*> * maps = m_world->maps();
         double viewLeft = absoluteX(0);
         double viewTop = absoluteY(0);
         double viewRight = viewLeft + this->width() * m_zoom;
@@ -73,13 +72,12 @@ void WorldView::updateViewCache()
         m_maxLayer = 0;
         for(unsigned int i=0; i < maps->size(); ++i) {
             // determine if the map is in range
-            World::WorldMap * wmap = &(maps->at(i));
-            EditorMap * map = (EditorMap *) maps->at(i).map;
+            EditorMap * map = (EditorMap *) maps->at(i);
 
-            if( !( wmap->x > viewRight || wmap->y > viewBottom ||
-                   wmap->x + map->width() < viewLeft || wmap->y + map->height() < viewTop ) )
+            if (!(map->left() > viewRight || map->top() > viewBottom ||
+                  map->left() + map->width() < viewLeft || map->top() + map->height() < viewTop))
             {
-                if( map->layerCount() > m_maxLayer )
+                if (map->layerCount() > m_maxLayer)
                     m_maxLayer = map->layerCount();
 
                 m_mapCache.append(map);

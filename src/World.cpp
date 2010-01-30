@@ -31,7 +31,8 @@ World::World(const char * buffer) :
             m_good = false;
             break;
         }
-        m_maps.push_back(WorldMap(x, y, z, map));
+        map->setPosition(x, y, z);
+        m_maps.push_back(map);
     }
 
     calculateBoundaries();
@@ -53,12 +54,7 @@ bool World::isGood() {
     return m_good;
 }
 
-Map * World::getMap() {
-    return m_maps[0].map;
-}
-
-Universe::Location World::locationOf(double absoluteX, double absoluteY)
-{
+Universe::Location World::locationOf(double absoluteX, double absoluteY) {
     Universe::Location loc;
 
     // the easy parts
@@ -68,14 +64,14 @@ Universe::Location World::locationOf(double absoluteX, double absoluteY)
     loc.z = -1; // don't know
 
     // find the map
-    for(unsigned int i=0; i<m_maps.size(); ++i){
-        WorldMap * wmap = &m_maps[i];
-        if( absoluteX >= wmap->x && absoluteX < wmap->x + wmap->map->width() &&
-            absoluteY >= wmap->y && absoluteY < wmap->y + wmap->map->height() )
+    for (unsigned int i = 0; i < m_maps.size(); i++) {
+        Map * map = m_maps[i];
+        if (absoluteX >= map->left() && absoluteX < map->left() + map->width() &&
+            absoluteY >= map->top() && absoluteY < map->top() + map->height())
         {
-            loc.map = wmap->map;
-            loc.mapX = wmap->x;
-            loc.mapY = wmap->y;
+            loc.map = map;
+            loc.mapX = map->left();
+            loc.mapY = map->top();
             return loc;
         }
     }
@@ -87,10 +83,8 @@ Universe::Location World::locationOf(double absoluteX, double absoluteY)
     return loc;
 }
 
-void World::calculateBoundaries()
-{
-    if ( m_maps.size() == 0)
-    {
+void World::calculateBoundaries() {
+    if (m_maps.size() == 0) {
         m_width = 0;
         m_height = 0;
         m_top = 0;
@@ -99,24 +93,23 @@ void World::calculateBoundaries()
     }
 
     // Calculate width
-    double left = m_maps[0].x;
-    double top = m_maps[0].y;
-    double right = left + m_maps[0].map->width();
-    double bottom = top + m_maps[0].map->height();
+    double left = m_maps[0]->left();
+    double top = m_maps[0]->top();
+    double right = left + m_maps[0]->width();
+    double bottom = top + m_maps[0]->height();
 
-    for( unsigned int i = 1; i < m_maps.size(); i++)
-    {
-        if( left > m_maps[i].x )
-            left = m_maps[i].x;
+    for (unsigned int i = 1; i < m_maps.size(); i++) {
+        if (left > m_maps[i]->left())
+            left = m_maps[i]->left();
 
-        if( top > m_maps[i].y )
-            top = m_maps[i].y;
+        if (top > m_maps[i]->top())
+            top = m_maps[i]->top();
 
-        if( right < m_maps[i].x + m_maps[i].map->width() )
-            right = m_maps[i].x + m_maps[i].map->width();
+        if (right < m_maps[i]->left() + m_maps[i]->width())
+            right = m_maps[i]->left() + m_maps[i]->width();
 
-        if( bottom < m_maps[i].y + m_maps[i].map->height() )
-            bottom = m_maps[i].y + m_maps[i].map->height();
+        if (bottom < m_maps[i]->top() + m_maps[i]->height())
+            bottom = m_maps[i]->top() + m_maps[i]->height();
     }
     m_left = left;
     m_top = top;

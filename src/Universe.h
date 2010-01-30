@@ -10,12 +10,11 @@ class Entity;
 /**
  * Universe - a list of all worlds.
  */
-class Universe
-{
+class Universe {
 public:
     typedef struct {
         World * world;
-        double x,y; // absolute coordinates in the World
+        double x, y; // absolute coordinates in the World
         double mapX, mapY; // absolute coordinates of the Map in the World
         Map * map;
         int z; // layer

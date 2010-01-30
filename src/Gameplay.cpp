@@ -44,7 +44,11 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
         return;
     }
     m_currentWorld = m_universe->startWorld();
-    m_loadedMaps.insert(m_currentWorld->getMap());
+
+    std::vector<Map*>* allMaps = m_currentWorld->maps();
+    for (unsigned int i = 0; i < allMaps->size(); i++)
+        m_loadedMaps.insert((*allMaps)[i]);
+
     m_player = m_universe->player();
 }
 
@@ -286,7 +290,6 @@ void Gameplay::updateDisplay() {
     //generic background color
     SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, 0,0,0));
 
-    //blit the map
     int layerCount = 2; // TODO: hax
     for (int layer = 0; layer < layerCount; layer++) {
         for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++) {
