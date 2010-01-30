@@ -42,6 +42,8 @@ EditorWorld::EditorWorld(QString file) :
             return;
         }
     }
+
+    calculateBoundaries();
 }
 
 EditorWorld::~EditorWorld()

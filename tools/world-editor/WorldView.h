@@ -56,6 +56,9 @@ private:
     EditorMap * m_selectedMap;
     int m_selectedLayer;
 
+    int m_mouseDownX;
+    int m_mouseDownY;
+
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);
     double screenY(double absoluteY);

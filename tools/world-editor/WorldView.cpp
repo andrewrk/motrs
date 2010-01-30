@@ -268,6 +268,9 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
 
 void WorldView::mousePressEvent(QMouseEvent * e)
 {
+    m_mouseDownX = e->x();
+    m_mouseDownY = e->y();
+
     MainWindow::MouseTool tool = MainWindow::Nothing;
 
     if( e->button() == Qt::LeftButton )
@@ -281,9 +284,19 @@ void WorldView::mousePressEvent(QMouseEvent * e)
         case MainWindow::Nothing:
             break;
         case MainWindow::Arrow:
+        {
+            // are we stretching the boundaries of a map?
+            bool overLeft = overMapLeft(e->x(), e->y());
+            bool overRight = overMapRight(e->x(), e->y());
+            bool overTop = overMapTop(e->x(), e->y());
+            bool overBottom = overMapBottom(e->x(), e->y());
+
+
+
             // if they clicked inside a map, select it
             selectMap(mapAt(e->x(), e->y()));
             break;
+        }
         case MainWindow::Eraser:
 
             break;
@@ -327,6 +340,15 @@ void WorldView::setWorld(EditorWorld * world)
     m_world = world;
     selectMap(NULL);
 
+    // set up scroll bars
+    const int bufferRoom = 800;
+    m_hsb->setMinimum(m_world->left() - bufferRoom);
+    m_hsb->setMaximum(m_world->left() + m_world->width());
+    m_hsb->setValue(m_world->left());
+    m_vsb->setMinimum(m_world->top() - bufferRoom);
+    m_vsb->setMaximum(m_world->top() + m_world->height());
+    m_vsb->setValue(m_world->top());
+
     updateViewCache();
 }
 
@@ -356,11 +378,13 @@ void WorldView::selectMap(EditorMap * map)
 
 void WorldView::verticalScroll(int value)
 {
-    qDebug() << value ;
+    m_offsetY = value;
+    updateViewCache();
 }
 void WorldView::horizontalScroll(int value)
 {
-    qDebug() << value;
+    m_offsetX = value;
+    updateViewCache();
 }
 
 void WorldView::setSelectedLayer(int index)
