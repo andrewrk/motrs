@@ -25,6 +25,9 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
     m_hsb->show();
     m_vsb->show();
 
+    connect(m_vsb, SIGNAL(valueChanged(int)), this, SLOT(verticalScroll(int)));
+    connect(m_hsb, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
+
     readSettings();
     updateViewCache();
 
@@ -234,4 +237,13 @@ void WorldView::selectMap(EditorMap * map)
     } else {
         list->addItem(tr("Click a map to select it and view layers"));
     }
+}
+
+void WorldView::verticalScroll(int value)
+{
+    qDebug() << value ;
+}
+void WorldView::horizontalScroll(int value)
+{
+    qDebug() << value;
 }
