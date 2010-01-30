@@ -72,10 +72,10 @@ private:
     EditorMap * mapAt(int x, int y);
 
     // determining if cursor is in range of resizing maps
-    EditorMap * mapWithLeftAt(int x, int y);
-    EditorMap * mapWithRightAt(int x, int y);
-    EditorMap * mapWithTopAt(int x, int y);
-    EditorMap * mapWithBottomAt(int x, int y);
+    bool overMapLeft(int x, int y);
+    bool overMapRight(int x, int y);
+    bool overMapTop(int x, int y);
+    bool overMapBottom(int x, int y);
 
 
 private slots:

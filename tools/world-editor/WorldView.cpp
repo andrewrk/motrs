@@ -197,65 +197,55 @@ double WorldView::absoluteY(double screenY)
     return (screenY / m_zoom) + m_offsetY;
 }
 
-EditorMap * WorldView::mapWithLeftAt(int x, int y)
+bool WorldView::overMapLeft(int x, int y)
 {
+    if( ! m_selectedMap )
+        return false;
+
     double absX = absoluteX(x);
     double absY = absoluteY(y);
-    for( int i=0; i<m_mapCache.size(); ++i) {
-        EditorMap * map = m_mapCache[i];
-        if( absX > map->left() - s_lineSelectRadius &&
-            absX < map->left() + s_lineSelectRadius &&
-            absY > map->top() && absY < map->top() + map->height() )
-        {
-            return map;
-        }
-    }
-    return NULL;
+
+    return  absX > m_selectedMap->left() - s_lineSelectRadius &&
+            absX < m_selectedMap->left() + s_lineSelectRadius &&
+            absY > m_selectedMap->top() && absY < m_selectedMap->top() + m_selectedMap->height();
 }
-EditorMap * WorldView::mapWithTopAt(int x, int y)
+
+bool WorldView::overMapTop(int x, int y)
 {
+    if( ! m_selectedMap )
+        return false;
+
     double absX = absoluteX(x);
     double absY = absoluteY(y);
-    for( int i=0; i<m_mapCache.size(); ++i) {
-        EditorMap * map = m_mapCache[i];
-        if( absX > map->left() && absX < map->left() + map->width() &&
-            absY > map->top() - s_lineSelectRadius &&
-            absY < map->top() + s_lineSelectRadius )
-        {
-            return map;
-        }
-    }
-    return NULL;
+
+    return  absX > m_selectedMap->left() && absX < m_selectedMap->left() + m_selectedMap->width() &&
+            absY > m_selectedMap->top() - s_lineSelectRadius &&
+            absY < m_selectedMap->top() + s_lineSelectRadius;
 }
-EditorMap * WorldView::mapWithRightAt(int x, int y)
+bool WorldView::overMapRight(int x, int y)
 {
+    if( ! m_selectedMap )
+        return false;
+
     double absX = absoluteX(x);
     double absY = absoluteY(y);
-    for( int i=0; i<m_mapCache.size(); ++i) {
-        EditorMap * map = m_mapCache[i];
-        if( absX > map->left() + map->width() - s_lineSelectRadius &&
-            absX < map->left() + map->width() + s_lineSelectRadius &&
-            absY > map->top() && absY < map->top() + map->height() )
-        {
-            return map;
-        }
-    }
-    return NULL;
+
+    return  absX > m_selectedMap->left() + m_selectedMap->width() - s_lineSelectRadius &&
+            absX < m_selectedMap->left() + m_selectedMap->width() + s_lineSelectRadius &&
+            absY > m_selectedMap->top() && absY < m_selectedMap->top() + m_selectedMap->height();
+
 }
-EditorMap * WorldView::mapWithBottomAt(int x, int y)
+bool WorldView::overMapBottom(int x, int y)
 {
+    if( ! m_selectedMap )
+        return false;
+
     double absX = absoluteX(x);
     double absY = absoluteY(y);
-    for( int i=0; i<m_mapCache.size(); ++i) {
-        EditorMap * map = m_mapCache[i];
-        if( absX > map->left() && absX < map->left() + map->width() &&
-            absY > map->top() + map->height() - s_lineSelectRadius &&
-            absY < map->top() + map->height() + s_lineSelectRadius )
-        {
-            return map;
-        }
-    }
-    return NULL;
+
+    return  absX > m_selectedMap->left() && absX < m_selectedMap->left() + m_selectedMap->width() &&
+            absY > m_selectedMap->top() + m_selectedMap->height() - s_lineSelectRadius &&
+            absY < m_selectedMap->top() + m_selectedMap->height() + s_lineSelectRadius;
 }
 
 void WorldView::mouseMoveEvent(QMouseEvent * e)
@@ -266,15 +256,10 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
         m_window->m_toolMiddleClick == MainWindow::Arrow ||
         m_window->m_toolRightClick == MainWindow::Arrow )
     {
-        EditorMap * mapLeft = mapWithLeftAt(e->x(), e->y());
-        EditorMap * mapRight = mapWithRightAt(e->x(), e->y());
-        EditorMap * mapTop = mapWithTopAt(e->x(), e->y());
-        EditorMap * mapBottom = mapWithBottomAt(e->x(), e->y());
-
         // left boundary
-        if( mapLeft || mapRight )
+        if( overMapLeft(e->x(), e->y()) || overMapRight(e->x(),e->y()))
             this->setCursor(Qt::SizeHorCursor);
-        else if( mapTop || mapBottom )
+        else if( overMapTop(e->x(), e->y()) || overMapBottom(e->x(), e->y()))
             this->setCursor(Qt::SizeVerCursor);
         else
             this->setCursor(Qt::ArrowCursor);
