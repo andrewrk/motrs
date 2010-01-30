@@ -290,10 +290,15 @@ void Gameplay::updateDisplay() {
     //generic background color
     SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, 0,0,0));
 
-    int layerCount = 2; // TODO: hax
+    // find layer count
+    int layerCount = 0;
+    for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++)
+        layerCount = Utils::max(layerCount, m_loadedMapsCache[i]->layerCount());
     for (int layer = 0; layer < layerCount; layer++) {
         for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++) {
-            m_loadedMapsCache[i]->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
+            Map * map = m_loadedMapsCache[i];
+            if (i < map->layerCount())
+                map->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
             if (layer == m_player->layer())
                 m_player->draw(m_screenX, m_screenY);
         }
