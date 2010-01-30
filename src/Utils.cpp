@@ -83,7 +83,7 @@ bool Utils::loadProperties(std::string path, std::map<std::string, std::string> 
         // strip comments
         unsigned int commentStart = line.find('#');
         if (commentStart != std::string::npos)
-            line = line.substr(commentStart);
+            line = line.substr(0, commentStart);
         // trim leading whitespace (indentation)
         line = ltrim(line);
         // skip blank lines
