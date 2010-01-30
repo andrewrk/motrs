@@ -50,6 +50,9 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
         m_loadedMaps.insert((*allMaps)[i]);
 
     m_player = m_universe->player();
+
+    if (!Input::init())
+        std::cerr << "Warning: Input did not initialize properly." << std::endl;
 }
 
 Gameplay::~Gameplay() {
@@ -290,10 +293,15 @@ void Gameplay::updateDisplay() {
     //generic background color
     SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, 0,0,0));
 
-    int layerCount = 2; // TODO: hax
+    // find layer count
+    int layerCount = 0;
+    for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++)
+        layerCount = Utils::max(layerCount, m_loadedMapsCache[i]->layerCount());
     for (int layer = 0; layer < layerCount; layer++) {
         for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++) {
-            m_loadedMapsCache[i]->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
+            Map * map = m_loadedMapsCache[i];
+            if (i < (unsigned int)map->layerCount())
+                map->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
             if (layer == m_player->layer())
                 m_player->draw(m_screenX, m_screenY);
         }

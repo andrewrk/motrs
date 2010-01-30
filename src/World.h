@@ -28,7 +28,6 @@ public:
     double top() {return m_top;}
     double width() {return m_width;}
     double height() {return m_height;}
-
 protected:
 
     bool m_good;

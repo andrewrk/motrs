@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <map>
 
 namespace Utils
 {
@@ -35,6 +36,11 @@ namespace Utils
         *cursor += sizeof(T);
         return (T*)value;
     }
+
+    std::string trim(std::string s);
+    std::string ltrim(std::string s);
+    std::string rtrim(std::string s);
+    bool loadProperties(std::string path, std::map<std::string, std::string> & propsMap);
 }
 
 #endif
