@@ -67,6 +67,11 @@ private:
     void selectMap(EditorMap * map);
     EditorMap * mapAt(int x, int y);
 
+
+private slots:
+    void verticalScroll(int value);
+    void horizontalScroll(int value);
+
     friend class MainWindow;
 };
 
