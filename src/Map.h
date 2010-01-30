@@ -9,8 +9,7 @@
 
 #include <vector>
 
-class Map
-{
+class Map {
 public:
     class TileAndLocation {
     public:
@@ -36,7 +35,8 @@ public:
     virtual void draw(double screenX, double screenY, double screenWidth,
               double screenHeight, int layer);
 
-    // location, width and height accessors
+    // world location
+    void setPosition(double x, double y, int story) { m_x = x; m_y = y; m_story = story; }
     double left() { return m_x; }
     double top() { return m_y; }
     double width(){ return m_width; }
@@ -65,6 +65,7 @@ protected:
     // absolute coordinates
     double m_x, m_y;
     double m_width, m_height; // computed
+    int m_story;
 
     void tileRange(double left, double top, double width, double height,
                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom);

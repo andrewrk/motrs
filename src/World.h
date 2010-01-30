@@ -2,23 +2,13 @@
 #define _WORLD_H_
 
 #include <vector>
+#include <set>
 #include "Map.h"
 #include "Universe.h"
 
 class World
 {
 public:
-    class WorldMap {
-    public:
-        // where the map is in the world
-        double x, y;
-        // stories
-        int z;
-        Map * map;
-        WorldMap(double x, double y, int z, Map * map)
-            : x(x), y(y), z(z), map(map) {}
-    };
-
     static World * load(const char * buffer);
     World(const char * buffer);
     // create an empty world
@@ -31,10 +21,7 @@ public:
     // return the Location at specified coordinates
     Universe::Location locationOf(double absoluteX, double absoluteY);
 
-    inline std::vector<WorldMap> * maps() { return &m_maps; }
-
-    //TODO:hax
-    Map * getMap();
+    std::vector<Map*> * maps() { return &m_maps; }
 
     // Position of the world
     double left() { return m_left;}
@@ -45,7 +32,7 @@ public:
 protected:
 
     bool m_good;
-    std::vector<WorldMap> m_maps;
+    std::vector<Map*> m_maps;
 
     double m_width;
     double m_height;

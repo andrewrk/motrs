@@ -17,18 +17,6 @@ const char * Gameplay::ResourceFilePath = "resources.dat";
 const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
 #endif
 
-const int Gameplay::WingDirectionsMap[] = {
-    1 << Entity::East | 1 << Entity::South,
-    1 << Entity::SouthEast | 1 << Entity::SouthWest,
-    1 << Entity::South | 1 << Entity::West,
-    1 << Entity::NorthEast | 1 << Entity::SouthEast,
-    0,
-    1 << Entity::SouthWest | 1 << Entity::NorthWest,
-    1 << Entity::North | 1 << Entity::East,
-    1 << Entity::NorthWest | 1 << Entity::NorthEast,
-    1 << Entity::West | 1 << Entity::North,
-};
-
 Gameplay * Gameplay::s_inst = NULL;
 
 Gameplay::Gameplay(SDL_Surface * screen, int fps) :
@@ -56,7 +44,11 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
         return;
     }
     m_currentWorld = m_universe->startWorld();
-    m_loadedMaps.insert(m_currentWorld->getMap());
+
+    std::vector<Map*>* allMaps = m_currentWorld->maps();
+    for (unsigned int i = 0; i < allMaps->size(); i++)
+        m_loadedMaps.insert((*allMaps)[i]);
+
     m_player = m_universe->player();
 }
 
@@ -77,8 +69,17 @@ void Gameplay::mainLoop() {
         Uint32 now = SDL_GetTicks();
         if (now >= next_time) {
             SDL_Flip(m_screen); //show the frame that is already drawn
-            nextFrame(); //main gameplay loop
-            updateDisplay(); //begin drawing next frame
+
+            // cache loaded maps
+            m_loadedMapsCache.clear();
+            for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
+                m_loadedMapsCache.push_back(*iMap);
+
+            //main gameplay loop
+            nextFrame();
+
+            // draw next frame
+            updateDisplay();
 
             next_time = now + m_interval;
         }
@@ -112,88 +113,117 @@ void Gameplay::nextFrame() {
     // refresh the input state
     Input::refresh();
 
-    // iterate map set once
-    std::vector<Map*> maps;
-    maps.reserve(m_loadedMaps.size());
-    for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
-        maps.push_back(*iMap);
-
     // determin directional input
     double dx = m_player->velocityX();
     double dy = m_player->velocityY();
 
+    bool canChangeDirections = false, canMoveAround = false;
+    bool canStartJump = false;
+    bool canKeepJumping = false;
+    bool canSwingSword = false;
+    bool isFalling = false;
+
     switch (m_player->movementMode()) {
     case Entity::Stand:
     case Entity::Walk:
-    case Entity::Run: {
-            // TODO code duplication
-            int north = Input::state(Input::North) ? 1 : 0;
-            int east = Input::state(Input::East) ? 1 : 0;
-            int south = Input::state(Input::South) ? 1 : 0;
-            int west = Input::state(Input::West) ? 1 : 0;
-            int input_dx = east - west;
-            int input_dy = south - north;
-            Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
-            if (direction != Entity::Center)
-                m_player->setOrientation(direction);
+    case Entity::Run:
+        canChangeDirections = true;
+        canStartJump = true;
+        canSwingSword = true;
+        canMoveAround = true;
+        break;
+    case Entity::JumpUp:
+        canKeepJumping = true;
+        canSwingSword = true;
+        break;
+    case Entity::Falling:
+        canChangeDirections = true;
+        isFalling = true;
+        canSwingSword = true;
+        break;
+    default: Debug::assert(false, "bad movement mode");
+    }
 
-            bool jump = Input::justPressed(Input::Jump);
-            if (jump) {
-                m_player->setMovementMode(Entity::JumpUp);
-                double jumpingSpeed = 5.0;
-                m_player->setAltitudeVelocity(jumpingSpeed);
-            } else {
-                if (direction == Entity::Center)
-                    m_player->setMovementMode(Entity::Stand);
-                else
-                    m_player->setMovementMode(Entity::Run);
-            }
+    if (canChangeDirections) {
+        int north = Input::state(Input::North) ? 1 : 0;
+        int east = Input::state(Input::East) ? 1 : 0;
+        int south = Input::state(Input::South) ? 1 : 0;
+        int west = Input::state(Input::West) ? 1 : 0;
+        int input_dx = east - west;
+        int input_dy = south - north;
+        Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
+        if (direction != Entity::Center)
+            m_player->setOrientation(direction);
+
+        if (canMoveAround) {
+            if (direction == Entity::Center)
+                m_player->setMovementMode(Entity::Stand);
+            else
+                m_player->setMovementMode(Entity::Run);
             double speed = 3.3;
             dx = speed * input_dx;
             dy = speed * input_dy;
             if (input_dx != 0 && input_dy != 0) {
-                // scale down by sqrt(1/2)
+                // for diagonal motion, scale both axes down by sqrt(1/2)
                 dx *= Utils::RadHalf;
                 dy *= Utils::RadHalf;
             }
         }
-        break;
-    case Entity::JumpUp: {
-            bool keepJumping = Input::state(Input::Jump);
-            double maxAltidue = 30.0;
-            if (keepJumping)
-                keepJumping = m_player->altitude() < maxAltidue;
-            if (!keepJumping)
-                m_player->setMovementMode(Entity::JumpDown);
-            m_player->applyAltitudeVelocity();
-        }
-        break;
-    case Entity::JumpDown: {
-            // TODO code duplication
-            int north = Input::state(Input::North) ? 1 : 0;
-            int east = Input::state(Input::East) ? 1 : 0;
-            int south = Input::state(Input::South) ? 1 : 0;
-            int west = Input::state(Input::West) ? 1 : 0;
-            int input_dx = east - west;
-            int input_dy = south - north;
-            Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
-            if (direction != Entity::Center)
-                m_player->setOrientation(direction);
+    }
 
-            double altitudeVelocity = m_player->altitudeVelocity();
-            double gravity = 1.0;
-            altitudeVelocity -= gravity;
-            m_player->setAltitudeVelocity(altitudeVelocity);
-            m_player->applyAltitudeVelocity();
-            if (m_player->altitude() <= 0.0) {
-                // hit the floor
-                m_player->setMovementMode(Entity::Stand);
-                m_player->setAltitude(0.0);
+    if (canStartJump) {
+        bool jump = Input::justPressed(Input::Jump);
+        if (jump) {
+            m_player->setMovementMode(Entity::JumpUp);
+            double jumpingSpeed = 5.0;
+            m_player->setAltitudeVelocity(jumpingSpeed);
+        }
+    }
+
+    if (canKeepJumping) {
+        bool keepJumping = Input::state(Input::Jump);
+        double maxAltidue = 30.0;
+        if (keepJumping)
+            keepJumping = m_player->altitude() < maxAltidue;
+        if (!keepJumping)
+            m_player->setMovementMode(Entity::Falling);
+        m_player->applyAltitudeVelocity();
+    }
+
+    if (isFalling) {
+        double altitudeVelocity = m_player->altitudeVelocity();
+        double gravity = 1.0;
+        altitudeVelocity -= gravity;
+        // TODO: terminal velocity
+        m_player->setAltitudeVelocity(altitudeVelocity);
+        m_player->applyAltitudeVelocity();
+        if (m_player->altitude() <= 0.0) {
+            // hit the floor
+            m_player->setMovementMode(Entity::Stand);
+            m_player->setAltitude(0.0);
+        }
+    }
+
+    switch (m_player->currentSequence()) {
+    case Entity::None:
+        if (canSwingSword) {
+            bool swingSword = Input::justPressed(Input::Attack_1);
+            if (swingSword) {
+                m_player->setCurrentSequence(Entity::Sword);
+                m_player->resetSequencePosition();
             }
         }
         break;
-    default: Debug::assert(false, "bad movement mode");
+    case Entity::Sword:
+        {
+            int sequencePosition = m_player->incrementSequencePosition();
+            if (sequencePosition >= 10)
+                m_player->setCurrentSequence(Entity::None);
+            break;
+        }
+    default: Debug::assert(false, "unrecognized Sequence.");
     }
+
 
     // calculate the desired location
     double x = m_player->centerX() + dx, y = m_player->centerY() + dy;
@@ -202,8 +232,8 @@ void Gameplay::nextFrame() {
 
     // resolve collisions
     std::vector<Map::TileAndLocation> tiles;
-    for (unsigned int i = 0; i < maps.size(); i++)
-        maps[i]->intersectingTiles(tiles, x, y, radius, layer, Tile::ppRail);
+    for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++)
+        m_loadedMapsCache[i]->intersectingTiles(tiles, x, y, radius, layer, Tile::ppRail);
     // sort by proximity
     sortByProximity(x, y, tiles);
     // resolve collisions
@@ -215,7 +245,7 @@ void Gameplay::nextFrame() {
     dy = y - m_player->centerY();
     // apply new location
     m_player->setCenter(x, y);
-    // store velocity for next fram
+    // store velocity for next frame
     m_player->setVelocity(dx, dy);
 
     // scroll the screen
@@ -260,11 +290,12 @@ void Gameplay::updateDisplay() {
     //generic background color
     SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, 0,0,0));
 
-    //blit the map
-    Map * map = m_currentWorld->getMap();
-    for (int layer = 0; layer < map->layerCount(); layer++) {
-        map->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
-        if (layer == m_player->layer())
-            m_player->draw(m_screenX, m_screenY);
+    int layerCount = 2; // TODO: hax
+    for (int layer = 0; layer < layerCount; layer++) {
+        for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++) {
+            m_loadedMapsCache[i]->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
+            if (layer == m_player->layer())
+                m_player->draw(m_screenX, m_screenY);
+        }
     }
 }

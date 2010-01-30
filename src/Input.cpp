@@ -22,6 +22,7 @@ void Input::refresh() {
     m_map[South] = SDLK_s;
     m_map[West] = SDLK_a;
     m_map[Jump] = SDLK_SPACE;
+    m_map[Attack_1] = SDLK_j;
 
     Uint8 * keystate = SDL_GetKeyState(NULL);
     for (int k = 0; k < Key_size; k++) {

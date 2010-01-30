@@ -34,7 +34,6 @@ public:
     double screenHeight() { return 600.0; }
 private:
 
-    static const int WingDirectionsMap[9];
     static const char * ResourceFilePath;
     static Gameplay * s_inst;
 
@@ -52,6 +51,7 @@ private:
 
     World * m_currentWorld;
     std::set<Map*> m_loadedMaps;
+    std::vector<Map*> m_loadedMapsCache;
     Entity * m_player;
 
     bool processEvents();

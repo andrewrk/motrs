@@ -14,7 +14,9 @@ Map::Map(const char * buffer) :
     m_submaps(),
     m_triggers(),
     m_entities(),
-    m_x(0.0), m_y(0.0)
+    m_x(0.0), m_y(0.0),
+    m_width(0.0), m_height(0.0),
+    m_story(0)
 {
     const char * cursor = buffer;
     int version = Utils::readInt(&cursor);

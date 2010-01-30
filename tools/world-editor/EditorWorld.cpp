@@ -34,9 +34,8 @@ EditorWorld::EditorWorld(QString file) :
             dir.cd("maps");
             QString mapFile = dir.absoluteFilePath(coords[3]);
             EditorMap * map = new EditorMap(mapFile);
-            WorldMap wmap(coords[0].toDouble(), coords[1].toDouble(),
-                          coords[2].toInt(), map);
-            m_maps.push_back(wmap);
+            map->setPosition(coords[0].toDouble(), coords[1].toDouble(), coords[2].toInt());
+            m_maps.push_back(map);
         } else {
             qDebug() << "Unrecognized World property: " << props[i].first;
             this->m_good = false;

@@ -30,7 +30,11 @@ public:
         Walk,
         Run,
         JumpUp,
-        JumpDown,
+        Falling,
+    };
+    enum Sequence {
+        None,
+        Sword,
     };
 
     static Entity * load(const char * buffer);
@@ -62,6 +66,12 @@ public:
     MovementMode movementMode() { return m_movementMode; }
     void setMovementMode(MovementMode movementMode) { m_movementMode = movementMode; }
 
+    Sequence currentSequence() { return m_currentSequence; }
+    void setCurrentSequence(Sequence value) { m_currentSequence = value; }
+    void resetSequencePosition() { m_sequencePosition = 0; }
+    // returns the next position
+    int incrementSequencePosition() { return ++m_sequencePosition; }
+
     void draw(double screenX, double screenY);
 
 private:
@@ -77,10 +87,15 @@ private:
     // hit box (actually a circle)
     double m_centerOffsetX, m_centerOffsetY;
 
-    // animations for walking, running, and standing, indexed by direction
+    // used for counting the frames in a sequence, like a sword swing
+    Sequence m_currentSequence;
+    int m_sequencePosition;
+
+    // animations for various visible activities indexed by direction
     Graphic * m_standing[9];
     Graphic * m_walking[9];
     Graphic * m_running[9];
+    Graphic * m_sword[9];
 
     Entity(double radius, double centerOffsetX, double centerOffsetY);
     ~Entity() {}
