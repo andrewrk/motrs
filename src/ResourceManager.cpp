@@ -7,10 +7,11 @@
 
 ResourceFile * ResourceManager::resourceFile = NULL;
 
-std::map<std::string, World*> ResourceManager::s_worlds;
-std::map<std::string, Map*> ResourceManager::s_maps;
+std::map<std::string, const char *> ResourceManager::s_worlds;
+std::map<std::string, const char *> ResourceManager::s_maps;
+std::map<std::string, const char *> ResourceManager::s_entities;
+
 std::map<std::string, Graphic*> ResourceManager::s_graphics;
-std::map<std::string, Entity*> ResourceManager::s_entities;
 
 Universe * ResourceManager::loadUniverse(std::string resourceFilePath, std::string id) {
     resourceFile = new ResourceFile(resourceFilePath);
@@ -39,18 +40,18 @@ Universe * ResourceManager::loadUniverse(std::string resourceFilePath, std::stri
 }
 
 World * ResourceManager::getWorld(std::string id) {
-    return getResource("World", s_worlds, 'W', id);
+    return loadFromCachedBuffer<World>("World", s_worlds, 'W', id);
 }
 
 Map * ResourceManager::getMap(std::string id) {
-    return getResource("Map", s_maps, 'M', id);
-}
-
-Graphic * ResourceManager::getGraphic(std::string id) {
-    return getResource("Graphic", s_graphics, 'G', id);
+    return loadFromCachedBuffer<Map>("Map", s_maps, 'M', id);
 }
 
 Entity * ResourceManager::getEntity(std::string id) {
-    return getResource("Entity", s_entities, 'E', id);
+    return loadFromCachedBuffer<Entity>("Entity", s_entities, 'E', id);
+}
+
+Graphic * ResourceManager::getGraphic(std::string id) {
+    return loadCachedResource<Graphic>("Graphic", s_graphics, 'G', id);
 }
 

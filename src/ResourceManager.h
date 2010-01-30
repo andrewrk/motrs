@@ -23,10 +23,11 @@ public:
 private:
     static ResourceFile * resourceFile;
 
-    static std::map<std::string, World*> s_worlds;
-    static std::map<std::string, Map*> s_maps;
+    static std::map<std::string, const char *> s_worlds;
+    static std::map<std::string, const char *> s_maps;
+    static std::map<std::string, const char *> s_entities;
+
     static std::map<std::string, Graphic*> s_graphics;
-    static std::map<std::string, Entity*> s_entities;
 
     template <class T>
     static T * find(std::map<std::string, T*> & map, std::string id) {
@@ -37,7 +38,30 @@ private:
     }
 
     template <class T>
-    static T * getResource(std::string resourceTypeName, std::map<std::string, T*> & cache, char typeCode, std::string id) {
+    static T * loadFromCachedBuffer(std::string resourceTypeName, std::map<std::string, const char *> & cache, char typeCode, std::string id) {
+        Debug::assert(resourceFile != NULL, "ResourceManager::get" + resourceTypeName + ": resourceFile == NULL");
+        const char * buffer = find(cache, id);
+        if (buffer == NULL) {
+            buffer = resourceFile->getResource(id);
+            if (buffer == NULL) {
+                std::cerr << "Unable to find " + resourceTypeName + ": " << id << std::endl;
+                return NULL;
+            }
+            char actualTypeCode = *buffer;
+            if (actualTypeCode != typeCode) {
+                std::cerr << "Wrong type code in resource " << id << ". " <<
+                        "Should be '" << typeCode << "' but it's '" << actualTypeCode << "'." << std::endl;
+                delete buffer;
+                return NULL;
+            }
+            cache[id] = buffer;
+        }
+        T * resource = T::load(buffer + sizeof(char));
+        return resource;
+    }
+
+    template <class T>
+    static T * loadCachedResource(std::string resourceTypeName, std::map<std::string, T*> & cache, char typeCode, std::string id) {
         Debug::assert(resourceFile != NULL, "ResourceManager::get" + resourceTypeName + ": resourceFile == NULL");
         T * resource = find(cache, id);
         if (resource == NULL) {
@@ -54,7 +78,9 @@ private:
                 return NULL;
             }
             resource = T::load(buffer + sizeof(char));
-            delete[] buffer;
+            delete buffer;
+            if (resource != NULL)
+                cache[id] = resource;
         }
         return resource;
     }
