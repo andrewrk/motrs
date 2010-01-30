@@ -7,6 +7,7 @@
 #include <QResizeEvent>
 
 #include "EditorWorld.h"
+#include "EditorMap.h"
 
 class MainWindow;
 
@@ -28,6 +29,7 @@ protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
     void mousePressEvent(QMouseEvent * e);
+    void mouseMoveEvent(QMouseEvent * e);
 private:
 
     QScrollBar * m_hsb;
@@ -43,6 +45,13 @@ private:
 
     GridRenderType m_grid;
 
+    // saved list of maps that are visible for fast rendering
+    QVector<EditorMap *> m_mapCache;
+    // highest number of layers of all visible maps
+    int m_maxLayer;
+
+    EditorMap * m_selectedMap;
+
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);
     double screenY(double absoluteY);
@@ -52,6 +61,16 @@ private:
     void readSettings();
 
     void drawGrid(QPainter &p);
+
+    void updateViewCache();
+
+    void selectMap(EditorMap * map);
+    EditorMap * mapAt(int x, int y);
+
+
+private slots:
+    void verticalScroll(int value);
+    void horizontalScroll(int value);
 
     friend class MainWindow;
 };

@@ -36,7 +36,9 @@ public:
     virtual void draw(double screenX, double screenY, double screenWidth,
               double screenHeight, int layer);
 
-    // width and height accessors
+    // location, width and height accessors
+    double left() { return m_x; }
+    double top() { return m_y; }
     double width(){ return m_width; }
     double height() { return m_height; }
     int layerCount() { return m_tiles->sizeZ; }

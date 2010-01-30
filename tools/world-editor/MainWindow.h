@@ -2,9 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QtGui/QMainWindow>
+#include <QListWidget>
 #include <QGraphicsScene>
 #include <QMap>
 #include <QModelIndex>
+#include <QComboBox>
 
 #include "WorldView.h"
 
@@ -24,17 +26,24 @@ public:
 protected:
     void resizeEvent(QResizeEvent * e);
     void showEvent(QShowEvent * e);
+    void closeEvent(QCloseEvent * e);
 
 private:
+    enum MouseTool {
+        Nothing,
+        Arrow,
+        Eraser,
+        Pan,
+        Center,
+        Pencil,
+        Brush,
+        SetStartingPoint,
+    };
+
     typedef struct {
         QGraphicsPixmapItem * graphicsPixmapItem;
         QPixmap * pixmap;
     } ArtItem;
-
-    enum MouseState {
-        Normal,
-        SetStartingPoint,
-    };
 
     Ui::MainWindow *ui;
 
@@ -42,17 +51,26 @@ private:
     QGraphicsScene * m_scene;
     QMap<QGraphicsPixmapItem *, ArtItem> m_art;
 
-    MouseState m_mouseState;
+    MouseTool m_toolLeftClick;
+    MouseTool m_toolMiddleClick;
+    MouseTool m_toolRightClick;
+
+    QStringList m_toolNames;
 
     void refreshArt();
     void refreshWorldList();
     void cleanupArt();
     void openWorld(QString file);
+    QListWidget * layersList();
+    void fillToolComboBox(QComboBox & comboBox);
 
 private slots:
     void on_list_worlds_doubleClicked(QModelIndex index);
-    void on_actionSetStartingPoint_triggered();
     void on_actionSettings_triggered();
+
+    void on_cboLeftClick_currentIndexChanged(int index);
+    void on_cboMiddleClick_currentIndexChanged(int index);
+    void on_cboRightClick_currentIndexChanged(int index);
 
     friend class WorldView;
 };

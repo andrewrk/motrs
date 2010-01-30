@@ -20,6 +20,17 @@ bool EditorUtils::loadTextFile(QString filename, QVector< QPair<QString, QString
     QTextStream in(&infile);
     while(! in.atEnd()) {
         QString line = in.readLine().trimmed();
+        // handle backslash at the end
+        while( line.mid(line.size()-1,1).compare("\\") == 0 ) {
+            if( in.atEnd() ) {
+                qDebug() << "Syntax error reading " << filename
+                    << ": Backslash at EOF and no next line";
+                infile.close();
+                return false;
+            }
+            line.remove(line.size()-1, 1);
+            line.append(in.readLine().trimmed());
+        }
 
         if( line.size() == 0 || line.at(0) == '#' ) {
             // comment. ignore

@@ -1,13 +1,12 @@
 #include "WorldView.h"
 
 #include "MainWindow.h"
-#include "EditorMap.h"
 
 #include <QPainter>
 #include <QDebug>
 #include <QSettings>
+#include <QListWidget>
 #include <cmath>
-
 
 #include "moc_WorldView.cxx"
 
@@ -19,12 +18,19 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
     m_world(NULL),
     m_zoom(1.0),
     m_offsetX(0),
-    m_offsetY(0)
+    m_offsetY(0),
+    m_mapCache(),
+    m_selectedMap(NULL)
 {
     m_hsb->show();
     m_vsb->show();
 
+    connect(m_vsb, SIGNAL(valueChanged(int)), this, SLOT(verticalScroll(int)));
+    connect(m_hsb, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
+
     readSettings();
+    updateViewCache();
+
 }
 
 WorldView::~WorldView()
@@ -47,42 +53,62 @@ void WorldView::resizeEvent(QResizeEvent * e)
     // move the scroll bars into position
     m_hsb->setGeometry(0, this->height()-m_hsb->height(), this->width()-m_vsb->width(), m_hsb->height());
     m_vsb->setGeometry(this->width()-m_vsb->width(), 0, m_vsb->width(), this->height()-m_hsb->height());
+
+    updateViewCache();
+    update();
+}
+
+void WorldView::updateViewCache()
+{
+    // when the scroll or zoom changes, we need to recalculate which maps
+    // need to be drawn.
+    m_mapCache.clear();
+    if( m_world && m_world->isGood() ) {
+        // select the maps that are in range
+        std::vector<World::WorldMap> * maps = m_world->maps();
+        double viewLeft = absoluteX(0);
+        double viewTop = absoluteY(0);
+        double viewRight = viewLeft + this->width() * m_zoom;
+        double viewBottom = viewTop + this->height() * m_zoom;
+        m_maxLayer = 0;
+        for(unsigned int i=0; i < maps->size(); ++i) {
+            // determine if the map is in range
+            World::WorldMap * wmap = &(maps->at(i));
+            EditorMap * map = (EditorMap *) maps->at(i).map;
+
+            if( !( wmap->x > viewRight || wmap->y > viewBottom ||
+                   wmap->x + map->width() < viewLeft || wmap->y + map->height() < viewTop ) )
+            {
+                if( map->layerCount() > m_maxLayer )
+                    m_maxLayer = map->layerCount();
+
+                m_mapCache.append(map);
+            }
+        }
+    }
+
+    this->update();
 }
 
 void WorldView::paintEvent(QPaintEvent * e)
 {
     QPainter p(this);
-
     p.setBackground(Qt::white);
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_world ) {
         if( m_world->isGood() ) {
-            // select the maps that are in range
-            std::vector<World::WorldMap> * maps = m_world->maps();
-            double viewLeft = absoluteX(0);
-            double viewTop = absoluteY(0);
-            double viewRight = viewLeft + this->width() * m_zoom;
-            double viewBottom = viewTop + this->height() * m_zoom;
-            for(unsigned int i=0; i < maps->size(); ++i) {
-                // determine if the map is in range
-                World::WorldMap * wmap = &(maps->at(i));
-                EditorMap * map = (EditorMap *) maps->at(i).map;
-
-                if( !( wmap->x > viewRight || wmap->y > viewBottom ||
-                       wmap->x + map->width() < viewLeft || wmap->y + map->height() < viewTop ) )
-                {
-                    // draw the map
-                    // TODO support more layers than 1
-                    map->draw(&p, absoluteX(0), absoluteY(0),
-                              (double)this->width(), (double)this->height(), 0);
+            for(int layer=0; layer<m_maxLayer; ++layer) {
+                for(int i=0; i<m_mapCache.size(); ++i) {
+                    if( layer < m_mapCache[i]->layerCount() )
+                        m_mapCache[i]->draw(&p, absoluteX(0), absoluteY(0),
+                            (double)this->width(), (double)this->height(), layer);
                 }
             }
-
             drawGrid(p);
         } else {
             p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
-            tr("Error loading World."));
+                tr("Error loading World."));
         }
     } else {
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
@@ -147,22 +173,100 @@ double WorldView::absoluteY(double screenY)
     return (screenY / m_zoom) + m_offsetY;
 }
 
+void WorldView::mouseMoveEvent(QMouseEvent * e)
+{
+
+}
+
 void WorldView::mousePressEvent(QMouseEvent * e)
 {
-    switch( m_window->m_mouseState ) {
-        case MainWindow::Normal:
+    MainWindow::MouseTool tool = MainWindow::Nothing;
+    MainWindow * parent = (MainWindow *) this->parent();
+
+    if( e->button() == Qt::LeftButton )
+        tool = parent->m_toolLeftClick;
+    else if( e->button() == Qt::MidButton )
+        tool = parent->m_toolMiddleClick;
+    else if( e->button() == Qt::RightButton )
+        tool = parent->m_toolRightClick;
+
+    switch( tool ){
+        case MainWindow::Nothing:
+            break;
+        case MainWindow::Arrow:
+            // if they clicked inside a map, select it
+            selectMap(mapAt(e->x(), e->y()));
+            break;
+        case MainWindow::Eraser:
+
+            break;
+        case MainWindow::Pan:
+
+            break;
+        case MainWindow::Center:
+
+            break;
+        case MainWindow::Pencil:
+
+            break;
+        case MainWindow::Brush:
 
             break;
         case MainWindow::SetStartingPoint:
+
             break;
         default:
-            qDebug() << "Unrecognized mouse state: " << m_window->m_mouseState;
+            qDebug() << "Invalid tool selected in mousePressEvent";
     }
+}
+
+EditorMap * WorldView::mapAt(int x, int y)
+{
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+    for(int i=0; i<m_mapCache.size(); ++i) {
+        EditorMap * map = m_mapCache[i];
+        if( absX > map->left() && absX < map->left() + map->width() &&
+            absY > map->top() && absY < map->top() + map->height() )
+        {
+            return map;
+        }
+    }
+    return NULL;
 }
 
 void WorldView::setWorld(EditorWorld * world)
 {
     m_world = world;
+    selectMap(NULL);
 
-    this->update();
+    updateViewCache();
+}
+
+void WorldView::selectMap(EditorMap * map)
+{
+    m_selectedMap = map;
+    MainWindow * parent = (MainWindow *) this->parent();
+    QListWidget * list = parent->layersList();
+    list->clear();
+    if( m_selectedMap ) {
+        // add the layers from that map
+        for(int i=0; i<m_selectedMap->layerCount(); ++i){
+            QListWidgetItem * newItem = new QListWidgetItem(tr("Layer %1").arg(i+1), list);
+            newItem->setFlags(Qt::ItemIsUserCheckable);
+            newItem->setCheckState(Qt::Checked);
+            list->addItem(newItem);
+        }
+    } else {
+        list->addItem(tr("Click a map to select it and view layers"));
+    }
+}
+
+void WorldView::verticalScroll(int value)
+{
+    qDebug() << value ;
+}
+void WorldView::horizontalScroll(int value)
+{
+    qDebug() << value;
 }

@@ -139,8 +139,9 @@ def compile_map(in_path, out_path):
     for (kind, value) in declarations[1:]:
         if kind == "size":
             assert size == None
-            (x, y) = value.split(",")
+            (x, y, layerCount) = value.split(",")
             size = (int(x), int(y))
+            layerCount = int(layerCount)
         elif kind == "tile":
             pallet.append(encode_tile(value))
         elif kind == "layer":
@@ -154,6 +155,7 @@ def compile_map(in_path, out_path):
         else:
             raise(Exception("unsupported kind: " + kind))
     assert size != None
+    assert layerCount == len(layers), "layerCount: %i, len(layers): %i" % (layerCount, len(layers))
     out_handle = open_output(out_path)
     out_handle.write("M" + pack("i", version_number))
     out_handle.write(pack("ii", size[0], size[1]))
