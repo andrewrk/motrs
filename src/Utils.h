@@ -10,16 +10,10 @@ namespace Utils
     const double RadHalf = 0.70710678118654757;
 
     template <class T>
-    T min(T x, T y)
-    {
-        return (x > y) ? y : x;
-    }
+    T min(T x, T y) { return (x > y) ? y : x; }
 
     template <class T>
-    T max(T x, T y)
-    {
-        return (x > y) ? x : y;
-    }
+    T max(T x, T y) { return (x > y) ? x : y; }
 
     double distance(double x1, double y1, double x2, double y2);
     double distance2(double x1, double y1, double x2, double y2);

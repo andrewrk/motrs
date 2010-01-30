@@ -1,0 +1,10 @@
+version=5
+
+contact=16,16,15
+
+stand = rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp
+walk  = rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp
+run   = rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp
+
+sword = rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp
+
