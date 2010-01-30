@@ -103,6 +103,22 @@ void WorldView::paintEvent(QPaintEvent * e)
                             (double)this->width(), (double)this->height(), layer);
                 }
             }
+            // draw a bold line around map borders
+            QPen normalMapBorder(Qt::black, 2);
+            QPen selectedMapBorder(Qt::blue, 2);
+            p.setBrush(Qt::NoBrush);
+            for(int i=0; i<m_mapCache.size(); ++i) {
+                EditorMap * map = m_mapCache[i];
+
+                if( m_selectedMap == map )
+                    p.setPen(selectedMapBorder);
+                else
+                    p.setPen(normalMapBorder);
+
+                p.drawRect(screenX(map->left()), screenY(map->top()),
+                    map->width() * m_zoom, map->height() * m_zoom);
+            }
+
             drawGrid(p);
         } else {
             p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
@@ -258,6 +274,7 @@ void WorldView::selectMap(EditorMap * map)
     } else {
         list->addItem(tr("Click a map to select it and view layers"));
     }
+    this->update();
 }
 
 void WorldView::verticalScroll(int value)
