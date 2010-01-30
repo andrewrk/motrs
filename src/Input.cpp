@@ -5,7 +5,7 @@
 bool Input::s_state[] = {false};
 bool Input::s_lastState[] = {false};
 SDLKey Input::s_map[] = {SDLK_UNKNOWN};
-std::map<std::string, Key> Input::s_namesToKeys;
+std::map<std::string, Input::Key> Input::s_namesToKeys;
 
 
 bool Input::state(Key key) {
@@ -47,7 +47,7 @@ bool Input::init() {
             std::cerr << "Unknown key \"" << name << "\"." << std::endl;
             return false;
         }
-        Key key = searchResult->second();
+        Key key = searchResult->second;
         SDLKey parsedValue = (SDLKey)Utils::stringToInt(value);
         s_map[key] = parsedValue;
     }

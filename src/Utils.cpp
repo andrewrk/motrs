@@ -60,7 +60,7 @@ std::string Utils::ltrim(std::string s) {
 std::string Utils::rtrim(std::string s) {
     unsigned int goodEnd = s.size();
     for (unsigned int i = goodEnd; i > 0; i--) {
-        if (std::isspace(s[i]))
+        if (std::isspace(s[i - 1]))
             continue;
         goodEnd = i;
         break;
