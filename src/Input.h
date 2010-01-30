@@ -4,6 +4,7 @@
 #include "SDL.h"
 
 #include <map>
+#include <string>
 
 
 // No mouse support yet. Also, if you want to type your name, too bad.
