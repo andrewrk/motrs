@@ -100,16 +100,16 @@ void EditorMap::setTop(double value)
 
 void EditorMap::setWidth(double value)
 {
-    int tileCount = value / Tile::size;
-    if( tileCount > 0 )
+    int tileCount = (int)(value / Tile::size);
+    if (tileCount > 0)
         m_tiles->redim(tileCount, m_tiles->sizeY(), m_tiles->sizeZ(), 0);
     calculateBoundaries();
 }
 
 void EditorMap::setHeight(double value)
 {
-    int tileCount = value / Tile::size;
-    if( tileCount > 0 )
+    int tileCount = (int)(value / Tile::size);
+    if (tileCount > 0)
         m_tiles->redim(m_tiles->sizeX(), tileCount, m_tiles->sizeZ(), 0);
     calculateBoundaries();
 }

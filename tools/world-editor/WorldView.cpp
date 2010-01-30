@@ -119,16 +119,16 @@ void WorldView::paintEvent(QPaintEvent * e)
             QPen normalMapBorder(Qt::black, 2);
             QPen selectedMapBorder(Qt::blue, 2);
             p.setBrush(Qt::NoBrush);
-            for(int i=0; i<m_mapCache.size(); ++i) {
+            for (int i = 0; i < m_mapCache.size(); i++) {
                 EditorMap * map = m_mapCache[i];
 
-                if( m_selectedMap == map )
+                if (m_selectedMap == map)
                     p.setPen(selectedMapBorder);
                 else
                     p.setPen(normalMapBorder);
 
-                p.drawRect(screenX(map->left()), screenY(map->top()),
-                    map->width() * m_zoom, map->height() * m_zoom);
+                p.drawRect((int)screenX(map->left()), (int)screenY(map->top()),
+                    (int)(map->width() * m_zoom), (int)(map->height() * m_zoom));
             }
 
             drawGrid(p);
@@ -404,12 +404,12 @@ void WorldView::setWorld(EditorWorld * world)
 
     // set up scroll bars
     const int bufferRoom = 800;
-    m_hsb->setMinimum(m_world->left() - bufferRoom);
-    m_hsb->setMaximum(m_world->left() + m_world->width());
-    m_hsb->setValue(m_world->left());
-    m_vsb->setMinimum(m_world->top() - bufferRoom);
-    m_vsb->setMaximum(m_world->top() + m_world->height());
-    m_vsb->setValue(m_world->top());
+    m_hsb->setMinimum((int)(m_world->left() - bufferRoom));
+    m_hsb->setMaximum((int)(m_world->left() + m_world->width()));
+    m_hsb->setValue((int)m_world->left());
+    m_vsb->setMinimum((int)(m_world->top() - bufferRoom));
+    m_vsb->setMaximum((int)(m_world->top() + m_world->height()));
+    m_vsb->setValue((int)(m_world->top()));
 
     updateViewCache();
 }
