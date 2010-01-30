@@ -1,5 +1,6 @@
- * outline maps in the world view
- * ability to resize the world and maps
+ * ability to resize and move maps within the world
  * make the art a better gui interface - caption, margin, alignment
  * ability to drag art from the art pane to the grid
  * ability to break the art into objects
+ * ability to add and delete layers
+ * ability to save the world

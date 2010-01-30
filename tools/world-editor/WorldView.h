@@ -25,6 +25,7 @@ public:
     ~WorldView();
 
     void setWorld(EditorWorld * world);
+    void setSelectedLayer(int index);
 protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
@@ -51,6 +52,7 @@ private:
     int m_maxLayer;
 
     EditorMap * m_selectedMap;
+    int m_selectedLayer;
 
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);

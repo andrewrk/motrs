@@ -65,6 +65,8 @@ private:
     void fillToolComboBox(QComboBox & comboBox);
 
 private slots:
+    void on_list_layers_itemChanged(QListWidgetItem* item);
+    void on_list_layers_itemSelectionChanged();
     void on_list_worlds_doubleClicked(QModelIndex index);
     void on_actionSettings_triggered();
 

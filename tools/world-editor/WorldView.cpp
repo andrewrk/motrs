@@ -98,8 +98,14 @@ void WorldView::paintEvent(QPaintEvent * e)
         if( m_world->isGood() ) {
             for(int layer=0; layer<m_maxLayer; ++layer) {
                 for(int i=0; i<m_mapCache.size(); ++i) {
-                    if( layer < m_mapCache[i]->layerCount() )
-                        m_mapCache[i]->draw(&p, absoluteX(0), absoluteY(0),
+                    EditorMap * map = m_mapCache[i];
+
+                    // if the map is selected and this layer is unchecked, don't draw
+                    if( map == m_selectedMap && m_window->layersList()->item(layer)->checkState() == Qt::Unchecked)
+                        continue;
+
+                    if( layer < map->layerCount() )
+                        map->draw(&p, absoluteX(0), absoluteY(0),
                             (double)this->width(), (double)this->height(), layer);
                 }
             }
@@ -195,14 +201,13 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
 void WorldView::mousePressEvent(QMouseEvent * e)
 {
     MainWindow::MouseTool tool = MainWindow::Nothing;
-    MainWindow * parent = (MainWindow *) this->parent();
 
     if( e->button() == Qt::LeftButton )
-        tool = parent->m_toolLeftClick;
+        tool = m_window->m_toolLeftClick;
     else if( e->button() == Qt::MidButton )
-        tool = parent->m_toolMiddleClick;
+        tool = m_window->m_toolMiddleClick;
     else if( e->button() == Qt::RightButton )
-        tool = parent->m_toolRightClick;
+        tool = m_window->m_toolRightClick;
 
     switch( tool ){
         case MainWindow::Nothing:
@@ -260,20 +265,24 @@ void WorldView::setWorld(EditorWorld * world)
 void WorldView::selectMap(EditorMap * map)
 {
     m_selectedMap = map;
-    MainWindow * parent = (MainWindow *) this->parent();
-    QListWidget * list = parent->layersList();
+    QListWidget * list = m_window->layersList();
     list->clear();
     if( m_selectedMap ) {
         // add the layers from that map
-        for(int i=0; i<m_selectedMap->layerCount(); ++i){
+        for(int i=0; i<m_selectedMap->layerCount(); ++i) {
             QListWidgetItem * newItem = new QListWidgetItem(tr("Layer %1").arg(i+1), list);
-            newItem->setFlags(Qt::ItemIsUserCheckable);
+            newItem->setFlags(Qt::ItemIsUserCheckable|Qt::ItemIsSelectable|
+                              Qt::ItemIsEditable|Qt::ItemIsEnabled);
             newItem->setCheckState(Qt::Checked);
             list->addItem(newItem);
         }
+
+        if( m_selectedMap->layerCount() > 0 )
+            list->item(0)->setSelected(true);
     } else {
         list->addItem(tr("Click a map to select it and view layers"));
     }
+
     this->update();
 }
 
@@ -284,4 +293,10 @@ void WorldView::verticalScroll(int value)
 void WorldView::horizontalScroll(int value)
 {
     qDebug() << value;
+}
+
+void WorldView::setSelectedLayer(int index)
+{
+    m_window->layersList()->setCurrentRow(index);
+    m_selectedLayer = index;
 }

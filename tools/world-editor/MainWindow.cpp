@@ -197,3 +197,13 @@ QListWidget * MainWindow::layersList()
 {
     return ui->list_layers;
 }
+
+void MainWindow::on_list_layers_itemSelectionChanged()
+{
+    m_view->setSelectedLayer(ui->list_layers->currentRow());
+}
+
+void MainWindow::on_list_layers_itemChanged(QListWidgetItem* item)
+{
+    m_view->update();
+}
