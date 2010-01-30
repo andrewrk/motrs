@@ -18,6 +18,11 @@ public:
 
     static QPainter * m_painter;
 
+    void setLeft(double value);
+    void setTop(double value);
+    void setWidth(double value);
+    void setHeight(double value);
+
 };
 
 #endif // EDITORMAP_H

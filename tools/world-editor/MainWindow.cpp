@@ -1,8 +1,8 @@
-
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "SettingsDialog.h"
 #include "EditorUtils.h"
+#include "WorldView.h"
 
 #include <QDir>
 #include <QGraphicsPixmapItem>

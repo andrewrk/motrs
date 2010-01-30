@@ -8,13 +8,14 @@
 
 #include "EditorWorld.h"
 #include "EditorMap.h"
-
-class MainWindow;
+#include "MainWindow.h"
 
 class WorldView : public QWidget
 {
     Q_OBJECT
+    friend class MainWindow;
 public:
+
     enum GridRenderType {
         None,
         Fast,
@@ -30,8 +31,18 @@ protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
     void mousePressEvent(QMouseEvent * e);
+    void mouseReleaseEvent(QMouseEvent * e);
     void mouseMoveEvent(QMouseEvent * e);
 private:
+    enum MouseState {
+        Normal,
+        SetStartPoint,
+        StretchMapLeft,
+        StretchMapTop,
+        StretchMapRight,
+        StretchMapBottom,
+    };
+
     // how far away from border lines can you be to be able to use stretch tools
     static const int s_lineSelectRadius;
 
@@ -58,6 +69,9 @@ private:
 
     int m_mouseDownX;
     int m_mouseDownY;
+    MainWindow::MouseTool m_mouseDownTool;
+    int m_mouseState;
+    double m_mouseDownTmpValue; // holds the original value of what is being dragged
 
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);
@@ -85,7 +99,6 @@ private slots:
     void verticalScroll(int value);
     void horizontalScroll(int value);
 
-    friend class MainWindow;
 };
 
 #endif // WORLDVIEW_H

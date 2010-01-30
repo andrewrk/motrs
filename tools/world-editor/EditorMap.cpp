@@ -74,9 +74,7 @@ EditorMap::EditorMap(QString file)
         }
     }
 
-    // pre-calculations
-    m_width = sizeX * Tile::size;
-    m_height = sizeY * Tile::size;
+    calculateBoundaries();
 }
 
 void EditorMap::draw(QPainter * p, double screenX, double screenY,
@@ -88,4 +86,30 @@ void EditorMap::draw(QPainter * p, double screenX, double screenY,
 
 EditorMap::~EditorMap()
 {
+}
+
+void EditorMap::setLeft(double value)
+{
+    this->m_x = value;
+}
+
+void EditorMap::setTop(double value)
+{
+    this->m_y = value;
+}
+
+void EditorMap::setWidth(double value)
+{
+    int tileCount = value / Tile::size;
+    if( tileCount > 0 )
+        m_tiles->redim(tileCount, m_tiles->sizeY(), m_tiles->sizeZ(), 0);
+    calculateBoundaries();
+}
+
+void EditorMap::setHeight(double value)
+{
+    int tileCount = value / Tile::size;
+    if( tileCount > 0 )
+        m_tiles->redim(m_tiles->sizeX(), tileCount, m_tiles->sizeZ(), 0);
+    calculateBoundaries();
 }

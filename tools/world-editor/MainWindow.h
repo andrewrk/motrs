@@ -8,7 +8,7 @@
 #include <QModelIndex>
 #include <QComboBox>
 
-#include "WorldView.h"
+class WorldView;
 
 namespace Ui
 {
@@ -18,7 +18,7 @@ namespace Ui
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
+    friend class WorldView;
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -37,7 +37,6 @@ private:
         Center,
         Pencil,
         Brush,
-        SetStartingPoint,
     };
 
     typedef struct {
@@ -74,7 +73,6 @@ private slots:
     void on_cboMiddleClick_currentIndexChanged(int index);
     void on_cboRightClick_currentIndexChanged(int index);
 
-    friend class WorldView;
 };
 
 #endif // MAINWINDOW_H

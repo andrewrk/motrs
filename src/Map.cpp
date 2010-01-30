@@ -77,10 +77,7 @@ Map::Map(const char * buffer) :
     int entityCount = Utils::readInt(&cursor);
     Debug::assert(entityCount == 0, "TODO support entities");
 
-
-    // pre-calculations
-    m_width = sizeX * Tile::size;
-    m_height = sizeY * Tile::size;
+    calculateBoundaries();
 }
 
 Map::Map() :
@@ -100,6 +97,13 @@ Map::~Map()
         delete m_palette[i];
 }
 
+void Map::calculateBoundaries()
+{
+    // pre-calculations
+    m_width = m_tiles->sizeX() * Tile::size;
+    m_height = m_tiles->sizeY() * Tile::size;
+}
+
 bool Map::isGood()
 {
     return m_good;
@@ -107,8 +111,8 @@ bool Map::isGood()
 
 void Map::tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, int layer) {
     int tileIndexX = (int)((x - m_x) / Tile::size), tileIndexY = (int)((y - m_y) / Tile::size);
-    if (!(0 <= tileIndexX && tileIndexX < m_tiles->sizeX &&
-          0 <= tileIndexY && tileIndexY < m_tiles->sizeY)) {
+    if (!(0 <= tileIndexX && tileIndexX < m_tiles->sizeX() &&
+          0 <= tileIndexY && tileIndexY < m_tiles->sizeY())) {
         double tileX = m_x + tileIndexX * Tile::size, tileY = m_y + tileIndexY * Tile::size;
         Tile * tile = m_palette[m_tiles->get(tileIndexX, tileIndexY, layer)];
         tiles.push_back(TileAndLocation(tileX, tileY, tile));
@@ -164,6 +168,6 @@ void Map::tileRange(double left, double top, double width, double height,
     int tileIndexBottom = (int)(localBottom / Tile::size) + 1;
     indexLeft = Utils::max(tileIndexLeft, 0);
     indexTop = Utils::max(tileIndexTop, 0);
-    indexRight = Utils::min(tileIndexRight, m_tiles->sizeX);
-    indexBottom = Utils::min(tileIndexBottom, m_tiles->sizeY);
+    indexRight = Utils::min(tileIndexRight, m_tiles->sizeX());
+    indexBottom = Utils::min(tileIndexBottom, m_tiles->sizeY());
 }

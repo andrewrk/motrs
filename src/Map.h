@@ -41,7 +41,7 @@ public:
     double top() { return m_y; }
     double width(){ return m_width; }
     double height() { return m_height; }
-    int layerCount() { return m_tiles->sizeZ; }
+    int layerCount() { return m_tiles->sizeZ(); }
 
 protected:
 
@@ -64,11 +64,14 @@ protected:
 
     // absolute coordinates
     double m_x, m_y;
-    double m_width, m_height; // computed
+    double m_width, m_height; // computed and cached
     int m_story;
 
     void tileRange(double left, double top, double width, double height,
                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom);
+
+    // cache the width and height of the map
+    void calculateBoundaries();
 };
 
 #endif

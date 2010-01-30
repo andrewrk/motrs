@@ -22,7 +22,9 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
     m_offsetX(0),
     m_offsetY(0),
     m_mapCache(),
-    m_selectedMap(NULL)
+    m_selectedMap(NULL),
+    m_mouseDownTool(MainWindow::Nothing),
+    m_mouseState(Normal)
 {
     m_hsb->show();
     m_vsb->show();
@@ -250,26 +252,78 @@ bool WorldView::overMapBottom(int x, int y)
 
 void WorldView::mouseMoveEvent(QMouseEvent * e)
 {
-    // change mouse cursor to sizers if over map boundaries
-    // if the user could use the arrow tool
-    if( m_window->m_toolLeftClick == MainWindow::Arrow ||
-        m_window->m_toolMiddleClick == MainWindow::Arrow ||
-        m_window->m_toolRightClick == MainWindow::Arrow )
-    {
-        // left boundary
-        if( overMapLeft(e->x(), e->y()) || overMapRight(e->x(),e->y()))
-            this->setCursor(Qt::SizeHorCursor);
-        else if( overMapTop(e->x(), e->y()) || overMapBottom(e->x(), e->y()))
-            this->setCursor(Qt::SizeVerCursor);
-        else
-            this->setCursor(Qt::ArrowCursor);
+    switch(m_mouseState) {
+        case Normal: {
+            switch(m_mouseDownTool) {
+                case MainWindow::Nothing: {
+                    // change mouse cursor to sizers if over map boundaries
+                    // if the user could use the arrow tool
+                    if( m_window->m_toolLeftClick == MainWindow::Arrow ||
+                        m_window->m_toolMiddleClick == MainWindow::Arrow ||
+                        m_window->m_toolRightClick == MainWindow::Arrow )
+                    {
+                        // left boundary
+                        if( overMapLeft(e->x(), e->y()) || overMapRight(e->x(),e->y()))
+                            this->setCursor(Qt::SizeHorCursor);
+                        else if( overMapTop(e->x(), e->y()) || overMapBottom(e->x(), e->y()))
+                            this->setCursor(Qt::SizeVerCursor);
+                        else
+                            this->setCursor(Qt::ArrowCursor);
+                    }
+                } break;
+                case MainWindow::Arrow: break;
+                case MainWindow::Eraser: break;
+                case MainWindow::Pan: break;
+                case MainWindow::Center: break;
+                case MainWindow::Pencil: break;
+                case MainWindow::Brush: break;
+            }
+        } break;
+        case SetStartPoint: break;
+        case StretchMapLeft:
+            m_selectedMap->setLeft(m_mouseDownTmpValue + (e->x() - m_mouseDownX));
+            this->update();
+            break;
+        case StretchMapTop:
+            m_selectedMap->setTop(m_mouseDownTmpValue + (e->y() - m_mouseDownY));
+            this->update();
+            break;
+        case StretchMapRight:
+            m_selectedMap->setWidth(m_mouseDownTmpValue + (e->x() - m_mouseDownX));
+            this->update();
+            break;
+        case StretchMapBottom:
+            m_selectedMap->setHeight(m_mouseDownTmpValue + (e->y() - m_mouseDownY));
+            this->update();
+            break;
+    }
+}
+
+void WorldView::mouseReleaseEvent(QMouseEvent * e)
+{
+    MainWindow::MouseTool tool = MainWindow::Nothing;
+
+    if( e->button() == Qt::LeftButton )
+        tool = m_window->m_toolLeftClick;
+    else if( e->button() == Qt::MidButton )
+        tool = m_window->m_toolMiddleClick;
+    else if( e->button() == Qt::RightButton )
+        tool = m_window->m_toolRightClick;
+    else
+        return;
+
+    if( tool == m_mouseDownTool ) {
+        m_mouseDownTool = MainWindow::Nothing;
+        m_mouseState = Normal;
+        this->setCursor(Qt::ArrowCursor);
     }
 }
 
 void WorldView::mousePressEvent(QMouseEvent * e)
 {
-    m_mouseDownX = e->x();
-    m_mouseDownY = e->y();
+    // if we are already pressing down the mouse with another tool, return
+    if( m_mouseDownTool != MainWindow::Nothing )
+        return;
 
     MainWindow::MouseTool tool = MainWindow::Nothing;
 
@@ -279,24 +333,35 @@ void WorldView::mousePressEvent(QMouseEvent * e)
         tool = m_window->m_toolMiddleClick;
     else if( e->button() == Qt::RightButton )
         tool = m_window->m_toolRightClick;
+    else
+        return;
+
+    m_mouseDownX = e->x();
+    m_mouseDownY = e->y();
+    m_mouseDownTool = tool;
 
     switch( tool ){
         case MainWindow::Nothing:
             break;
-        case MainWindow::Arrow:
-        {
+        case MainWindow::Arrow: {
             // are we stretching the boundaries of a map?
-            bool overLeft = overMapLeft(e->x(), e->y());
-            bool overRight = overMapRight(e->x(), e->y());
-            bool overTop = overMapTop(e->x(), e->y());
-            bool overBottom = overMapBottom(e->x(), e->y());
-
-
-
-            // if they clicked inside a map, select it
-            selectMap(mapAt(e->x(), e->y()));
-            break;
-        }
+            if( overMapLeft(e->x(), e->y()) ) {
+                m_mouseDownTmpValue = m_selectedMap->left();
+                m_mouseState = StretchMapLeft;
+            } else if( overMapRight(e->x(), e->y()) ) {
+                m_mouseDownTmpValue = m_selectedMap->width();
+                m_mouseState = StretchMapRight;
+            } else if( overMapTop(e->x(), e->y()) ) {
+                m_mouseDownTmpValue = m_selectedMap->top();
+                m_mouseState = StretchMapTop;
+            } else if( overMapBottom(e->x(), e->y()) ) {
+                m_mouseDownTmpValue = m_selectedMap->height();
+                m_mouseState = StretchMapBottom;
+            } else{
+                // if they clicked inside a map, select it
+                selectMap(mapAt(e->x(), e->y()));
+            }
+        } break;
         case MainWindow::Eraser:
 
             break;
@@ -310,9 +375,6 @@ void WorldView::mousePressEvent(QMouseEvent * e)
 
             break;
         case MainWindow::Brush:
-
-            break;
-        case MainWindow::SetStartingPoint:
 
             break;
         default:
