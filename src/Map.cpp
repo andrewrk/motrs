@@ -1,10 +1,17 @@
 #include "Map.h"
 
+#include "ResourceManager.h"
+
 #include "Utils.h"
 #include "Debug.h"
 
 Map * Map::load(const char *buffer) {
-    return new Map(buffer);
+    Map * map = new Map(buffer);
+    if (!map->isGood()) {
+        delete map;
+        return NULL;
+    }
+    return map;
 }
 
 Map::Map(const char * buffer) :
@@ -20,7 +27,7 @@ Map::Map(const char * buffer) :
 {
     const char * cursor = buffer;
     int version = Utils::readInt(&cursor);
-    if (version != 1) {
+    if (version != 2) {
         std::cerr << "Unsupported Map version: " << version << std::endl;
         m_good = false;
         return;
@@ -75,7 +82,15 @@ Map::Map(const char * buffer) :
 
     // entities
     int entityCount = Utils::readInt(&cursor);
-    Debug::assert(entityCount == 0, "TODO support entities");
+    for (int i = 0; i < entityCount; i++) {
+        int x = Utils::readInt(&cursor);
+        int y = Utils::readInt(&cursor);
+        int layer = Utils::readInt(&cursor);
+        std::string id = Utils::readString(&cursor);
+        Entity * entity = ResourceManager::getEntity(id);
+        entity->setCenter(x, y);
+        entity->setLayer(layer);
+    }
 
     calculateBoundaries();
 }

@@ -1,4 +1,4 @@
-version=1
+version=2
 
 # size=sizeX,sizeY,layerCount
 # sizes in number of tiles, not in actual coordinates.
@@ -96,4 +96,4 @@ layer=\
 # trigger=???
 
 # entity declarations yet to come.
-# entity=???
+entity=256,256,0,rock.entity

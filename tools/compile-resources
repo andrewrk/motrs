@@ -124,11 +124,14 @@ def compile_map(in_path, out_path):
         else:
             # sparse
             return pack("ii", FMT_SPARSE, len(sparse_version) / calcsize("iii")) + sparse_version
-
+    def encode_entity(value):
+        (x_str, y_str, layer_str, id) = split_strip(value)
+        x, y, layer = int(x_str), int(y_str), int(layer_str)
+        return pack("iii", x, y, layer) + encode_string(id)
     declarations = read_declarations(in_path)
     assert(declarations[0][0] == "version")
     version_number = int(declarations[0][1])
-    assert(version_number == 1)
+    assert(version_number == 2)
 
     pallet = []
     size = None
@@ -151,7 +154,7 @@ def compile_map(in_path, out_path):
         elif kind == "trigger":
             raise("TODO: support trigger")
         elif kind == "entity":
-            raise("TODO: support entity")
+            entities.append(encode_entity(value))
         else:
             raise(Exception("unsupported kind: " + kind))
     assert size != None

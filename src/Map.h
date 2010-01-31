@@ -25,8 +25,6 @@ public:
     Map();
     virtual ~Map();
 
-    bool isGood();
-
     void tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, int layer);
     void intersectingTiles(std::vector<TileAndLocation>& tiles, double centerX, double centerY, double apothem,
                            int layer, Tile::PhysicalPresence minPresence);
@@ -66,6 +64,8 @@ protected:
     double m_x, m_y;
     double m_width, m_height; // computed and cached
     int m_story;
+
+    bool isGood();
 
     void tileRange(double left, double top, double width, double height,
                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom);

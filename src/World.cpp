@@ -6,7 +6,12 @@
 #include "ResourceManager.h"
 
 World * World::load(const char * buffer) {
-    return new World(buffer);
+    World * world = new World(buffer);
+    if (!world->isGood()) {
+        delete world;
+        return NULL;
+    }
+    return world;
 }
 
 World::World(const char * buffer) :
@@ -27,7 +32,7 @@ World::World(const char * buffer) :
         int z = Utils::readInt(&cursor);
         std::string mapId = Utils::readString(&cursor);
         Map * map = ResourceManager::getMap(mapId);
-        if (!map->isGood()) {
+        if (map == NULL) {
             m_good = false;
             break;
         }

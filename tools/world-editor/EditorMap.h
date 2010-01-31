@@ -25,4 +25,4 @@ public:
 
 };
 
-#endif // EDITORMAP_H
+#endif
