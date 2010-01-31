@@ -274,6 +274,7 @@ void Gameplay:: resolveWithEntity(Entity * entity1, Entity * entity2) {
         double mass1 = 1.0, mass2 = 1.0;
         double totalMass = mass1 + mass2;
         double push1 = overlap * mass1 / totalMass, push2 = overlap * mass2 / totalMass;
+        int x = 5;
         double dx = entity2->centerX() - entity1->centerX(), dy = entity2->centerY() - entity1->centerY();
         double normalX = dx / distance, normalY = dy / distance;
         entity1->setVelocity(entity1->velocityX() + push1 * -normalX, entity1->velocityY() + push1 * -normalY);
