@@ -127,8 +127,12 @@ void Gameplay::nextFrame() {
     // refresh the input state
     Input::refresh();
 
+    applyInput(m_player);
+    for (unsigned int i = 0; i < m_entities.size() - 1; i++)
+        for (unsigned int j = i + 1; j < m_entities.size(); j++)
+            resolveWithEntity(m_entities[i], m_entities[j]);
     for (unsigned int i = 0; i < m_entities.size(); i++)
-        physics(m_entities[i]);
+        resolveWithWorld(m_entities[i]);
 
     // scroll the screen
     double marginNorth = m_player->centerY() - m_screenY;
@@ -148,7 +152,7 @@ void Gameplay::nextFrame() {
     m_frameCount++;
 }
 
-void Gameplay::physics(Entity * entity) {
+void Gameplay::applyInput(Entity * entity) {
     // determin directional input
     double dx = entity->velocityX();
     double dy = entity->velocityY();
@@ -259,9 +263,27 @@ void Gameplay::physics(Entity * entity) {
         }
     default: Debug::assert(false, "unrecognized Sequence.");
     }
+    entity->setVelocity(dx, dy);
+}
 
+void Gameplay:: resolveWithEntity(Entity * entity1, Entity * entity2) {
+    double distance = Utils::distance(entity1->centerX(), entity1->centerY(), entity2->centerX(), entity2->centerY());
+    double minDistance = entity1->radius() + entity2->radius();
+    double overlap = minDistance - distance;
+    if (overlap > 0.0) {
+        double mass1 = 1.0, mass2 = 1.0;
+        double totalMass = mass1 + mass2;
+        double push1 = overlap * mass1 / totalMass, push2 = overlap * mass2 / totalMass;
+        double dx = entity2->centerX() - entity1->centerX(), dy = entity2->centerY() - entity1->centerY();
+        double normalX = dx / distance, normalY = dy / distance;
+        entity1->setVelocity(entity1->velocityX() + push1 * -normalX, entity1->velocityY() + push1 * -normalY);
+        entity2->setVelocity(entity2->velocityX() + push2 * normalX, entity2->velocityY() + push2 * normalY);
+    }
+}
 
+void Gameplay::resolveWithWorld(Entity * entity) {
     // calculate the desired location
+    double dx = entity->velocityX(), dy = entity->velocityY();
     double x = entity->centerX() + dx, y = entity->centerY() + dy;
     double radius = entity->radius();
     int layer = entity->layer();

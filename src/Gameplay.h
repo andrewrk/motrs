@@ -58,7 +58,10 @@ private:
     bool processEvents();
     void updateDisplay();
     void nextFrame();
-    void physics(Entity * entity);
+
+    void applyInput(Entity * entity);
+    void resolveWithEntity(Entity * entity1, Entity * entity2);
+    void resolveWithWorld(Entity * entity);
 
     double minMarginNorth() { return 250.0; }
     double minMarginEast() { return 350.0; }
