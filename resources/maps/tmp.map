@@ -97,3 +97,7 @@ layer=\
 
 # entity declarations yet to come.
 entity=256,256,0,rock.entity
+entity=223,256,0,rock.entity
+entity=190,256,0,rock.entity
+entity=157,256,0,rock.entity
+entity=124,256,0,rock.entity
