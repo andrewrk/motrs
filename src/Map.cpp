@@ -90,6 +90,7 @@ Map::Map(const char * buffer) :
         Entity * entity = ResourceManager::getEntity(id);
         entity->setCenter(x, y);
         entity->setLayer(layer);
+        m_entities.push_back(entity);
     }
 
     calculateBoundaries();
@@ -106,8 +107,7 @@ Map::Map() :
 {
 }
 
-Map::~Map()
-{
+Map::~Map() {
     for (unsigned int i = 0; i < m_palette.size(); i++)
         delete m_palette[i];
 }

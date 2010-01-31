@@ -41,6 +41,9 @@ public:
     double height() { return m_height; }
     int layerCount() { return m_tiles->sizeZ(); }
 
+    // gimme the entities
+    std::vector<Entity*> * entities() { return &m_entities; }
+
 protected:
 
     enum LayerType {

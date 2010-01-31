@@ -29,6 +29,8 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     m_universe(NULL),
     m_currentWorld(NULL),
     m_loadedMaps(),
+    m_loadedMapsCache(),
+    m_entities(),
     m_player(NULL)
 {
     Debug::assert(s_inst == NULL, "only one Gameplay allowed");
@@ -77,6 +79,15 @@ void Gameplay::mainLoop() {
             m_loadedMapsCache.clear();
             for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
                 m_loadedMapsCache.push_back(*iMap);
+            // cache loaded entities
+            m_entities.clear();
+            m_entities.push_back(m_player);
+            for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++) {
+                std::vector<Entity*>* mapEntities = m_loadedMapsCache[i]->entities();
+                for (unsigned int j = 0; j < mapEntities->size(); j++)
+                    m_entities.push_back((*mapEntities)[j]);
+            }
+
 
             //main gameplay loop
             nextFrame();
@@ -116,9 +127,31 @@ void Gameplay::nextFrame() {
     // refresh the input state
     Input::refresh();
 
+    for (unsigned int i = 0; i < m_entities.size(); i++)
+        physics(m_entities[i]);
+
+    // scroll the screen
+    double marginNorth = m_player->centerY() - m_screenY;
+    double marginEast = m_screenX + screenWidth() - (m_player->centerX() + m_player->radius());
+    double marginSouth = m_screenY + screenHeight() - (m_player->centerY() + m_player->radius());
+    double marginWest = m_player->centerX() - m_screenX;
+
+    if (marginNorth < minMarginNorth())
+        m_screenY -= minMarginNorth() - marginNorth;
+    else if (marginSouth < minMarginSouth())
+        m_screenY += minMarginSouth() - marginSouth;
+    if (marginWest < minMarginWest())
+        m_screenX -= minMarginWest() - marginWest;
+    else if (marginEast < minMarginEast())
+        m_screenX += minMarginEast() - marginEast;
+
+    m_frameCount++;
+}
+
+void Gameplay::physics(Entity * entity) {
     // determin directional input
-    double dx = m_player->velocityX();
-    double dy = m_player->velocityY();
+    double dx = entity->velocityX();
+    double dy = entity->velocityY();
 
     bool canChangeDirections = false, canMoveAround = false;
     bool canStartJump = false;
@@ -126,7 +159,7 @@ void Gameplay::nextFrame() {
     bool canSwingSword = false;
     bool isFalling = false;
 
-    switch (m_player->movementMode()) {
+    switch (entity->movementMode()) {
     case Entity::Stand:
     case Entity::Walk:
     case Entity::Run:
@@ -156,13 +189,13 @@ void Gameplay::nextFrame() {
         int input_dy = south - north;
         Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
         if (direction != Entity::Center)
-            m_player->setOrientation(direction);
+            entity->setOrientation(direction);
 
         if (canMoveAround) {
             if (direction == Entity::Center)
-                m_player->setMovementMode(Entity::Stand);
+                entity->setMovementMode(Entity::Stand);
             else
-                m_player->setMovementMode(Entity::Run);
+                entity->setMovementMode(Entity::Run);
             double speed = 3.3;
             dx = speed * input_dx;
             dy = speed * input_dy;
@@ -177,9 +210,9 @@ void Gameplay::nextFrame() {
     if (canStartJump) {
         bool jump = Input::justPressed(Input::Jump);
         if (jump) {
-            m_player->setMovementMode(Entity::JumpUp);
+            entity->setMovementMode(Entity::JumpUp);
             double jumpingSpeed = 5.0;
-            m_player->setAltitudeVelocity(jumpingSpeed);
+            entity->setAltitudeVelocity(jumpingSpeed);
         }
     }
 
@@ -187,41 +220,41 @@ void Gameplay::nextFrame() {
         bool keepJumping = Input::state(Input::Jump);
         double maxAltidue = 30.0;
         if (keepJumping)
-            keepJumping = m_player->altitude() < maxAltidue;
+            keepJumping = entity->altitude() < maxAltidue;
         if (!keepJumping)
-            m_player->setMovementMode(Entity::Falling);
-        m_player->applyAltitudeVelocity();
+            entity->setMovementMode(Entity::Falling);
+        entity->applyAltitudeVelocity();
     }
 
     if (isFalling) {
-        double altitudeVelocity = m_player->altitudeVelocity();
+        double altitudeVelocity = entity->altitudeVelocity();
         double gravity = 1.0;
         altitudeVelocity -= gravity;
         // TODO: terminal velocity
-        m_player->setAltitudeVelocity(altitudeVelocity);
-        m_player->applyAltitudeVelocity();
-        if (m_player->altitude() <= 0.0) {
+        entity->setAltitudeVelocity(altitudeVelocity);
+        entity->applyAltitudeVelocity();
+        if (entity->altitude() <= 0.0) {
             // hit the floor
-            m_player->setMovementMode(Entity::Stand);
-            m_player->setAltitude(0.0);
+            entity->setMovementMode(Entity::Stand);
+            entity->setAltitude(0.0);
         }
     }
 
-    switch (m_player->currentSequence()) {
+    switch (entity->currentSequence()) {
     case Entity::None:
         if (canSwingSword) {
             bool swingSword = Input::justPressed(Input::Attack_1);
             if (swingSword) {
-                m_player->setCurrentSequence(Entity::Sword);
-                m_player->resetSequencePosition();
+                entity->setCurrentSequence(Entity::Sword);
+                entity->resetSequencePosition();
             }
         }
         break;
     case Entity::Sword:
         {
-            int sequencePosition = m_player->incrementSequencePosition();
+            int sequencePosition = entity->incrementSequencePosition();
             if (sequencePosition >= 10)
-                m_player->setCurrentSequence(Entity::None);
+                entity->setCurrentSequence(Entity::None);
             break;
         }
     default: Debug::assert(false, "unrecognized Sequence.");
@@ -229,9 +262,9 @@ void Gameplay::nextFrame() {
 
 
     // calculate the desired location
-    double x = m_player->centerX() + dx, y = m_player->centerY() + dy;
-    double radius = m_player->radius();
-    int layer = m_player->layer();
+    double x = entity->centerX() + dx, y = entity->centerY() + dy;
+    double radius = entity->radius();
+    int layer = entity->layer();
 
     // resolve collisions
     std::vector<Map::TileAndLocation> tiles;
@@ -244,29 +277,12 @@ void Gameplay::nextFrame() {
         tiles[i].tile->resolveCircleCollision(tiles[i].x, tiles[i].y, x, y, radius);
 
     // calculate real dx, dy
-    dx = x - m_player->centerX();
-    dy = y - m_player->centerY();
+    dx = x - entity->centerX();
+    dy = y - entity->centerY();
     // apply new location
-    m_player->setCenter(x, y);
+    entity->setCenter(x, y);
     // store velocity for next frame
-    m_player->setVelocity(dx, dy);
-
-    // scroll the screen
-    double marginNorth = m_player->centerY() - m_screenY;
-    double marginEast = m_screenX + screenWidth() - (m_player->centerX() + m_player->radius());
-    double marginSouth = m_screenY + screenHeight() - (m_player->centerY() + m_player->radius());
-    double marginWest = m_player->centerX() - m_screenX;
-
-    if (marginNorth < minMarginNorth())
-        m_screenY -= minMarginNorth() - marginNorth;
-    else if (marginSouth < minMarginSouth())
-        m_screenY += minMarginSouth() - marginSouth;
-    if (marginWest < minMarginWest())
-        m_screenX -= minMarginWest() - marginWest;
-    else if (marginEast < minMarginEast())
-        m_screenX += minMarginEast() - marginEast;
-
-    m_frameCount++;
+    entity->setVelocity(dx, dy);
 }
 
 void Gameplay::sortByProximity(double x, double y, std::vector<Map::TileAndLocation> & tiles) {
@@ -302,8 +318,9 @@ void Gameplay::updateDisplay() {
             Map * map = m_loadedMapsCache[i];
             if (i < (unsigned int)map->layerCount())
                 map->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
-            if (layer == m_player->layer())
-                m_player->draw(m_screenX, m_screenY);
         }
+        for (unsigned int i = 0; i < m_entities.size(); i++)
+            if (m_entities[i]->layer() == layer)
+                m_entities[i]->draw(m_screenX, m_screenY);
     }
 }

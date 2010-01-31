@@ -52,11 +52,13 @@ private:
     World * m_currentWorld;
     std::set<Map*> m_loadedMaps;
     std::vector<Map*> m_loadedMapsCache;
+    std::vector<Entity*> m_entities;
     Entity * m_player;
 
     bool processEvents();
     void updateDisplay();
     void nextFrame();
+    void physics(Entity * entity);
 
     double minMarginNorth() { return 250.0; }
     double minMarginEast() { return 350.0; }

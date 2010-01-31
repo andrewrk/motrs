@@ -36,6 +36,7 @@ Universe * ResourceManager::loadUniverse(std::string resourceFilePath, std::stri
         delete universe;
         return NULL;
     }
+    // TODO: clean caches of buffers
     return universe;
 }
 
