@@ -40,6 +40,12 @@ int Utils::readInt(const char ** cursor) {
     return value;
 }
 
+double Utils::readDouble(const char ** cursor) {
+    double value = *(double*)*cursor;
+    *cursor += sizeof(double);
+    return value;
+}
+
 std::string Utils::trim(std::string s) {
     return ltrim(rtrim(s));
 }

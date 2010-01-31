@@ -23,6 +23,7 @@ namespace Utils
 
     std::string readString(const char ** cursor);
     int readInt(const char ** cursor);
+    double readDouble(const char ** cursor);
 
     template <class T>
     T* readStruct(const char** cursor) {

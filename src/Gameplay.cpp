@@ -200,7 +200,7 @@ void Gameplay::applyInput(Entity * entity) {
                 entity->setMovementMode(Entity::Stand);
             else
                 entity->setMovementMode(Entity::Run);
-            double speed = 3.3;
+            double speed = entity->speed();
             dx = speed * input_dx;
             dy = speed * input_dy;
             if (input_dx != 0 && input_dy != 0) {
@@ -271,10 +271,9 @@ void Gameplay:: resolveWithEntity(Entity * entity1, Entity * entity2) {
     double minDistance = entity1->radius() + entity2->radius();
     double overlap = minDistance - distance;
     if (overlap > 0.0) {
-        double mass1 = 1.0, mass2 = 1.0;
+        double mass1 = entity1->mass(), mass2 = entity2->mass();
         double totalMass = mass1 + mass2;
-        double push1 = overlap * mass1 / totalMass, push2 = overlap * mass2 / totalMass;
-        int x = 5;
+        double push1 = overlap * mass2 / totalMass, push2 = overlap * mass1 / totalMass;
         double dx = entity2->centerX() - entity1->centerX(), dy = entity2->centerY() - entity1->centerY();
         double normalX = dx / distance, normalY = dy / distance;
         entity1->setVelocity(entity1->velocityX() + push1 * -normalX, entity1->velocityY() + push1 * -normalY);

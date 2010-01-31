@@ -173,21 +173,28 @@ def compile_entity(in_path, out_path):
     declarations = read_declarations(in_path)
     assert(declarations[0][0] == "version")
     version_number = int(declarations[0][1])
-    assert(version_number == 5)
+    assert(version_number == 6)
+
+    contact = None
+    specs = None
     movement_kinds = ("stand", "walk", "run", "sword")
     movement_map = {}
-    contact = None
     for (kind, value) in declarations[1:]:
-        if kind in movement_kinds:
+        if kind == "contact":
+            assert(contact == None)
+            dims = split_strip(value)
+            contact = pack("iii", *[int(dim) for dim in dims])
+        elif kind == "specs":
+            assert(specs == None)
+            values = split_strip(value)
+            speed, mass = [float(v) for v in values]
+            specs = pack("dd", speed, mass)
+        elif kind in movement_kinds:
             assert(kind not in movement_map)
             graphic_ids = split_strip(value)
             assert(len(graphic_ids) == 9)
             encoded_ids = "".join(encode_string(id) for id in graphic_ids)
             movement_map[kind] = encoded_ids
-        elif kind == "contact":
-            assert(contact == None)
-            dims = split_strip(value)
-            contact = pack("iii", *[int(dim) for dim in dims])
         else:
             raise(Exception("unsupported kind: " + kind))
     assert(len(movement_map) == len(movement_kinds))
@@ -196,6 +203,7 @@ def compile_entity(in_path, out_path):
     out_handle.write("E" + pack("i", version_number))
 
     out_handle.write(contact)
+    out_handle.write(specs)
     [out_handle.write(movement_map[movement_kind]) for movement_kind in movement_kinds]
     out_handle.close()
 

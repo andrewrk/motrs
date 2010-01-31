@@ -60,6 +60,9 @@ public:
     void setAltitudeVelocity(double value) { m_altitudeVelocity = value; }
     void applyAltitudeVelocity() { m_altitude += m_altitudeVelocity; }
 
+    double speed() { return m_speed; }
+    double mass() { return m_mass; }
+
     Direction orientation() { return m_direction; }
     void setOrientation(Direction direction) { m_direction = direction; }
 
@@ -81,6 +84,9 @@ private:
     int m_layer;
     double m_altitude, m_altitudeVelocity;
 
+    double m_speed;
+    double m_mass;
+
     Direction m_direction;
     MovementMode m_movementMode;
 
@@ -97,7 +103,7 @@ private:
     Graphic * m_running[9];
     Graphic * m_sword[9];
 
-    Entity(double radius, double centerOffsetX, double centerOffsetY);
+    Entity(double radius, double centerOffsetX, double centerOffsetY, double speed, double mass);
     ~Entity() {}
 };
 

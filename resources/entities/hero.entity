@@ -1,11 +1,11 @@
-version=5
+version=6
 
 # contact=cx,cy,r
 # experimentally, it seems a minimum radius of 4 is required
 contact=16,36,12
 
-# TODO: specs = speed, health, defense, stamina, more?
-# specs = 10,10,10,10, ???
+# specs = speed, mass
+specs = 3.3, 5
 
 # walk, run, and stand define graphics for the following 9 directions:
 #  nw,w,sw,n,c,s,ne,e,se
