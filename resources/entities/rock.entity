@@ -1,6 +1,8 @@
-version=5
+version=6
 
 contact=16,16,15
+
+specs = 0, 100
 
 stand = rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp
 walk  = rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp

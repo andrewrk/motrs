@@ -5,11 +5,12 @@
 
 #include "Utils.h"
 
-Entity::Entity(double radius, double centerOffsetX, double centerOffsetY) :
+Entity::Entity(double radius, double centerOffsetX, double centerOffsetY, double speed, double mass) :
     m_centerX(0.0), m_centerY(0.0), m_radius(radius),
     m_velocityX(0.0), m_velocityY(0.0),
     m_layer(0),
     m_altitude(0.0), m_altitudeVelocity(0.0),
+    m_speed(speed), m_mass(mass),
     m_direction(Center), m_movementMode(Stand),
     m_centerOffsetX(centerOffsetX), m_centerOffsetY(centerOffsetY),
     m_currentSequence(None), m_sequencePosition(0)
@@ -24,7 +25,7 @@ Entity * Entity::load(const char *buffer) {
     const char * cursor = buffer;
 
     int version = Utils::readInt(&cursor);
-    if (version != 5) {
+    if (version != 6) {
         std::cerr << "Unsupported Entity version: " << version << std::endl;
         return NULL;
     }
@@ -33,7 +34,10 @@ Entity * Entity::load(const char *buffer) {
     double centerOffsetY = (double)Utils::readInt(&cursor);
     double radius = (double)Utils::readInt(&cursor);
 
-    Entity * entity = new Entity(radius, centerOffsetX, centerOffsetY);
+    double speed = Utils::readDouble(&cursor);
+    double mass = Utils::readDouble(&cursor);
+
+    Entity * entity = new Entity(radius, centerOffsetX, centerOffsetY, speed, mass);
     Graphic** movementGraphics[] = { entity->m_standing, entity->m_walking, entity->m_running, entity->m_sword };
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 9; j++) {
