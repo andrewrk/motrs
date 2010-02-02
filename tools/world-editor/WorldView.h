@@ -27,6 +27,10 @@ public:
 
     void setWorld(EditorWorld * world);
     void setSelectedLayer(int index);
+
+    void addLayer();
+    void swapLayers(int i, int j);
+    void deleteLayer(int index);
 protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
@@ -103,6 +107,9 @@ private:
     bool overSelectedMap(int x, int y);
 
     void determineCursor();
+
+    void refreshLayersList();
+    void setControlEnableStates();
 
 
 private slots:

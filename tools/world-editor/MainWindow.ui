@@ -173,16 +173,43 @@
     <number>1</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_5">
-    <widget class="QListWidget" name="list_layers">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>10</y>
-       <width>221</width>
-       <height>141</height>
-      </rect>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QListWidget" name="list_layers"/>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QPushButton" name="btnMoveLayerUp">
+         <property name="text">
+          <string>Up</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnMoveLayerDown">
+         <property name="text">
+          <string>Down</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnNewLayer">
+         <property name="text">
+          <string>New</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnDeleteLayer">
+         <property name="text">
+          <string>Delete</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QDockWidget" name="dock_art">

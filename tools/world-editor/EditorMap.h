@@ -24,7 +24,7 @@ public:
     void setWidth(double value);
     void setHeight(double value);
 
-    void addLayer();
+    void addLayer(QString name = "");
     void deleteLayer(int index);
     void swapLayer(int i, int j);
     void renameLayer(int index, QString newName);

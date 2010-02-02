@@ -498,9 +498,8 @@ void WorldView::setWorld(EditorWorld * world)
     updateViewCache();
 }
 
-void WorldView::selectMap(EditorMap * map)
+void WorldView::refreshLayersList()
 {
-    m_selectedMap = map;
     QListWidget * list = m_window->layersList();
     list->clear();
     if( m_selectedMap ) {
@@ -518,7 +517,13 @@ void WorldView::selectMap(EditorMap * map)
     } else {
         list->addItem(tr("Click a map to select it and view layers"));
     }
+    setControlEnableStates();
+}
 
+void WorldView::selectMap(EditorMap * map)
+{
+    m_selectedMap = map;
+    refreshLayersList();
     this->update();
 }
 
@@ -537,4 +542,41 @@ void WorldView::setSelectedLayer(int index)
 {
     m_window->layersList()->setCurrentRow(index);
     m_selectedLayer = index;
+}
+
+
+void WorldView::addLayer()
+{
+    Debug::assert(m_selectedMap, "Error: Layer manipulations on no selected map");
+    m_selectedMap->addLayer();
+
+    updateViewCache();
+    refreshLayersList();
+}
+
+void WorldView::swapLayers(int i, int j)
+{
+    Debug::assert(m_selectedMap, "Error: Layer manipulations on no selected map");
+    m_selectedMap->swapLayer(i, j);
+
+    updateViewCache();
+    refreshLayersList();
+}
+
+void WorldView::deleteLayer(int index)
+{
+    Debug::assert(m_selectedMap, "Error: Layer manipulations on no selected map");
+    m_selectedMap->deleteLayer(index);
+    updateViewCache();
+    refreshLayersList();
+}
+
+
+void WorldView::setControlEnableStates()
+{
+    m_window->moveLayerUpButton()->setEnabled(m_selectedMap != NULL && m_window->layersList()->currentRow() > 0);
+    m_window->moveLayerDownButton()->setEnabled(m_selectedMap != NULL && m_window->layersList()->currentRow() < m_window->layersList()->count()-1);
+    m_window->deleteLayerButton()->setEnabled(m_selectedMap != NULL && m_window->layersList()->currentRow() > -1);
+    m_window->newLayerButton()->setEnabled(m_selectedMap != NULL);
+
 }

@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QModelIndex>
 #include <QComboBox>
+#include <QPushButton>
 
 class WorldView;
 
@@ -60,18 +61,30 @@ private:
     void refreshWorldList();
     void cleanupArt();
     void openWorld(QString file);
-    QListWidget * layersList();
     void fillToolComboBox(QComboBox & comboBox);
 
+
+    QListWidget * layersList();
+    QPushButton * newLayerButton();
+    QPushButton * deleteLayerButton();
+    QPushButton * moveLayerUpButton();
+    QPushButton * moveLayerDownButton();
+
 private slots:
+    void on_btnDeleteLayer_clicked();
+    void on_btnNewLayer_clicked();
+    void on_btnMoveLayerDown_clicked();
+    void on_btnMoveLayerUp_clicked();
     void on_list_layers_itemChanged(QListWidgetItem* item);
     void on_list_layers_itemSelectionChanged();
     void on_list_worlds_doubleClicked(QModelIndex index);
+
     void on_actionSettings_triggered();
 
     void on_cboLeftClick_currentIndexChanged(int index);
     void on_cboMiddleClick_currentIndexChanged(int index);
     void on_cboRightClick_currentIndexChanged(int index);
+
 
 };
 

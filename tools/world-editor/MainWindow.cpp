@@ -27,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->dock_art->setWidget(ui->widget_art);
     ui->view_art->setScene(m_scene);
-    ui->dock_layers->setWidget(ui->list_layers);
 
     // fill tools combo box with appropriate values
     fillToolComboBox(*ui->cboLeftClick);
@@ -200,12 +199,58 @@ QListWidget * MainWindow::layersList()
     return ui->list_layers;
 }
 
+QPushButton * MainWindow::newLayerButton()
+{
+    return ui->btnNewLayer;
+}
+
+QPushButton * MainWindow::deleteLayerButton()
+{
+    return ui->btnDeleteLayer;
+}
+
+QPushButton * MainWindow::moveLayerUpButton()
+{
+    return ui->btnMoveLayerUp;
+}
+
+QPushButton * MainWindow::moveLayerDownButton()
+{
+    return ui->btnMoveLayerDown;
+}
+
+
+
 void MainWindow::on_list_layers_itemSelectionChanged()
 {
     m_view->setSelectedLayer(ui->list_layers->currentRow());
+    m_view->setControlEnableStates();
 }
 
 void MainWindow::on_list_layers_itemChanged(QListWidgetItem* item)
 {
     m_view->update();
+}
+
+void MainWindow::on_btnMoveLayerUp_clicked()
+{
+    if( ui->list_layers->currentRow() > 0 )
+        m_view->swapLayers(ui->list_layers->currentRow(), ui->list_layers->currentRow()-1);
+}
+
+void MainWindow::on_btnMoveLayerDown_clicked()
+{
+    if( ui->list_layers->currentRow() < ui->list_layers->count() - 1 )
+        m_view->swapLayers(ui->list_layers->currentRow(), ui->list_layers->currentRow()+1);
+}
+
+void MainWindow::on_btnNewLayer_clicked()
+{
+    m_view->addLayer();
+}
+
+void MainWindow::on_btnDeleteLayer_clicked()
+{
+    if( ui->list_layers->currentRow() > -1 )
+        m_view->deleteLayer(ui->list_layers->currentRow());
 }

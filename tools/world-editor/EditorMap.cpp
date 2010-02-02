@@ -125,19 +125,24 @@ void EditorMap::setHeight(double value)
 }
 
 
-void EditorMap::addLayer()
+void EditorMap::addLayer(QString name)
 {
-
+    QString newLayerName = name.isEmpty() ? QObject::tr("Layer %1").arg(QString::number(layerCount()))
+        : name;
+    m_tiles->redim(m_tiles->sizeX(), m_tiles->sizeY(), m_tiles->sizeZ()+1, 0);
+    m_layerNames << newLayerName;
 }
 
 void EditorMap::deleteLayer(int index)
 {
-
+    m_tiles->deleteRowZ(index);
+    m_layerNames.removeAt(index);
 }
 
 void EditorMap::swapLayer(int i, int j)
 {
-
+    m_tiles->swapRowZ(i, j);
+    m_layerNames.swap(i, j);
 }
 
 void EditorMap::renameLayer(int index, QString newName)

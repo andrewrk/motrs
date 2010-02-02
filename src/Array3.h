@@ -31,6 +31,8 @@ public:
     inline int sizeY(){ return m_sizeY; }
     inline int sizeZ(){ return m_sizeZ; }
 
+    void deleteRowZ(int index);
+    void swapRowZ(int i, int j);
 
     void clear();
 private:
@@ -124,8 +126,7 @@ void Array3<T>::redim(int newSizeX, int newSizeY, int newSizeZ, T fill) {
                     new_arr[x + y * newSizeX + z * newSizeY * newSizeX] =
                         m_arr[x + y * m_sizeX + z * m_sizeY * m_sizeX];
                 } else {
-                    new_arr[x + y * newSizeX + z * newSizeY * newSizeX] =
-                        fill;
+                    new_arr[x + y * newSizeX + z * newSizeY * newSizeX] = fill;
                 }
             }
         }
@@ -136,5 +137,39 @@ void Array3<T>::redim(int newSizeX, int newSizeY, int newSizeZ, T fill) {
     m_sizeY = newSizeY;
     m_sizeZ = newSizeZ;
 }
+
+template <class T>
+void Array3<T>::deleteRowZ(int index)
+{
+    T * new_arr = new T[m_sizeX * m_sizeY * (m_sizeZ-1)];
+    for(int x=0; x<m_sizeX; ++x) {
+        for( int y=0; y<m_sizeY; ++y) {
+            for( int z=0; z<m_sizeZ; ++z) {
+                if( z < index ) {
+                    new_arr[getLinearIndex(x,y,z)] = m_arr[getLinearIndex(x,y,z)];
+                } else if( z > index ) {
+                    new_arr[x + y * m_sizeX + (z-1) * m_sizeY * m_sizeX] =
+                        m_arr[getLinearIndex(x,y,z)];
+                }
+            }
+        }
+    }
+    delete[] m_arr;
+    m_arr = new_arr;
+    --m_sizeZ;
+}
+
+template <class T>
+void Array3<T>::swapRowZ(int i, int j)
+{
+    for(int x=0; x<m_sizeX; ++x) {
+        for(int y=0; y<m_sizeY; ++y) {
+            T tmp = m_arr[getLinearIndex(x,y,i)];
+            m_arr[getLinearIndex(x,y,i)] = m_arr[getLinearIndex(x,y,j)];
+            m_arr[getLinearIndex(x,y,j)] = tmp;
+        }
+    }
+}
+
 
 #endif
