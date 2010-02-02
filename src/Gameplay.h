@@ -59,7 +59,7 @@ private:
     void updateDisplay();
     void nextFrame();
 
-    void applyInput(Entity * entity);
+    void applyInput(Entity * entity, bool takesInput);
     void resolveWithEntity(Entity * entity1, Entity * entity2);
     void resolveWithWorld(Entity * entity);
 
