@@ -33,6 +33,8 @@ protected:
     void mousePressEvent(QMouseEvent * e);
     void mouseReleaseEvent(QMouseEvent * e);
     void mouseMoveEvent(QMouseEvent * e);
+    void keyPressEvent(QKeyEvent * e);
+    void keyReleaseEvent(QKeyEvent * e);
 private:
     enum MouseState {
         Normal,
@@ -41,6 +43,7 @@ private:
         StretchMapTop,
         StretchMapRight,
         StretchMapBottom,
+        MoveMap,
     };
 
     // how far away from border lines can you be to be able to use stretch tools
@@ -75,6 +78,7 @@ private:
     // location of the mouse
     int m_mouseX;
     int m_mouseY;
+    Qt::KeyboardModifiers m_keyboardModifiers;
 
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);
@@ -96,6 +100,9 @@ private:
     bool overMapRight(int x, int y);
     bool overMapTop(int x, int y);
     bool overMapBottom(int x, int y);
+    bool overSelectedMap(int x, int y);
+
+    void determineCursor();
 
 
 private slots:
