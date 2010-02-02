@@ -127,7 +127,8 @@ void Gameplay::nextFrame() {
     // refresh the input state
     Input::refresh();
 
-    applyInput(m_player);
+    for (unsigned int i = 0; i < m_entities.size(); i++)
+        applyInput(m_entities[i], m_entities[i] == m_player);
     for (unsigned int i = 0; i < m_entities.size() - 1; i++)
         for (unsigned int j = i + 1; j < m_entities.size(); j++)
             resolveWithEntity(m_entities[i], m_entities[j]);
@@ -152,7 +153,7 @@ void Gameplay::nextFrame() {
     m_frameCount++;
 }
 
-void Gameplay::applyInput(Entity * entity) {
+void Gameplay::applyInput(Entity * entity, bool takesInput) {
     // determin directional input
     double dx = entity->velocityX();
     double dy = entity->velocityY();
@@ -162,24 +163,26 @@ void Gameplay::applyInput(Entity * entity) {
     bool canKeepJumping = false;
     bool canSwingSword = false;
     bool isFalling = false;
+    bool affectedByFriction = false;
 
     switch (entity->movementMode()) {
     case Entity::Stand:
     case Entity::Walk:
     case Entity::Run:
-        canChangeDirections = true;
-        canStartJump = true;
-        canSwingSword = true;
-        canMoveAround = true;
+        canChangeDirections = takesInput;
+        canStartJump = takesInput;
+        canSwingSword = takesInput;
+        canMoveAround = takesInput;
+        affectedByFriction = true;
         break;
     case Entity::JumpUp:
-        canKeepJumping = true;
-        canSwingSword = true;
+        canKeepJumping = takesInput;
+        canSwingSword = takesInput;
         break;
     case Entity::Falling:
-        canChangeDirections = true;
+        canChangeDirections = takesInput;
         isFalling = true;
-        canSwingSword = true;
+        canSwingSword = takesInput;
         break;
     default: Debug::assert(false, "bad movement mode");
     }
@@ -201,13 +204,15 @@ void Gameplay::applyInput(Entity * entity) {
             else
                 entity->setMovementMode(Entity::Run);
             double speed = entity->speed();
-            dx = speed * input_dx;
-            dy = speed * input_dy;
+            double accelX = speed * input_dx;
+            double accelY = speed * input_dy;
             if (input_dx != 0 && input_dy != 0) {
                 // for diagonal motion, scale both axes down by sqrt(1/2)
-                dx *= Utils::RadHalf;
-                dy *= Utils::RadHalf;
+                accelX *= Utils::RadHalf;
+                accelY *= Utils::RadHalf;
             }
+            dx += accelX;
+            dy += accelY;
         }
     }
 
@@ -244,6 +249,11 @@ void Gameplay::applyInput(Entity * entity) {
         }
     }
 
+    if (affectedByFriction) {
+        double friction = 0.6;
+        dx *= friction;
+        dy *= friction;
+    }
     switch (entity->currentSequence()) {
     case Entity::None:
         if (canSwingSword) {
