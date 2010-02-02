@@ -5,6 +5,7 @@
 
 #include <QString>
 #include <QPainter>
+#include <QStringList>
 
 class EditorMap : public Map
 {
@@ -22,6 +23,14 @@ public:
     void setTop(double value);
     void setWidth(double value);
     void setHeight(double value);
+
+    void addLayer();
+    void deleteLayer(int index);
+    void swapLayer(int i, int j);
+    void renameLayer(int index, QString newName);
+    QString layerName(int index);
+private:
+    QStringList m_layerNames;
 
 };
 

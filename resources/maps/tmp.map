@@ -1,4 +1,4 @@
-version=2
+version=3
 
 # size=sizeX,sizeY,layerCount
 # sizes in number of tiles, not in actual coordinates.
@@ -22,8 +22,8 @@ tile=6,0,Sand Block SW.bmp
 # Layer declarations are always full arrays (no sparse allowed).
 # Flatten a 2d grid in row-major order. 
 # There must be (sizeX*sizeY) comma delimitted tile indexes.
-# layer=0,0,...
-layer=\
+# layer=layer name,0,0,...
+layer=layer name,\
 2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,2, \
 2,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,2, \
 2,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,2, \
@@ -54,7 +54,7 @@ layer=\
 2,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,2, \
 2,2,2,2, 1,2,2,2, 2,2,2,2, 2,2,2,2, 2,2,2,1, 1,2,2,2
 
-layer=\
+layer=another layer name,\
 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, \
 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,1,1,0, \
 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,2,1,0, \
@@ -96,6 +96,7 @@ layer=\
 # trigger=???
 
 # entity declarations yet to come.
+# entity=x,y,layer,id
 entity=256,256,0,rock.entity
 entity=223,256,0,rock.entity
 entity=190,256,0,rock.entity

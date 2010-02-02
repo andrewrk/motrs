@@ -108,7 +108,11 @@ def compile_map(in_path, out_path):
         shape_str, surface_str, graphic_id = split_strip(value)
         return pack("ii", int(shape_str), int(surface_str)) + encode_string(graphic_id)
     def encode_layer(value, size_x, size_y):
-        values = [int(v) for v in value.split(",")]
+        # leave layer names out of binary
+        values = value.split(",")
+        layer_name = values.pop(0)
+
+        values = [int(v) for v in values]
         assert len(values) == size_x * size_y
         FMT_FULL = 1
         FMT_SPARSE = 2
@@ -131,7 +135,7 @@ def compile_map(in_path, out_path):
     declarations = read_declarations(in_path)
     assert(declarations[0][0] == "version")
     version_number = int(declarations[0][1])
-    assert(version_number == 2)
+    assert(version_number == 3)
 
     pallet = []
     size = None

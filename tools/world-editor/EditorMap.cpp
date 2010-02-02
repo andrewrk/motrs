@@ -25,11 +25,12 @@ EditorMap::EditorMap(QString file)
     // implicit null tile
     m_palette.clear();
     m_palette.push_back(Tile::nullTile());
+    m_layerNames.clear();
 
     for(int i=0; i<props.size(); ++i) {
         if( props[i].first.compare("version", Qt::CaseInsensitive) == 0 ) {
             int fileVersion = props[i].second.toInt();
-            int codeVersion = 1;
+            int codeVersion = 3;
             if( fileVersion != codeVersion ) {
                 qDebug() << "Tried to open version  " << fileVersion <<
                     " with version " << codeVersion << " code.";
@@ -56,8 +57,9 @@ EditorMap::EditorMap(QString file)
                 pixmap);
             m_palette.push_back(tile);
         } else if( props[i].first.compare("layer", Qt::CaseInsensitive) == 0 ) {
-            // layer=0,0,...
+            // layer=name,0,0,...
             QStringList layer = props[i].second.split(",");
+            m_layerNames << layer.takeFirst();
             int index = 0;
             for(int y = 0; y < sizeY; ++y) {
                 for(int x = 0; x < sizeX; ++x) {
@@ -66,9 +68,17 @@ EditorMap::EditorMap(QString file)
                 }
             }
             ++layerIndex;
-
+        } else if( props[i].first.compare("entity", Qt::CaseInsensitive) == 0 ) {
+            // entity=x,y,layer,id
+            QStringList entityProps = props[i].second.split(",");
+            double x = entityProps.at(0).toDouble();
+            double y = entityProps.at(1).toDouble();
+            int layerIndex = entityProps.at(2).toInt();
+            QString entityFile = entityProps.at(3);
+            // TODO: add support for entities
         } else {
-            qDebug() << "Unrecognized Map property: " << props[i].first;
+            qDebug() << "Unrecognized Map property: " << props[i].first
+                << " = " << props[i].second;
             this->m_good = false;
             return;
         }
@@ -113,3 +123,30 @@ void EditorMap::setHeight(double value)
         m_tiles->redim(m_tiles->sizeX(), tileCount, m_tiles->sizeZ(), 0);
     calculateBoundaries();
 }
+
+
+void EditorMap::addLayer()
+{
+
+}
+
+void EditorMap::deleteLayer(int index)
+{
+
+}
+
+void EditorMap::swapLayer(int i, int j)
+{
+
+}
+
+void EditorMap::renameLayer(int index, QString newName)
+{
+    m_layerNames.replace(index, newName);
+}
+
+QString EditorMap::layerName(int index)
+{
+    return m_layerNames.at(index);
+}
+

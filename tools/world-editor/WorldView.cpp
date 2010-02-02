@@ -506,7 +506,7 @@ void WorldView::selectMap(EditorMap * map)
     if( m_selectedMap ) {
         // add the layers from that map
         for(int i=0; i<m_selectedMap->layerCount(); ++i) {
-            QListWidgetItem * newItem = new QListWidgetItem(tr("Layer %1").arg(i+1), list);
+            QListWidgetItem * newItem = new QListWidgetItem(m_selectedMap->layerName(i), list);
             newItem->setFlags(Qt::ItemIsUserCheckable|Qt::ItemIsSelectable|
                               Qt::ItemIsEditable|Qt::ItemIsEnabled);
             newItem->setCheckState(Qt::Checked);
