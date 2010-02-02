@@ -104,13 +104,12 @@ def compile_world(in_path, out_path):
 
 
 def compile_map(in_path, out_path):
-    def encode_tile(value):
-        shape_str, surface_str, graphic_id = split_strip(value)
+    def encode_tile(values):
+        shape_str, surface_str, graphic_id = values
         return pack("ii", int(shape_str), int(surface_str)) + encode_string(graphic_id)
-    def encode_layer(value, size_x, size_y):
-        # leave layer names out of binary
-        values = value.split(",")
-        layer_name = values.pop(0)
+    def encode_layer(values, size_x, size_y):
+        # ignore layer name
+        values.pop(0)
 
         values = [int(v) for v in values]
         assert len(values) == size_x * size_y
@@ -128,8 +127,8 @@ def compile_map(in_path, out_path):
         else:
             # sparse
             return pack("ii", FMT_SPARSE, len(sparse_version) / calcsize("iii")) + sparse_version
-    def encode_entity(value):
-        (x_str, y_str, layer_str, id) = split_strip(value)
+    def encode_entity(values):
+        (x_str, y_str, layer_str, id) = values
         x, y, layer = int(x_str), int(y_str), int(layer_str)
         return pack("iii", x, y, layer) + encode_string(id)
     declarations = read_declarations(in_path)
@@ -143,26 +142,26 @@ def compile_map(in_path, out_path):
     submaps = []
     triggers = []
     entities = []
-    for (kind, value) in declarations[1:]:
+    for (kind, values_str) in declarations[1:]:
+        values = split_strip(values_str)
         if kind == "size":
-            assert size == None
-            (x, y, layerCount) = value.split(",")
-            size = (int(x), int(y))
-            layerCount = int(layerCount)
+            assert(size == None)
+            (x_str, y_str, layerCount_str) = values
+            size = (int(x_str), int(y_str), int(layerCount_str))
         elif kind == "tile":
-            pallet.append(encode_tile(value))
+            pallet.append(encode_tile(values))
         elif kind == "layer":
-            layers.append(encode_layer(value, size[0], size[1]))
+            layers.append(encode_layer(values, size[0], size[1]))
         elif kind == "submap":
             raise("TODO: support submap")
         elif kind == "trigger":
             raise("TODO: support trigger")
         elif kind == "entity":
-            entities.append(encode_entity(value))
+            entities.append(encode_entity(values))
         else:
             raise(Exception("unsupported kind: " + kind))
-    assert size != None
-    assert layerCount == len(layers), "layerCount: %i, len(layers): %i" % (layerCount, len(layers))
+    assert(size != None)
+    assert(size[2] == len(layers))
     out_handle = open_output(out_path)
     out_handle.write("M" + pack("i", version_number))
     out_handle.write(pack("ii", size[0], size[1]))

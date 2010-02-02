@@ -6,65 +6,47 @@
 #include "Debug.h"
 
 Map * Map::load(const char *buffer) {
-    Map * map = new Map(buffer);
-    if (!map->isGood()) {
-        delete map;
-        return NULL;
-    }
-    return map;
-}
-
-Map::Map(const char * buffer) :
-    m_good(true),
-    m_palette(),
-    m_tiles(NULL),
-    m_submaps(),
-    m_triggers(),
-    m_entities(),
-    m_x(0.0), m_y(0.0),
-    m_width(0.0), m_height(0.0),
-    m_story(0)
-{
     const char * cursor = buffer;
     int version = Utils::readInt(&cursor);
-    if (version != 2) {
+    if (version != 3) {
         std::cerr << "Unsupported Map version: " << version << std::endl;
-        m_good = false;
-        return;
+        return NULL;
     }
 
     int sizeX = Utils::readInt(&cursor);
     int sizeY = Utils::readInt(&cursor);
 
+    Map * map = new Map();
+
     // pallet
     int tileCount = Utils::readInt(&cursor);
-    m_palette.push_back(Tile::nullTile());
+    map->m_palette.push_back(Tile::nullTile());
     for (int i = 0; i < tileCount; i++) {
         Tile * tile = new Tile(&cursor);
+        map->m_palette.push_back(tile);
         if (!tile->isGood()) {
-            m_good = false;
-            return;
+            delete map;
+            return NULL;
         }
-        m_palette.push_back(tile);
     }
 
     // layers
     int layerCount = Utils::readInt(&cursor);
-    m_tiles = new Array3<int>(sizeX, sizeY, layerCount);
-    m_tiles->clear(); // must be cleared for sparse layers
+    map->m_tiles = new Array3<int>(sizeX, sizeY, layerCount);
+    map->m_tiles->clear(); // must be cleared for sparse layers
     for (int z = 0; z < layerCount; z++) {
         LayerType layerType = (LayerType)Utils::readInt(&cursor);
         switch (layerType) {
             case ltFull:
                 for (int y = 0; y < sizeY; y++)
                     for (int x = 0; x < sizeX; x++)
-                        m_tiles->set(x, y, z, Utils::readInt(&cursor));
+                        map->m_tiles->set(x, y, z, Utils::readInt(&cursor));
                 break;
             case ltSparse: {
                 int tileCount = Utils::readInt(&cursor);
                 for (int i = 0; i < tileCount; i++) {
                     SparseTile * sparseTile = Utils::readStruct<SparseTile>(&cursor);
-                    m_tiles->set(sparseTile->x, sparseTile->y, z, sparseTile->tile);
+                    map->m_tiles->set(sparseTile->x, sparseTile->y, z, sparseTile->tile);
                 }
                 break;
             }
@@ -88,22 +70,28 @@ Map::Map(const char * buffer) :
         int layer = Utils::readInt(&cursor);
         std::string id = Utils::readString(&cursor);
         Entity * entity = ResourceManager::getEntity(id);
+        if (entity == NULL) {
+            delete map;
+            return NULL;
+        }
         entity->setCenter(x, y);
         entity->setLayer(layer);
-        m_entities.push_back(entity);
+        map->m_entities.push_back(entity);
     }
 
-    calculateBoundaries();
+    map->calculateBoundaries();
+    return map;
 }
 
 Map::Map() :
-    m_good(true),
     m_palette(),
     m_tiles(NULL),
     m_submaps(),
     m_triggers(),
     m_entities(),
-    m_x(0.0), m_y(0.0)
+    m_x(0.0), m_y(0.0),
+    m_width(0.0), m_height(0.0),
+    m_story(0)
 {
 }
 
@@ -117,11 +105,6 @@ void Map::calculateBoundaries()
     // pre-calculations
     m_width = m_tiles->sizeX() * Tile::size;
     m_height = m_tiles->sizeY() * Tile::size;
-}
-
-bool Map::isGood()
-{
-    return m_good;
 }
 
 void Map::tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, int layer) {

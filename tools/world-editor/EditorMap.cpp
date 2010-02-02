@@ -14,9 +14,9 @@ EditorMap::EditorMap(QString file)
 {
     QVector< QPair<QString, QString> > props;
 
-    m_good = EditorUtils::loadTextFile(file, props);
+    bool good = EditorUtils::loadTextFile(file, props);
 
-    if( ! m_good )
+    if( ! good )
         return;
 
     int sizeX, sizeY, layerCount;
@@ -34,7 +34,7 @@ EditorMap::EditorMap(QString file)
             if( fileVersion != codeVersion ) {
                 qDebug() << "Tried to open version  " << fileVersion <<
                     " with version " << codeVersion << " code.";
-                this->m_good = false;
+                good = false;
                 return;
             }
         } else if( props[i].first.compare("size", Qt::CaseInsensitive) == 0 ) {
@@ -79,7 +79,7 @@ EditorMap::EditorMap(QString file)
         } else {
             qDebug() << "Unrecognized Map property: " << props[i].first
                 << " = " << props[i].second;
-            this->m_good = false;
+            good = false;
             return;
         }
     }

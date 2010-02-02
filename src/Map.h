@@ -21,7 +21,6 @@ public:
     };
 
     static Map * load(const char * buffer);
-    Map(const char * buffer);
     Map();
     virtual ~Map();
 
@@ -54,9 +53,6 @@ protected:
         int x, y, tile;
     } SparseTile;
 
-
-    bool m_good;
-
     std::vector<Tile*> m_palette;
     Array3<int> * m_tiles;
     std::vector<Map*> m_submaps;
@@ -67,8 +63,6 @@ protected:
     double m_x, m_y;
     double m_width, m_height; // computed and cached
     int m_story;
-
-    bool isGood();
 
     void tileRange(double left, double top, double width, double height,
                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom);

@@ -3,7 +3,6 @@ version=3
 # size=sizeX,sizeY,layerCount
 # sizes in number of tiles, not in actual coordinates.
 size=24,24,2
-#size=2,2
 
 # Tile declarations define the pallet. order is significant.
 # tile=shape,surface,graphicId
