@@ -122,13 +122,23 @@ void WorldView::paintEvent(QPaintEvent * e)
             for (int i = 0; i < m_mapCache.size(); i++) {
                 EditorMap * map = m_mapCache[i];
 
-                if (m_selectedMap == map)
-                    p.setPen(selectedMapBorder);
-                else
-                    p.setPen(normalMapBorder);
-
-                p.drawRect((int)screenX(map->left()), (int)screenY(map->top()),
+                p.setPen(m_selectedMap == map ? selectedMapBorder : normalMapBorder);
+                QRect outline((int)screenX(map->left()), (int)screenY(map->top()),
                     (int)(map->width() * m_zoom), (int)(map->height() * m_zoom));
+
+                // if we're dragging boundaries, move the blue line
+                if( m_selectedMap == map ) {
+                    if (m_mouseState == StretchMapLeft)
+                        outline.setLeft(outline.left() + (m_mouseX - m_mouseDownX));
+                    else if (m_mouseState == StretchMapBottom)
+                        outline.setBottom(outline.bottom() + (m_mouseY - m_mouseDownY));
+                    else if (m_mouseState == StretchMapRight)
+                        outline.setRight(outline.right() + (m_mouseX - m_mouseDownX));
+                    else if (m_mouseState == StretchMapTop)
+                        outline.setTop(outline.top() + (m_mouseY - m_mouseDownY));
+                }
+
+                p.drawRect(outline);
             }
 
             drawGrid(p);
@@ -252,6 +262,8 @@ bool WorldView::overMapBottom(int x, int y)
 
 void WorldView::mouseMoveEvent(QMouseEvent * e)
 {
+    m_mouseX = e->x();
+    m_mouseY = e->y();
     switch(m_mouseState) {
         case Normal: {
             switch(m_mouseDownTool) {
@@ -280,20 +292,12 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
             }
         } break;
         case SetStartPoint: break;
+
+        // update the screen when we're making a stretch box
         case StretchMapLeft:
-            m_selectedMap->setLeft(m_mouseDownTmpValue + (e->x() - m_mouseDownX));
-            this->update();
-            break;
         case StretchMapTop:
-            m_selectedMap->setTop(m_mouseDownTmpValue + (e->y() - m_mouseDownY));
-            this->update();
-            break;
         case StretchMapRight:
-            m_selectedMap->setWidth(m_mouseDownTmpValue + (e->x() - m_mouseDownX));
-            this->update();
-            break;
         case StretchMapBottom:
-            m_selectedMap->setHeight(m_mouseDownTmpValue + (e->y() - m_mouseDownY));
             this->update();
             break;
     }
@@ -312,6 +316,32 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
     else
         return;
 
+    switch(m_mouseState) {
+        case StretchMapLeft: {
+            double delta = (e->x() - m_mouseDownX) * m_zoom;
+            m_selectedMap->setLeft(m_selectedMap->left() + delta);
+            m_selectedMap->setWidth(m_selectedMap->width() - delta);
+            this->update();
+        } break;
+        case StretchMapTop: {
+            double delta = (e->y() - m_mouseDownY) * m_zoom;
+            m_selectedMap->setTop(m_selectedMap->top() + delta);
+            m_selectedMap->setHeight(m_selectedMap->height() - delta);
+            this->update();
+        } break;
+        case StretchMapRight: {
+            double delta = (e->x() - m_mouseDownX) * m_zoom;
+            m_selectedMap->setWidth(m_selectedMap->width() + delta);
+            this->update();
+        } break;
+        case StretchMapBottom: {
+            double delta = (e->y() - m_mouseDownY) * m_zoom;
+            m_selectedMap->setHeight(m_selectedMap->height() + delta);
+            this->update();
+        } break;
+    }
+
+    // return state to normal
     if( tool == m_mouseDownTool ) {
         m_mouseDownTool = MainWindow::Nothing;
         m_mouseState = Normal;
@@ -345,22 +375,16 @@ void WorldView::mousePressEvent(QMouseEvent * e)
             break;
         case MainWindow::Arrow: {
             // are we stretching the boundaries of a map?
-            if( overMapLeft(e->x(), e->y()) ) {
-                m_mouseDownTmpValue = m_selectedMap->left();
+            if( overMapLeft(e->x(), e->y()) )
                 m_mouseState = StretchMapLeft;
-            } else if( overMapRight(e->x(), e->y()) ) {
-                m_mouseDownTmpValue = m_selectedMap->width();
+            else if( overMapRight(e->x(), e->y()) )
                 m_mouseState = StretchMapRight;
-            } else if( overMapTop(e->x(), e->y()) ) {
-                m_mouseDownTmpValue = m_selectedMap->top();
+            else if( overMapTop(e->x(), e->y()) )
                 m_mouseState = StretchMapTop;
-            } else if( overMapBottom(e->x(), e->y()) ) {
-                m_mouseDownTmpValue = m_selectedMap->height();
+            else if( overMapBottom(e->x(), e->y()) )
                 m_mouseState = StretchMapBottom;
-            } else{
-                // if they clicked inside a map, select it
-                selectMap(mapAt(e->x(), e->y()));
-            }
+            else
+                selectMap(mapAt(e->x(), e->y())); // if they clicked inside a map, select it
         } break;
         case MainWindow::Eraser:
 

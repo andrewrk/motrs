@@ -71,7 +71,10 @@ private:
     int m_mouseDownY;
     MainWindow::MouseTool m_mouseDownTool;
     int m_mouseState;
-    double m_mouseDownTmpValue; // holds the original value of what is being dragged
+
+    // location of the mouse
+    int m_mouseX;
+    int m_mouseY;
 
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);
