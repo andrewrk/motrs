@@ -11,6 +11,7 @@
 #include "moc_WorldView.cxx"
 
 const int WorldView::s_lineSelectRadius = 4;
+QPainter * WorldView::s_painter = NULL;
 
 WorldView::WorldView(MainWindow * window, QWidget * parent) :
     QWidget(parent),
@@ -68,6 +69,7 @@ void WorldView::updateViewCache()
     // when the scroll or zoom changes, we need to recalculate which maps
     // need to be drawn.
     m_mapCache.clear();
+    m_entityCache.clear();
     if( m_world && m_world->isGood() ) {
         // select the maps that are in range
         std::vector<Map*> * maps = m_world->maps();
@@ -87,6 +89,10 @@ void WorldView::updateViewCache()
                     m_maxLayer = map->layerCount();
 
                 m_mapCache.append(map);
+
+                // add the map's entities to our cache
+                for(unsigned int j = 0; j<map->entities()->size(); ++j)
+                    m_entityCache.append( (EditorEntity *) map->entities()->at(j));
             }
         }
     }
@@ -97,12 +103,17 @@ void WorldView::updateViewCache()
 void WorldView::paintEvent(QPaintEvent * e)
 {
     QPainter p(this);
+    s_painter = &p;
     p.setBackground(Qt::white);
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_world ) {
         if( m_world->isGood() ) {
+            double absX = absoluteX(0);
+            double absY = absoluteY(0);
+
             for(int layer=0; layer<m_maxLayer; ++layer) {
+                // draw map at this layer
                 for(int i=0; i<m_mapCache.size(); ++i) {
                     EditorMap * map = m_mapCache[i];
 
@@ -111,8 +122,14 @@ void WorldView::paintEvent(QPaintEvent * e)
                         continue;
 
                     if( layer < map->layerCount() )
-                        map->draw(&p, absoluteX(0), absoluteY(0),
+                        map->draw(absX, absY,
                             (double)this->width(), (double)this->height(), layer);
+                }
+
+                // draw entities at this layer
+                for(int i=0; i<m_entityCache.size(); ++i) {
+                    if( m_entityCache[i]->layer() == layer )
+                        m_entityCache[i]->draw(absX, absY);
                 }
             }
             // draw a bold line around map borders
@@ -155,6 +172,8 @@ void WorldView::paintEvent(QPaintEvent * e)
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
             tr("Double click a world to edit"));
     }
+
+    s_painter = NULL;
 }
 
 void WorldView::drawGrid(QPainter &p)

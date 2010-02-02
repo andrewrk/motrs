@@ -2,13 +2,12 @@
 
 #include "EditorUtils.h"
 #include "EditorTile.h"
+#include "EditorEntity.h"
 
 #include <QPixmap>
 #include <QDir>
 #include <QDebug>
 #include <QPainter>
-
-QPainter * EditorMap::m_painter = NULL;
 
 EditorMap::EditorMap(QString file)
 {
@@ -26,6 +25,7 @@ EditorMap::EditorMap(QString file)
     m_palette.clear();
     m_palette.push_back(Tile::nullTile());
     m_layerNames.clear();
+    m_entities.clear();
 
     for(int i=0; i<props.size(); ++i) {
         if( props[i].first.compare("version", Qt::CaseInsensitive) == 0 ) {
@@ -74,8 +74,15 @@ EditorMap::EditorMap(QString file)
             double x = entityProps.at(0).toDouble();
             double y = entityProps.at(1).toDouble();
             int layerIndex = entityProps.at(2).toInt();
-            QString entityFile = entityProps.at(3);
-            // TODO: add support for entities
+            QString entityFileTitle = entityProps.at(3);
+
+            QDir dir(EditorUtils::dataDir());
+            dir.cd("entities");
+            QString entityFile = dir.absoluteFilePath(entityFileTitle);
+            EditorEntity * entity = new EditorEntity(entityFile);
+            entity->setCenter(x, y);
+            entity->setLayer(layerIndex);
+            m_entities.push_back(entity);
         } else {
             qDebug() << "Unrecognized Map property: " << props[i].first
                 << " = " << props[i].second;
@@ -87,10 +94,9 @@ EditorMap::EditorMap(QString file)
     calculateBoundaries();
 }
 
-void EditorMap::draw(QPainter * p, double screenX, double screenY,
+void EditorMap::draw(double screenX, double screenY,
                      double screenWidth, double screenHeight, int layer)
 {
-    m_painter = p;
     Map::draw(screenX, screenY, screenWidth, screenHeight, layer);
 }
 

@@ -1,6 +1,6 @@
 #include "EditorTile.h"
 
-#include "EditorMap.h"
+#include "WorldView.h"
 
 EditorTile::EditorTile(Shape shape, SurfaceType surfaceType, QPixmap * pixmap) :
     Tile(),
@@ -16,5 +16,5 @@ EditorTile::~EditorTile()
 }
 
 void EditorTile::draw(int screenX, int screenY) {
-    EditorMap::m_painter->drawPixmap((int)screenX, (int)screenY, *m_pixmap );
+    WorldView::painter()->drawPixmap((int)screenX, (int)screenY, *m_pixmap );
 }

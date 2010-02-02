@@ -4,7 +4,6 @@
 #include "Map.h"
 
 #include <QString>
-#include <QPainter>
 #include <QStringList>
 
 class EditorMap : public Map
@@ -14,10 +13,8 @@ public:
     EditorMap(QString file);
     virtual ~EditorMap();
 
-    void draw(QPainter * p, double screenX, double screenY, double screenWidth,
+    void draw(double screenX, double screenY, double screenWidth,
               double screenHeight, int layer);
-
-    static QPainter * m_painter;
 
     void setLeft(double value);
     void setTop(double value);

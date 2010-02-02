@@ -45,8 +45,8 @@ bool EditorUtils::loadTextFile(QString filename, QVector< QPair<QString, QString
                 qDebug() << "Syntax error reading " << filename;
                 return false;
             }
-            QString name = pairs.takeFirst();
-            QString value = pairs.join("");
+            QString name = pairs.takeFirst().trimmed();
+            QString value = pairs.join("").trimmed();
 
             v.append(QPair<QString, QString>(name, value));
         }

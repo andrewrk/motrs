@@ -8,6 +8,7 @@
 
 #include "EditorWorld.h"
 #include "EditorMap.h"
+#include "EditorEntity.h"
 #include "MainWindow.h"
 
 class WorldView : public QWidget
@@ -31,6 +32,8 @@ public:
     void addLayer();
     void swapLayers(int i, int j);
     void deleteLayer(int index);
+
+    inline static QPainter * painter() { return s_painter; }
 protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
@@ -68,6 +71,7 @@ private:
 
     // saved list of maps that are visible for fast rendering
     QVector<EditorMap *> m_mapCache;
+    QVector<EditorEntity *> m_entityCache;
     // highest number of layers of all visible maps
     int m_maxLayer;
 
@@ -83,6 +87,9 @@ private:
     int m_mouseX;
     int m_mouseY;
     Qt::KeyboardModifiers m_keyboardModifiers;
+
+    // holds QPainter object for drawing
+    static QPainter * s_painter;
 
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);

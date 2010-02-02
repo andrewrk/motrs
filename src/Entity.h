@@ -75,9 +75,9 @@ public:
     // returns the next position
     int incrementSequencePosition() { return ++m_sequencePosition; }
 
-    void draw(double screenX, double screenY);
+    virtual void draw(double screenX, double screenY);
 
-private:
+protected:
     double m_centerX, m_centerY;
     double m_radius;
     double m_velocityX, m_velocityY;
@@ -104,6 +104,7 @@ private:
     Graphic * m_sword[9];
 
     Entity(double radius, double centerOffsetX, double centerOffsetY, double speed, double mass);
+    Entity();
     ~Entity() {}
 };
 
