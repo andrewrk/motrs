@@ -78,6 +78,12 @@ public:
     void draw(double screenX, double screenY);
 
 private:
+    enum Shape {
+        Circle = 0,
+        Square = 1,
+    };
+
+    Shape m_shape;
     double m_centerX, m_centerY;
     double m_radius;
     double m_velocityX, m_velocityY;
