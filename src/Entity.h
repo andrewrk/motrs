@@ -109,7 +109,7 @@ private:
     Graphic * m_running[9];
     Graphic * m_sword[9];
 
-    Entity(double radius, double centerOffsetX, double centerOffsetY, double speed, double mass);
+    Entity(Shape shape, double radius, double centerOffsetX, double centerOffsetY, double speed, double mass);
     ~Entity() {}
 };
 
