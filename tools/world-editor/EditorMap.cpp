@@ -1,6 +1,6 @@
 #include "EditorMap.h"
 
-#include "EditorUtils.h"
+#include "EditorResourceManager.h"
 #include "EditorTile.h"
 #include "EditorEntity.h"
 
@@ -13,7 +13,7 @@ EditorMap::EditorMap(QString file)
 {
     QVector< QPair<QString, QString> > props;
 
-    m_good = EditorUtils::loadTextFile(file, props);
+    m_good = EditorResourceManager::loadTextFile(file, props);
 
     if( ! m_good )
         return;
@@ -50,7 +50,7 @@ EditorMap::EditorMap(QString file)
             // tile=shape,surface,graphicId
             QStringList tileProps = props[i].second.split(",");
             QString graphicFile = tileProps.at(2);
-            QPixmap * pixmap = EditorUtils::pixmapForGraphic(graphicFile);
+            QPixmap * pixmap = EditorResourceManager::pixmapForGraphic(graphicFile);
             EditorTile * tile = new EditorTile(
                 (EditorTile::Shape)tileProps.at(0).toInt(),
                 (EditorTile::SurfaceType)tileProps.at(1).toInt(),
@@ -76,7 +76,7 @@ EditorMap::EditorMap(QString file)
             int layerIndex = entityProps.at(2).toInt();
             QString entityFileTitle = entityProps.at(3);
 
-            QDir dir(EditorUtils::dataDir());
+            QDir dir(EditorResourceManager::dataDir());
             dir.cd("entities");
             QString entityFile = dir.absoluteFilePath(entityFileTitle);
             EditorEntity * entity = new EditorEntity(entityFile);

@@ -1,6 +1,6 @@
 #include "EditorEntity.h"
 
-#include "EditorUtils.h"
+#include "EditorResourceManager.h"
 #include "WorldView.h"
 
 #include <QDebug>
@@ -10,7 +10,7 @@ EditorEntity::EditorEntity(QString file)
 {
     QVector< QPair<QString, QString> > props;
 
-    m_good = EditorUtils::loadTextFile(file, props);
+    m_good = EditorResourceManager::loadTextFile(file, props);
 
     if( ! m_good )
         return;
@@ -39,7 +39,7 @@ EditorEntity::EditorEntity(QString file)
         } else if( props[i].first.compare("stand", Qt::CaseInsensitive) == 0 ) {
             // nw,w,sw,n,c,s,ne,e,se
             QStringList standGraphics = props[i].second.split(",");
-            m_pixmap = EditorUtils::pixmapForGraphic(standGraphics.at(5));
+            m_pixmap = EditorResourceManager::pixmapForGraphic(standGraphics.at(5));
         } else if( props[i].first.compare("walk", Qt::CaseInsensitive) == 0 ) {
             // world editor doesn't care about this
         } else if( props[i].first.compare("run", Qt::CaseInsensitive) == 0 ) {
