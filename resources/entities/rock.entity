@@ -1,6 +1,6 @@
-version=6
+version=7
 
-contact=16,16,15
+contact=square,16,16,15
 
 specs = 0, 10
 

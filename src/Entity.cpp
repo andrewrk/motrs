@@ -9,7 +9,7 @@ Entity * Entity::load(const char *buffer) {
     const char * cursor = buffer;
 
     int version = Utils::readInt(&cursor);
-    if (version != 6) {
+    if (version != 7) {
         std::cerr << "Unsupported Entity version: " << version << std::endl;
         return NULL;
     }

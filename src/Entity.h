@@ -79,8 +79,9 @@ public:
 
 private:
     enum Shape {
-        Circle = 0,
-        Square = 1,
+        Shapeless = 0,
+        Circle = 1,
+        Square = 2,
     };
 
     Shape m_shape;
