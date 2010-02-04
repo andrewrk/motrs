@@ -15,9 +15,22 @@ Entity * Entity::load(const char *buffer) {
     }
 
     Shape shape = (Shape)Utils::readInt(&cursor);
-    double centerOffsetX = (double)Utils::readInt(&cursor);
-    double centerOffsetY = (double)Utils::readInt(&cursor);
-    double radius = (double)Utils::readInt(&cursor);
+    double centerOffsetX = 0.0;
+    double centerOffsetY = 0.0;
+    double radius = 0.0;
+    switch (shape) {
+    case Shapeless:
+        break;
+    case Circle:
+    case Square:
+        centerOffsetX = (double)Utils::readInt(&cursor);
+        centerOffsetY = (double)Utils::readInt(&cursor);
+        radius = (double)Utils::readInt(&cursor);
+        break;
+    default:
+        std::cerr << "Unknown shape: " << shape << "." << std::endl;
+        return NULL;
+    }
 
     double speed = Utils::readDouble(&cursor);
     double mass = Utils::readDouble(&cursor);
@@ -53,6 +66,22 @@ Entity::Entity(Shape shape, double radius, double centerOffsetX, double centerOf
     memset(m_walking, 0, sizeof(m_walking));
     memset(m_running, 0, sizeof(m_running));
     memset(m_sword, 0, sizeof(m_running));
+}
+
+void Entity::resolveCollision(Entity * other) {
+    // TODO: switch on this->shape() and then other->shape()
+    double distance = Utils::distance(this->centerX(), this->centerY(), other->centerX(), other->centerY());
+    double minDistance = this->radius() + other->radius();
+    double overlap = minDistance - distance;
+    if (overlap > 0.0) {
+        double mass1 = this->mass(), mass2 = other->mass();
+        double totalMass = mass1 + mass2;
+        double push1 = overlap * mass2 / totalMass, push2 = overlap * mass1 / totalMass;
+        double dx = other->centerX() - this->centerX(), dy = other->centerY() - this->centerY();
+        double normalX = dx / distance, normalY = dy / distance;
+        this->setVelocity(this->velocityX() + push1 * -normalX, this->velocityY() + push1 * -normalY);
+        other->setVelocity(other->velocityX() + push2 * normalX, other->velocityY() + push2 * normalY);
+    }
 }
 
 void Entity::draw(double screenX, double screenY) {

@@ -75,6 +75,7 @@ public:
     // returns the next position
     int incrementSequencePosition() { return ++m_sequencePosition; }
 
+    void resolveCollision(Entity * other);
     void draw(double screenX, double screenY);
 
 private:
