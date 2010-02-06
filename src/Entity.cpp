@@ -2,6 +2,7 @@
 
 #include "ResourceManager.h"
 #include "Gameplay.h"
+#include "Physics.h"
 
 #include "Utils.h"
 
@@ -139,7 +140,9 @@ void Entity::resolveCircleOnCircle(Entity * other) {
 }
 
 void Entity::resolveCircleOnSquare(Entity * other) {
-
+    double dx, dy;
+    Physics::squareAndCircle(other->centerX(), other->centerY(), other->radius(), this->centerX(), this->centerY(), this->radius(), dx, dy);
+    other->setVelocity(-dx, -dy);
 }
 
 void Entity::resolveSquareOnSquare(Entity * other) {

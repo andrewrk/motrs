@@ -9,6 +9,7 @@ public:
     static void squareAndSquare(double cx1, double cy1, double a1, double cx2, double cy2, double a2, double & out_dx, double & out_dy);
     static void pointAndCircle(double px1, double py1, double cx2, double cy2, double r2, double & out_dx, double & out_dy);
 
+    static void triangleNWAndCircle(double cx1, double cy1, double a1, double cx2, double cy2, double r2, double & out_dx, double & out_dy);
 };
 
 #endif
