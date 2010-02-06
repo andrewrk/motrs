@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "Gameplay.h"
 #include "ResourceManager.h"
+#include "Physics.h"
 
 #include "SDL.h"
 #include <cmath>
@@ -124,44 +125,10 @@ void Tile::resolveCircleCollision(double tileX, double tileY, double & objectCen
 }
 
 void Tile::resolveCircleOnSquare(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius) {
-    // zones:
-    // 0 1 2
-    // 3 4 5
-    // 6 7 8
-    int zoneX = 1 * ((objectCenterX > tileX) + (tileX + Tile::size < objectCenterX));
-    int zoneY = 3 * ((objectCenterY > tileY) + (tileY + Tile::size < objectCenterY));
-    int zone = zoneX + zoneY;
-    switch (zone) {
-    case 0:
-        resolveCircleOnPoint(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
-        break;
-    case 1:
-        objectCenterY = Utils::min(objectCenterY, tileY - objectRadius);
-        break;
-    case 2:
-        resolveCircleOnPoint(tileX + Tile::size, tileY, objectCenterX, objectCenterY, objectRadius);
-        break;
-    case 3:
-        objectCenterX = Utils::min(objectCenterX, tileX - objectRadius);
-        break;
-    case 4:
-        // omg inside the wall!
-        break;
-    case 5:
-        objectCenterX = Utils::max(objectCenterX, tileX + Tile::size + objectRadius);
-        break;
-    case 6:
-        resolveCircleOnPoint(tileX, tileY + Tile::size, objectCenterX, objectCenterY, objectRadius);
-        break;
-    case 7:
-        objectCenterY = Utils::max(objectCenterY, tileY + Tile::size + objectRadius);
-        break;
-    case 8:
-        resolveCircleOnPoint(tileX + Tile::size, tileY + Tile::size, objectCenterX, objectCenterY, objectRadius);
-        break;
-    default:
-        Debug::assert(false, "unknown zone");
-    }
+    double dx, dy;
+    Physics::squareAndCircle(tileX + Tile::size * 0.5, tileY + Tile::size * 0.5, Tile::size * 0.5, objectCenterX, objectCenterY, objectRadius, dx, dy);
+    objectCenterX += dx;
+    objectCenterY += dy;
 }
 
 void Tile::resolveCircleOnTriangleNW(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius) {

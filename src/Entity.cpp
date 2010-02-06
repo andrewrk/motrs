@@ -85,7 +85,45 @@ Entity::Entity(Shape shape, double radius, double centerOffsetX, double centerOf
 }
 
 void Entity::resolveCollision(Entity * other) {
-    // TODO: switch on this->shape() and then other->shape()
+    // marshal!!!!
+    switch (this->m_shape) {
+    case Shapeless:
+        return;
+    case Circle:
+        switch (other->m_shape) {
+        case Shapeless:
+            return;
+        case Circle:
+            this->resolveCircleOnCircle(other);
+            return;
+        case Square:
+            this->resolveCircleOnSquare(other);
+            return;
+        default:
+            Debug::assert(false, "aosidnvaosidnao");
+            return;
+        }
+    case Square:
+        switch (other->m_shape) {
+        case Shapeless:
+            return;
+        case Circle:
+            other->resolveCircleOnSquare(this);
+            return;
+        case Square:
+            this->resolveSquareOnSquare(other);
+            return;
+        default:
+            Debug::assert(false, "aosidnvaosidnao");
+            return;
+        }
+    default:
+        Debug::assert(false, "asfoaiovisnvoasd");
+        return;
+    }
+}
+
+void Entity::resolveCircleOnCircle(Entity * other) {
     double distance = Utils::distance(this->centerX(), this->centerY(), other->centerX(), other->centerY());
     double minDistance = this->radius() + other->radius();
     double overlap = minDistance - distance;
@@ -98,6 +136,13 @@ void Entity::resolveCollision(Entity * other) {
         this->setVelocity(this->velocityX() + push1 * -normalX, this->velocityY() + push1 * -normalY);
         other->setVelocity(other->velocityX() + push2 * normalX, other->velocityY() + push2 * normalY);
     }
+}
+
+void Entity::resolveCircleOnSquare(Entity * other) {
+
+}
+
+void Entity::resolveSquareOnSquare(Entity * other) {
 }
 
 void Entity::draw(double screenX, double screenY) {

@@ -113,7 +113,10 @@ protected:
 
     Entity(Shape shape, double radius, double centerOffsetX, double centerOffsetY, double speed, double mass);
     Entity();
-    ~Entity() {}
+
+    void resolveCircleOnCircle(Entity * other);
+    void resolveCircleOnSquare(Entity * other);
+    void resolveSquareOnSquare(Entity * other);
 };
 
 #endif
