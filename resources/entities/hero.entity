@@ -11,7 +11,7 @@ version=7
 contact=circle,16,36,12
 
 # specs = speed, mass
-specs = 3.3, 5
+specs = 2, 5
 
 # walk, run, and stand define graphics for the following 9 directions:
 #  nw,w,sw,n,c,s,ne,e,se
