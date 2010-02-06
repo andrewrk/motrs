@@ -1,7 +1,7 @@
 #include "EditorWorld.h"
 
 #include "EditorMap.h"
-#include "EditorUtils.h"
+#include "EditorResourceManager.h"
 
 #include <QDebug>
 #include <QStringList>
@@ -12,7 +12,7 @@ EditorWorld::EditorWorld(QString file) :
 {
     QVector< QPair<QString, QString> > props;
 
-    m_good = EditorUtils::loadTextFile(file, props);
+    m_good = EditorResourceManager::loadTextFile(file, props);
 
     if( ! m_good )
         return;
@@ -30,7 +30,7 @@ EditorWorld::EditorWorld(QString file) :
         } else if( props[i].first.compare("map", Qt::CaseInsensitive) == 0 ) {
             // map=x,y,z,id
             QStringList coords = props[i].second.split(",");
-            QDir dir(EditorUtils::dataDir());
+            QDir dir(EditorResourceManager::dataDir());
             dir.cd("maps");
             QString mapFile = dir.absoluteFilePath(coords[3]);
             EditorMap * map = new EditorMap(mapFile);

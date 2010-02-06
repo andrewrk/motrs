@@ -1,7 +1,3 @@
- * add/remove/re-order layers
- * ability to resize and move maps within the world
- * make the art a better gui interface - caption, margin, alignment
- * ability to drag art from the art pane to the grid
- * ability to break the art into objects
- * ability to add and delete layers
+ * object composer
+ * entity composer
  * ability to save the world

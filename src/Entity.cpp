@@ -5,6 +5,22 @@
 
 #include "Utils.h"
 
+Entity::Entity():
+    m_centerX(0.0), m_centerY(0.0), m_radius(0),
+    m_velocityX(0.0), m_velocityY(0.0),
+    m_layer(0),
+    m_altitude(0.0), m_altitudeVelocity(0.0),
+    m_speed(0), m_mass(1),
+    m_direction(Center), m_movementMode(Stand),
+    m_centerOffsetX(0), m_centerOffsetY(0),
+    m_currentSequence(None), m_sequencePosition(0)
+{
+    memset(m_standing, 0, sizeof(m_standing));
+    memset(m_walking, 0, sizeof(m_walking));
+    memset(m_running, 0, sizeof(m_running));
+    memset(m_sword, 0, sizeof(m_running));
+}
+
 Entity * Entity::load(const char *buffer) {
     const char * cursor = buffer;
 

@@ -76,9 +76,9 @@ public:
     int incrementSequencePosition() { return ++m_sequencePosition; }
 
     void resolveCollision(Entity * other);
-    void draw(double screenX, double screenY);
+    virtual void draw(double screenX, double screenY);
 
-private:
+protected:
     enum Shape {
         Shapeless = 0,
         Circle = 1,
@@ -112,6 +112,7 @@ private:
     Graphic * m_sword[9];
 
     Entity(Shape shape, double radius, double centerOffsetX, double centerOffsetY, double speed, double mass);
+    Entity();
     ~Entity() {}
 };
 

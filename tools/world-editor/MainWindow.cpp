@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "SettingsDialog.h"
-#include "EditorUtils.h"
+#include "EditorResourceManager.h"
 #include "WorldView.h"
 
 #include <QDir>
@@ -16,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_view(new WorldView(this, this)),
-    m_scene(new QGraphicsScene()),
     m_toolNames()
 {
     ui->setupUi(this);
@@ -26,7 +25,6 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidget(m_view);
 
     ui->dock_art->setWidget(ui->widget_art);
-    ui->view_art->setScene(m_scene);
 
     // fill tools combo box with appropriate values
     fillToolComboBox(*ui->cboLeftClick);
@@ -96,9 +94,7 @@ void MainWindow::fillToolComboBox(QComboBox & cbo)
 MainWindow::~MainWindow()
 {
     delete ui;
-    cleanupArt();
     delete m_view;
-    delete m_scene;
 
 }
 
@@ -126,7 +122,7 @@ void MainWindow::refreshWorldList()
     ui->list_worlds->clear();
 
     // do a directory listing of data/worlds
-    QDir dir(EditorUtils::dataDir());
+    QDir dir(EditorResourceManager::dataDir());
     dir.cd("worlds");
     QStringList filters;
     filters << "*.world";
@@ -137,54 +133,27 @@ void MainWindow::refreshWorldList()
 
 void MainWindow::refreshArt()
 {
-    m_scene->clear();
-    cleanupArt();
-
     // do a directory listing of data/art
-    QDir dir(EditorUtils::dataDir());
+    QDir dir(EditorResourceManager::dataDir());
     dir.cd("art");
     QStringList filters;
     filters << "*.bmp" << "*.png" << "*.jpg";
     QStringList entries = dir.entryList(filters, QDir::Files | QDir::Readable,
         QDir::Name | QDir::IgnoreCase);
-    int paneWidth = 0, paneHeight = 0;
     for(int i=0; i<entries.size(); ++i) {
         // create item
-        QPixmap * pixmap = new QPixmap(dir.absoluteFilePath(entries[i]));
-        QGraphicsPixmapItem * item = m_scene->addPixmap(*pixmap);
-
-        // position the item
-        QSize size = pixmap->size();
-        item->setPos(0, paneHeight);
-        paneWidth = size.width() > paneWidth ? size.width() : size.height();
-        paneHeight += size.height();
-
-        // keep track for memory purposes
-        ArtItem artItem;
-        artItem.graphicsPixmapItem = item;
-        artItem.pixmap = pixmap;
-
-        m_art.insert(item, artItem);
+        QString file = dir.absoluteFilePath(entries[i]);
+        QPixmap * pixmap = new QPixmap(file);
+        QListWidgetItem * item = new QListWidgetItem(QIcon(*pixmap), entries[i], ui->lstArt);
+        item->setData(Qt::UserRole, QVariant(file));
+        ui->lstArt->addItem(item);
     }
-
-    ui->view_art->setSceneRect(0, 0, paneWidth, paneHeight);
-}
-
-void MainWindow::cleanupArt()
-{
-    for(QMap<QGraphicsPixmapItem *, ArtItem>::const_iterator i =
-        m_art.constBegin(); i != m_art.constEnd(); ++i)
-    {
-        delete i.value().pixmap;
-    }
-
-    m_art.clear();
 }
 
 void MainWindow::on_list_worlds_doubleClicked(QModelIndex index)
 {
     QListWidgetItem * item = ui->list_worlds->item(index.row());
-    QDir dir(EditorUtils::dataDir());
+    QDir dir(EditorResourceManager::dataDir());
     dir.cd("worlds");
     openWorld(dir.absoluteFilePath(item->text()));
 }
@@ -192,6 +161,11 @@ void MainWindow::on_list_worlds_doubleClicked(QModelIndex index)
 void MainWindow::openWorld(QString file)
 {
     m_view->setWorld(new EditorWorld(file));
+}
+
+QListWidget * MainWindow::artList()
+{
+    return ui->lstArt;
 }
 
 QListWidget * MainWindow::layersList()
