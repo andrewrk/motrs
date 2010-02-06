@@ -6,6 +6,8 @@
 
 #include "Utils.h"
 
+#include <cmath>
+
 Entity::Entity():
     m_centerX(0.0), m_centerY(0.0), m_radius(0),
     m_velocityX(0.0), m_velocityY(0.0),
@@ -86,7 +88,8 @@ Entity::Entity(Shape shape, double radius, double centerOffsetX, double centerOf
 }
 
 void Entity::resolveCollision(Entity * other) {
-    // marshal!!!!
+    Entity * entity1 = NULL, * entity2 = NULL;
+    double dx = 0.0, dy = 0.0;
     switch (this->m_shape) {
     case Shapeless:
         return;
@@ -95,33 +98,53 @@ void Entity::resolveCollision(Entity * other) {
         case Shapeless:
             return;
         case Circle:
-            this->resolveCircleOnCircle(other);
-            return;
+            entity1 = this;
+            entity2 = other;
+            Physics::circleAndCircle(entity1->centerX(), entity1->centerY(), entity1->radius(), entity2->centerX(), entity2->centerY(), entity2->radius(), dx, dy);
+            break;
         case Square:
-            this->resolveCircleOnSquare(other);
-            return;
+            entity1 = other;
+            entity2 = this;
+            Physics::squareAndCircle(entity1->centerX(), entity1->centerY(), entity1->radius(), entity2->centerX(), entity2->centerY(), entity2->radius(), dx, dy);
+            break;
         default:
             Debug::assert(false, "aosidnvaosidnao");
-            return;
+            break;
         }
+        break;
     case Square:
         switch (other->m_shape) {
         case Shapeless:
             return;
         case Circle:
-            other->resolveCircleOnSquare(this);
-            return;
+            entity1 = this;
+            entity2 = other;
+            Physics::squareAndCircle(entity1->centerX(), entity1->centerY(), entity1->radius(), entity2->centerX(), entity2->centerY(), entity2->radius(), dx, dy);
+            break;
         case Square:
-            this->resolveSquareOnSquare(other);
-            return;
+            entity1 = this;
+            entity2 = other;
+            Physics::squareAndSquare(entity1->centerX(), entity1->centerY(), entity1->radius(), entity2->centerX(), entity2->centerY(), entity2->radius(), dx, dy);
+            break;
         default:
             Debug::assert(false, "aosidnvaosidnao");
-            return;
+            break;
         }
+        break;
     default:
         Debug::assert(false, "asfoaiovisnvoasd");
-        return;
+        break;
     }
+
+    if (Utils::isZero(dx) && Utils::isZero(dy))
+        return;
+    double distance = std::sqrt(dx * dx + dy * dy);
+    double normalX = dx / distance, normalY = dy / distance;
+    double mass1 = entity1->mass(), mass2 = entity2->mass();
+    double totalMass = mass1 + mass2;
+    double push1 = -distance * mass2 / totalMass, push2 = distance * mass1 / totalMass;
+    entity1->setVelocity(push1 * normalX, push1 * normalY);
+    entity2->setVelocity(push2 * normalX, push2 * normalY);
 }
 
 void Entity::resolveCircleOnCircle(Entity * other) {
