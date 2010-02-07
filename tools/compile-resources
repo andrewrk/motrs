@@ -176,7 +176,7 @@ def compile_entity(in_path, out_path):
     declarations = read_declarations(in_path)
     assert(declarations[0][0] == "version")
     version_number = int(declarations[0][1])
-    assert(version_number == 6)
+    assert(version_number == 7)
 
     contact = None
     specs = None
@@ -185,8 +185,18 @@ def compile_entity(in_path, out_path):
     for (kind, value) in declarations[1:]:
         if kind == "contact":
             assert(contact == None)
-            dims = split_strip(value)
-            contact = pack("iii", *[int(dim) for dim in dims])
+            values = split_strip(value)
+            shape_str = values[0]
+            shape = {
+                "shapeless": 0,
+                "circle": 1,
+                "square": 2,
+            }[shape_str]
+            if shape == 0:
+                raise("TODO: shapeless")
+            elif shape in (1, 2):
+                contact = pack("i" * 4, *([shape] + [int(value) for value in values[1:]]))
+            assert(contact != None)
         elif kind == "specs":
             assert(specs == None)
             values = split_strip(value)

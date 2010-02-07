@@ -8,6 +8,7 @@
 
 #include "EditorWorld.h"
 #include "EditorMap.h"
+#include "EditorEntity.h"
 #include "MainWindow.h"
 
 class WorldView : public QWidget
@@ -31,6 +32,8 @@ public:
     void addLayer();
     void swapLayers(int i, int j);
     void deleteLayer(int index);
+
+    inline static QPainter * painter() { return s_painter; }
 protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
@@ -39,6 +42,10 @@ protected:
     void mouseMoveEvent(QMouseEvent * e);
     void keyPressEvent(QKeyEvent * e);
     void keyReleaseEvent(QKeyEvent * e);
+    void dropEvent(QDropEvent * e);
+    void dragEnterEvent(QDragEnterEvent * e);
+    void dragMoveEvent(QDragMoveEvent * e);
+    void dragLeaveEvent(QDragLeaveEvent * e);
 private:
     enum MouseState {
         Normal,
@@ -49,6 +56,18 @@ private:
         StretchMapBottom,
         MoveMap,
     };
+
+    typedef struct {
+        // representation
+        QPixmap * pixmap;
+        // location on disk
+        QString artFile;
+        // location in the game
+        double x;
+        double y;
+        int layer;
+        EditorMap * map;
+    } ArtItem;
 
     // how far away from border lines can you be to be able to use stretch tools
     static const int s_lineSelectRadius;
@@ -68,6 +87,7 @@ private:
 
     // saved list of maps that are visible for fast rendering
     QVector<EditorMap *> m_mapCache;
+    QVector<EditorEntity *> m_entityCache;
     // highest number of layers of all visible maps
     int m_maxLayer;
 
@@ -83,6 +103,18 @@ private:
     int m_mouseX;
     int m_mouseY;
     Qt::KeyboardModifiers m_keyboardModifiers;
+
+    // holds QPainter object for drawing
+    static QPainter * s_painter;
+
+    // contains a pixmap to draw when dragging art and such
+    QPixmap * m_dragPixmap;
+    int m_dragPixmapX;
+    int m_dragPixmapY;
+
+    // art that has not been converted into objects or entities yet.
+    ArtItem m_tempArt;
+
 
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);
@@ -105,6 +137,7 @@ private:
     bool overMapTop(int x, int y);
     bool overMapBottom(int x, int y);
     bool overSelectedMap(int x, int y);
+    EditorMap * overAnyMap(int x, int y);
 
     void determineCursor();
 

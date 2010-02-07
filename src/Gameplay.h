@@ -60,7 +60,6 @@ private:
     void nextFrame();
 
     void applyInput(Entity * entity, bool takesInput);
-    void resolveWithEntity(Entity * entity1, Entity * entity2);
     void resolveWithWorld(Entity * entity);
 
     double minMarginNorth() { return 250.0; }

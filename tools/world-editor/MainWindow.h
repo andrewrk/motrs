@@ -3,7 +3,6 @@
 
 #include <QtGui/QMainWindow>
 #include <QListWidget>
-#include <QGraphicsScene>
 #include <QMap>
 #include <QModelIndex>
 #include <QComboBox>
@@ -40,16 +39,9 @@ private:
         Brush,
     };
 
-    typedef struct {
-        QGraphicsPixmapItem * graphicsPixmapItem;
-        QPixmap * pixmap;
-    } ArtItem;
-
     Ui::MainWindow *ui;
 
     WorldView * m_view;
-    QGraphicsScene * m_scene;
-    QMap<QGraphicsPixmapItem *, ArtItem> m_art;
 
     MouseTool m_toolLeftClick;
     MouseTool m_toolMiddleClick;
@@ -59,12 +51,12 @@ private:
 
     void refreshArt();
     void refreshWorldList();
-    void cleanupArt();
     void openWorld(QString file);
     void fillToolComboBox(QComboBox & comboBox);
 
 
     QListWidget * layersList();
+    QListWidget * artList();
     QPushButton * newLayerButton();
     QPushButton * deleteLayerButton();
     QPushButton * moveLayerUpButton();

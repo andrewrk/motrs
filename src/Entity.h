@@ -49,6 +49,8 @@ public:
     double velocityX() { return m_velocityX; }
     double velocityY() { return m_velocityY; }
     void setVelocity(double x, double y) { m_velocityX = x; m_velocityY = y; }
+    double intendedCenterX() { return m_centerX + m_velocityX; }
+    double intendedCenterY() { return m_centerY + m_velocityY; }
 
     int layer() { return m_layer; }
     void setLayer(int layer) { m_layer = layer; }
@@ -75,9 +77,17 @@ public:
     // returns the next position
     int incrementSequencePosition() { return ++m_sequencePosition; }
 
-    void draw(double screenX, double screenY);
+    void resolveCollision(Entity * other);
+    virtual void draw(double screenX, double screenY);
 
-private:
+protected:
+    enum Shape {
+        Shapeless = 0,
+        Circle = 1,
+        Square = 2,
+    };
+
+    Shape m_shape;
     double m_centerX, m_centerY;
     double m_radius;
     double m_velocityX, m_velocityY;
@@ -103,8 +113,8 @@ private:
     Graphic * m_running[9];
     Graphic * m_sword[9];
 
-    Entity(double radius, double centerOffsetX, double centerOffsetY, double speed, double mass);
-    ~Entity() {}
+    Entity(Shape shape, double radius, double centerOffsetX, double centerOffsetY, double speed, double mass);
+    Entity();
 };
 
 #endif

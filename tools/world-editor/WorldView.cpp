@@ -1,16 +1,24 @@
 #include "WorldView.h"
 
 #include "MainWindow.h"
+#include "EditorResourceManager.h"
 
 #include <QPainter>
 #include <QDebug>
 #include <QSettings>
 #include <QListWidget>
+#include <QList>
+#include <QUrl>
+#include <QFileInfo>
+#include <QMessageBox>
+#include <QStandardItemModel>
+
 #include <cmath>
 
 #include "moc_WorldView.cxx"
 
 const int WorldView::s_lineSelectRadius = 4;
+QPainter * WorldView::s_painter = NULL;
 
 WorldView::WorldView(MainWindow * window, QWidget * parent) :
     QWidget(parent),
@@ -24,7 +32,8 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
     m_mapCache(),
     m_selectedMap(NULL),
     m_mouseDownTool(MainWindow::Nothing),
-    m_mouseState(Normal)
+    m_mouseState(Normal),
+    m_dragPixmap(NULL)
 {
     m_hsb->show();
     m_vsb->show();
@@ -36,6 +45,7 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
     updateViewCache();
 
     this->setMouseTracking(true);
+    this->setAcceptDrops(true);
 }
 
 WorldView::~WorldView()
@@ -68,6 +78,7 @@ void WorldView::updateViewCache()
     // when the scroll or zoom changes, we need to recalculate which maps
     // need to be drawn.
     m_mapCache.clear();
+    m_entityCache.clear();
     if( m_world && m_world->isGood() ) {
         // select the maps that are in range
         std::vector<Map*> * maps = m_world->maps();
@@ -87,6 +98,10 @@ void WorldView::updateViewCache()
                     m_maxLayer = map->layerCount();
 
                 m_mapCache.append(map);
+
+                // add the map's entities to our cache
+                for(unsigned int j = 0; j<map->entities()->size(); ++j)
+                    m_entityCache.append( (EditorEntity *) map->entities()->at(j));
             }
         }
     }
@@ -97,12 +112,17 @@ void WorldView::updateViewCache()
 void WorldView::paintEvent(QPaintEvent * e)
 {
     QPainter p(this);
+    s_painter = &p;
     p.setBackground(Qt::white);
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_world ) {
         if( m_world->isGood() ) {
+            double absX = absoluteX(0);
+            double absY = absoluteY(0);
+
             for(int layer=0; layer<m_maxLayer; ++layer) {
+                // draw map at this layer
                 for(int i=0; i<m_mapCache.size(); ++i) {
                     EditorMap * map = m_mapCache[i];
 
@@ -111,8 +131,19 @@ void WorldView::paintEvent(QPaintEvent * e)
                         continue;
 
                     if( layer < map->layerCount() )
-                        map->draw(&p, absoluteX(0), absoluteY(0),
+                        map->draw(absX, absY,
                             (double)this->width(), (double)this->height(), layer);
+                }
+
+                // draw entities at this layer
+                for(int i=0; i<m_entityCache.size(); ++i) {
+                    if( m_entityCache[i]->layer() == layer )
+                        m_entityCache[i]->draw(absX, absY);
+                }
+
+                // draw dragged stuff
+                if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
+                    p.drawPixmap(m_dragPixmapX, m_dragPixmapY, *m_dragPixmap);
                 }
             }
             // draw a bold line around map borders
@@ -155,6 +186,8 @@ void WorldView::paintEvent(QPaintEvent * e)
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
             tr("Double click a world to edit"));
     }
+
+    s_painter = NULL;
 }
 
 void WorldView::drawGrid(QPainter &p)
@@ -579,4 +612,98 @@ void WorldView::setControlEnableStates()
     m_window->deleteLayerButton()->setEnabled(m_selectedMap != NULL && m_window->layersList()->currentRow() > -1);
     m_window->newLayerButton()->setEnabled(m_selectedMap != NULL);
 
+}
+
+void WorldView::dropEvent(QDropEvent * e)
+{
+    QStringList pictureExtensions;
+    pictureExtensions << "bmp" << "jpg" << "png";
+
+    QString itemModelMime = "application/x-qabstractitemmodeldatalist";
+
+    // don't show the art in paintevent
+    m_dragPixmap = NULL;
+    const QMimeData * data = e->mimeData();
+    if(data->hasFormat(itemModelMime)) {
+        if( m_world != NULL ) {
+            QStandardItemModel model;
+            model.dropMimeData(data, Qt::CopyAction, 0, 0, QModelIndex());
+            QString file = model.item(0,0)->data(Qt::UserRole).toString();
+
+            QFileInfo info(file);
+            QString ext = info.suffix();
+            if( pictureExtensions.contains(ext, Qt::CaseInsensitive) ) {
+                // it's art
+                QString title = info.fileName();
+                QPixmap * pixmap = EditorResourceManager::pixmapForArt(title);
+
+            } else if( ext.compare("entity", Qt::CaseInsensitive) ) {
+                // it's an entity
+                // TODO
+            } else if( ext.compare("map", Qt::CaseInsensitive) ) {
+                // it's a map
+                // TODO
+            } else {
+                qDebug() << "Unable to drag drop extension " << ext;
+                QMessageBox::warning(this, tr("error"), tr("Uh oh, we don't support %1 yet.").arg(ext));
+                return;
+            }
+            e->acceptProposedAction();
+        }
+    }
+}
+
+
+void WorldView::dragEnterEvent(QDragEnterEvent * e)
+{
+    if( e->source() == m_window->artList() ) {
+        if( m_world != NULL ) {
+            QStringList pictureExtensions;
+            pictureExtensions << "bmp" << "jpg" << "png";
+
+            QString itemModelMime = "application/x-qabstractitemmodeldatalist";
+
+            const QMimeData * data = e->mimeData();
+            if(data->hasFormat(itemModelMime)) {
+                QStandardItemModel model;
+                model.dropMimeData(data, Qt::CopyAction, 0, 0, QModelIndex());
+                QString file = model.item(0,0)->data(Qt::UserRole).toString();
+
+                QFileInfo info(file);
+                QString ext = info.suffix();
+                if( pictureExtensions.contains(ext, Qt::CaseInsensitive) ) {
+                    // it's art
+                    QString title = info.fileName();
+                    qDebug() << title;
+                    QPixmap * pixmap = EditorResourceManager::pixmapForArt(title);
+                    m_dragPixmap = pixmap;
+                } else if( ext.compare("entity", Qt::CaseInsensitive) ) {
+                    // it's an entity
+                    // TODO
+                } else if( ext.compare("map", Qt::CaseInsensitive) ) {
+                    // it's a map
+                    // TODO
+                } else {
+                    qDebug() << "Unable to drag drop extension " << ext;
+                    QMessageBox::warning(this, tr("error"), tr("Uh oh, we don't support %1 yet.").arg(ext));
+                    return;
+                }
+                e->acceptProposedAction();
+            }
+        }
+    }
+}
+
+void WorldView::dragMoveEvent(QDragMoveEvent * e)
+{
+    m_dragPixmapX = e->pos().x();
+    m_dragPixmapY = e->pos().y();
+    this->update();
+
+    e->acceptProposedAction();
+}
+
+void WorldView::dragLeaveEvent(QDragLeaveEvent * e)
+{
+    m_dragPixmap = NULL;
 }
