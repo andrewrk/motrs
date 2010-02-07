@@ -1,0 +1,12 @@
+version=7
+
+contact=square,8,8,8
+
+specs = 0, 100
+
+stand = block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp
+walk  = block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp
+run   = block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp
+
+sword = block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp,block.bmp
+

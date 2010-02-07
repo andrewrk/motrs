@@ -1,0 +1,12 @@
+version=7
+
+contact=square,8,8,8
+
+specs = 0, 2
+
+stand = pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp
+walk  = pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp
+run   = pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp
+
+sword = pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp,pebble.bmp
+
