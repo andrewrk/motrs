@@ -2,7 +2,7 @@ version=7
 
 contact=square,16,16,15
 
-specs = 0, 10
+specs = 0, 5
 
 stand = rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp
 walk  = rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp,rock.bmp

@@ -100,12 +100,12 @@ void Entity::resolveCollision(Entity * other) {
         case Circle:
             entity1 = this;
             entity2 = other;
-            Physics::circleAndCircle(entity1->centerX(), entity1->centerY(), entity1->radius(), entity2->centerX(), entity2->centerY(), entity2->radius(), dx, dy);
+            Physics::circleAndCircle(entity1->intendedCenterX(), entity1->intendedCenterY(), entity1->radius(), entity2->intendedCenterX(), entity2->intendedCenterY(), entity2->radius(), dx, dy);
             break;
         case Square:
             entity1 = other;
             entity2 = this;
-            Physics::squareAndCircle(entity1->centerX(), entity1->centerY(), entity1->radius(), entity2->centerX(), entity2->centerY(), entity2->radius(), dx, dy);
+            Physics::squareAndCircle(entity1->intendedCenterX(), entity1->intendedCenterY(), entity1->radius(), entity2->intendedCenterX(), entity2->intendedCenterY(), entity2->radius(), dx, dy);
             break;
         default:
             Debug::assert(false, "aosidnvaosidnao");
@@ -119,12 +119,12 @@ void Entity::resolveCollision(Entity * other) {
         case Circle:
             entity1 = this;
             entity2 = other;
-            Physics::squareAndCircle(entity1->centerX(), entity1->centerY(), entity1->radius(), entity2->centerX(), entity2->centerY(), entity2->radius(), dx, dy);
+            Physics::squareAndCircle(entity1->intendedCenterX(), entity1->intendedCenterY(), entity1->radius(), entity2->intendedCenterX(), entity2->intendedCenterY(), entity2->radius(), dx, dy);
             break;
         case Square:
             entity1 = this;
             entity2 = other;
-            Physics::squareAndSquare(entity1->centerX(), entity1->centerY(), entity1->radius(), entity2->centerX(), entity2->centerY(), entity2->radius(), dx, dy);
+            Physics::squareAndSquare(entity1->intendedCenterX(), entity1->intendedCenterY(), entity1->radius(), entity2->intendedCenterX(), entity2->intendedCenterY(), entity2->radius(), dx, dy);
             break;
         default:
             Debug::assert(false, "aosidnvaosidnao");
@@ -138,37 +138,15 @@ void Entity::resolveCollision(Entity * other) {
 
     if (Utils::isZero(dx) && Utils::isZero(dy))
         return;
+
+    // resolve momentum collision
     double distance = std::sqrt(dx * dx + dy * dy);
     double normalX = dx / distance, normalY = dy / distance;
     double mass1 = entity1->mass(), mass2 = entity2->mass();
     double totalMass = mass1 + mass2;
     double push1 = -distance * mass2 / totalMass, push2 = distance * mass1 / totalMass;
-    entity1->setVelocity(push1 * normalX, push1 * normalY);
-    entity2->setVelocity(push2 * normalX, push2 * normalY);
-}
-
-void Entity::resolveCircleOnCircle(Entity * other) {
-    double distance = Utils::distance(this->centerX(), this->centerY(), other->centerX(), other->centerY());
-    double minDistance = this->radius() + other->radius();
-    double overlap = minDistance - distance;
-    if (overlap > 0.0) {
-        double mass1 = this->mass(), mass2 = other->mass();
-        double totalMass = mass1 + mass2;
-        double push1 = overlap * mass2 / totalMass, push2 = overlap * mass1 / totalMass;
-        double dx = other->centerX() - this->centerX(), dy = other->centerY() - this->centerY();
-        double normalX = dx / distance, normalY = dy / distance;
-        this->setVelocity(this->velocityX() + push1 * -normalX, this->velocityY() + push1 * -normalY);
-        other->setVelocity(other->velocityX() + push2 * normalX, other->velocityY() + push2 * normalY);
-    }
-}
-
-void Entity::resolveCircleOnSquare(Entity * other) {
-    double dx, dy;
-    Physics::squareAndCircle(other->centerX(), other->centerY(), other->radius(), this->centerX(), this->centerY(), this->radius(), dx, dy);
-    other->setVelocity(-dx, -dy);
-}
-
-void Entity::resolveSquareOnSquare(Entity * other) {
+    entity1->setVelocity(entity1->velocityX() + push1 * normalX, entity1->velocityY() + push1 * normalY);
+    entity2->setVelocity(entity2->velocityX() + push2 * normalX, entity2->velocityY() + push2 * normalY);
 }
 
 void Entity::draw(double screenX, double screenY) {
