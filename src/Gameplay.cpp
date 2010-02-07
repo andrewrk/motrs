@@ -303,6 +303,7 @@ void Gameplay::resolveWithWorld(Entity * entity) {
 }
 
 void Gameplay::sortByProximity(double x, double y, std::vector<Map::TileAndLocation> & tiles) {
+    // TODO: code duplication
     if (tiles.size() == 0)
         return; // we have to check for this because of stupid unsigned int size;
     for (unsigned int i = 0; i < tiles.size(); i++)
@@ -322,6 +323,25 @@ void Gameplay::sortByProximity(double x, double y, std::vector<Map::TileAndLocat
     }
 }
 
+void Gameplay::sortByCenterY(std::vector<Entity *> & entities) {
+    // TODO: code duplication
+    if (entities.size() == 0)
+        return; // we have to check for this because of stupid unsigned int size;
+    // selection sort
+    for (unsigned int i = 0; i < entities.size() - 1; i++) {
+        unsigned int minIndex = i;
+        for (unsigned int j = i + 1; j < entities.size(); j++) {
+            if (entities[j]->centerY() < entities[minIndex]->centerY())
+                minIndex = j;
+        }
+        if (minIndex != i) {
+            Entity * tmp = entities[i];
+            entities[i] = entities[minIndex];
+            entities[minIndex] = tmp;
+        }
+    }
+}
+
 void Gameplay::updateDisplay() {
     //generic background color
     SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, 0,0,0));
@@ -336,8 +356,13 @@ void Gameplay::updateDisplay() {
             if (i < (unsigned int)map->layerCount())
                 map->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
         }
+        // TODO: cache entities on each layer
+        std::vector<Entity *> entities;
         for (unsigned int i = 0; i < m_entities.size(); i++)
             if (m_entities[i]->layer() == layer)
-                m_entities[i]->draw(m_screenX, m_screenY);
+                entities.push_back(m_entities[i]);
+        sortByCenterY(entities);
+        for (unsigned int i = 0; i < entities.size(); i++)
+            entities[i]->draw(m_screenX, m_screenY);
     }
 }

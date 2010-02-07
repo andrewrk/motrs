@@ -38,6 +38,8 @@ private:
     static Gameplay * s_inst;
 
     static void sortByProximity(double x, double y, std::vector<Map::TileAndLocation> & tiles);
+    static void sortByCenterY(std::vector<Entity *> & entities);
+
 
     bool m_good;
     SDL_Surface * m_screen;
