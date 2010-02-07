@@ -65,7 +65,46 @@ void Physics::squareAndCircle(double cx1, double cy1, double a1, double cx2, dou
 }
 
 void Physics::squareAndSquare(double cx1, double cy1, double a1, double cx2, double cy2, double a2, double &out_dx, double &out_dy) {
-
+    // zones:
+    //  \ 1 /
+    //   +-+
+    // 0 | | 3
+    //   +-+
+    //  / 2 \      (don't warn me about multi-line comments)
+    double minDistance = a1 + a2;
+    out_dx = 0.0;
+    out_dy = 0.0;
+    int zone1 = 1 * (cx1 - cy1 < cx2 - cy2);
+    int zone2 = 2 * (cx1 + cy1 < cx2 + cy2);
+    int zone = zone1 + zone2;
+    switch (zone) {
+    case 0: {
+            double actualDistance = cx1 - cx2;
+            if (actualDistance < minDistance)
+                out_dx = actualDistance - minDistance;
+        }
+        break;
+    case 1: {
+            double actualDistance = cy1 - cy2;
+            if (actualDistance < minDistance)
+                out_dy = actualDistance - minDistance;
+        }
+        break;
+    case 2: {
+            double actualDistance = cy2 - cy1;
+            if (actualDistance < minDistance)
+                out_dy = minDistance - actualDistance;
+        }
+        break;
+    case 3: {
+            double actualDistance = cx2 - cx1;
+            if (actualDistance < minDistance)
+                out_dx = minDistance - actualDistance;
+        }
+        break;
+    default:
+        Debug::assert(false, "ifuvwbiwufdbivw");
+    }
 }
 
 void Physics::pointAndCircle(double px1, double py1, double cx2, double cy2, double r2, double &out_dx, double &out_dy) {

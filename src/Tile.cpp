@@ -139,7 +139,7 @@ void Tile::resolveCircleOnTriangleNW(double tileX, double tileY, double & object
         // from here, it's the same as a square.
         resolveCircleOnSquare(tileX, tileY, objectCenterX, objectCenterY, objectRadius);
     } else {
-        // regions:
+        // zones:
         // +-, 0
         // |/ \    (don't warn me about multi-line comments)
         // ' 1
