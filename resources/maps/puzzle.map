@@ -99,6 +99,7 @@ entity =328,200,0,pebble.entity
 entity=336,224,0,rock.entity
 
 
+entity  =72,296,0,load_stone.entity
 entity =104,328,0,pebble.entity
 
 entity=176,304,0,rock.entity
