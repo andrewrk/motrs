@@ -306,7 +306,7 @@ void Gameplay::sortByProximity(double x, double y, std::vector<Map::TileAndLocat
     if (tiles.size() == 0)
         return; // we have to check for this because of stupid unsigned int size;
     for (unsigned int i = 0; i < tiles.size(); i++)
-        tiles[i].proximity2 = Utils::distance2(x, y, tiles[i].x, tiles[i].y);
+        tiles[i].proximity2 = Utils::distance2(x, y, tiles[i].x + Tile::size / 2.0, tiles[i].y + Tile::size / 2.0);
     // selection sort
     for (unsigned int i = 0; i < tiles.size() - 1; i++) {
         unsigned int minIndex = i;
