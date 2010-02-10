@@ -3,6 +3,7 @@
 #include "SettingsDialog.h"
 #include "EditorResourceManager.h"
 #include "WorldView.h"
+#include "ObjectEditor.h"
 
 #include <QDir>
 #include <QGraphicsPixmapItem>
@@ -23,8 +24,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_view->setFocusPolicy(Qt::StrongFocus);
 
     setCentralWidget(m_view);
-
-    ui->dock_art->setWidget(ui->widget_art);
 
     // fill tools combo box with appropriate values
     fillToolComboBox(*ui->cboLeftClick);
@@ -106,8 +105,6 @@ void MainWindow::resizeEvent(QResizeEvent * e)
 void MainWindow::showEvent(QShowEvent * e)
 {
     // load universe
-
-    refreshArt();
     refreshWorldList();
 }
 
@@ -115,6 +112,11 @@ void MainWindow::on_actionSettings_triggered()
 {
     SettingsDialog::instance()->exec();
     m_view->readSettings();
+}
+
+void MainWindow::on_actionObjectEditor_triggered()
+{
+    ObjectEditor::instance()->show();
 }
 
 void MainWindow::refreshWorldList()
@@ -131,25 +133,6 @@ void MainWindow::refreshWorldList()
     ui->list_worlds->addItems(entries);
 }
 
-void MainWindow::refreshArt()
-{
-    // do a directory listing of data/art
-    QDir dir(EditorResourceManager::dataDir());
-    dir.cd("art");
-    QStringList filters;
-    filters << "*.bmp" << "*.png" << "*.jpg";
-    QStringList entries = dir.entryList(filters, QDir::Files | QDir::Readable,
-        QDir::Name | QDir::IgnoreCase);
-    for(int i=0; i<entries.size(); ++i) {
-        // create item
-        QString file = dir.absoluteFilePath(entries[i]);
-        QPixmap * pixmap = new QPixmap(file);
-        QListWidgetItem * item = new QListWidgetItem(QIcon(*pixmap), entries[i], ui->lstArt);
-        item->setData(Qt::UserRole, QVariant(file));
-        ui->lstArt->addItem(item);
-    }
-}
-
 void MainWindow::on_list_worlds_doubleClicked(QModelIndex index)
 {
     QListWidgetItem * item = ui->list_worlds->item(index.row());
@@ -161,11 +144,6 @@ void MainWindow::on_list_worlds_doubleClicked(QModelIndex index)
 void MainWindow::openWorld(QString file)
 {
     m_view->setWorld(new EditorWorld(file));
-}
-
-QListWidget * MainWindow::artList()
-{
-    return ui->lstArt;
 }
 
 QListWidget * MainWindow::layersList()

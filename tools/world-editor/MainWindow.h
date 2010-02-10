@@ -49,14 +49,12 @@ private:
 
     QStringList m_toolNames;
 
-    void refreshArt();
     void refreshWorldList();
     void openWorld(QString file);
     void fillToolComboBox(QComboBox & comboBox);
 
 
     QListWidget * layersList();
-    QListWidget * artList();
     QPushButton * newLayerButton();
     QPushButton * deleteLayerButton();
     QPushButton * moveLayerUpButton();
@@ -72,6 +70,7 @@ private slots:
     void on_list_worlds_doubleClicked(QModelIndex index);
 
     void on_actionSettings_triggered();
+    void on_actionObjectEditor_triggered();
 
     void on_cboLeftClick_currentIndexChanged(int index);
     void on_cboMiddleClick_currentIndexChanged(int index);

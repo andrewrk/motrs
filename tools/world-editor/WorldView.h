@@ -42,10 +42,6 @@ protected:
     void mouseMoveEvent(QMouseEvent * e);
     void keyPressEvent(QKeyEvent * e);
     void keyReleaseEvent(QKeyEvent * e);
-    void dropEvent(QDropEvent * e);
-    void dragEnterEvent(QDragEnterEvent * e);
-    void dragMoveEvent(QDragMoveEvent * e);
-    void dragLeaveEvent(QDragLeaveEvent * e);
 private:
     enum MouseState {
         Normal,
@@ -106,11 +102,6 @@ private:
 
     // holds QPainter object for drawing
     static QPainter * s_painter;
-
-    // contains a pixmap to draw when dragging art and such
-    QPixmap * m_dragPixmap;
-    int m_dragPixmapX;
-    int m_dragPixmapY;
 
     // art that has not been converted into objects or entities yet.
     ArtItem m_tempArt;
