@@ -54,12 +54,6 @@ EditorEntity::EditorEntity(QString file)
 
         }
     }
-
-}
-
-EditorEntity::~EditorEntity()
-{
-
 }
 
 void EditorEntity::draw(double screenX, double screenY)

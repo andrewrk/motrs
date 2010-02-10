@@ -49,6 +49,8 @@ public:
     double velocityX() { return m_velocityX; }
     double velocityY() { return m_velocityY; }
     void setVelocity(double x, double y) { m_velocityX = x; m_velocityY = y; }
+    double intendedCenterX() { return m_centerX + m_velocityX; }
+    double intendedCenterY() { return m_centerY + m_velocityY; }
 
     int layer() { return m_layer; }
     void setLayer(int layer) { m_layer = layer; }
@@ -113,7 +115,6 @@ protected:
 
     Entity(Shape shape, double radius, double centerOffsetX, double centerOffsetY, double speed, double mass);
     Entity();
-    ~Entity() {}
 };
 
 #endif

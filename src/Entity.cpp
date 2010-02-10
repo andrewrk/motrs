@@ -2,8 +2,11 @@
 
 #include "ResourceManager.h"
 #include "Gameplay.h"
+#include "Physics.h"
 
 #include "Utils.h"
+
+#include <cmath>
 
 Entity::Entity():
     m_centerX(0.0), m_centerY(0.0), m_radius(0),
@@ -85,19 +88,65 @@ Entity::Entity(Shape shape, double radius, double centerOffsetX, double centerOf
 }
 
 void Entity::resolveCollision(Entity * other) {
-    // TODO: switch on this->shape() and then other->shape()
-    double distance = Utils::distance(this->centerX(), this->centerY(), other->centerX(), other->centerY());
-    double minDistance = this->radius() + other->radius();
-    double overlap = minDistance - distance;
-    if (overlap > 0.0) {
-        double mass1 = this->mass(), mass2 = other->mass();
-        double totalMass = mass1 + mass2;
-        double push1 = overlap * mass2 / totalMass, push2 = overlap * mass1 / totalMass;
-        double dx = other->centerX() - this->centerX(), dy = other->centerY() - this->centerY();
-        double normalX = dx / distance, normalY = dy / distance;
-        this->setVelocity(this->velocityX() + push1 * -normalX, this->velocityY() + push1 * -normalY);
-        other->setVelocity(other->velocityX() + push2 * normalX, other->velocityY() + push2 * normalY);
+    Entity * entity1 = NULL, * entity2 = NULL;
+    double dx = 0.0, dy = 0.0;
+    switch (this->m_shape) {
+    case Shapeless:
+        return;
+    case Circle:
+        switch (other->m_shape) {
+        case Shapeless:
+            return;
+        case Circle:
+            entity1 = this;
+            entity2 = other;
+            Physics::circleAndCircle(entity1->intendedCenterX(), entity1->intendedCenterY(), entity1->radius(), entity2->intendedCenterX(), entity2->intendedCenterY(), entity2->radius(), dx, dy);
+            break;
+        case Square:
+            entity1 = other;
+            entity2 = this;
+            Physics::squareAndCircle(entity1->intendedCenterX(), entity1->intendedCenterY(), entity1->radius(), entity2->intendedCenterX(), entity2->intendedCenterY(), entity2->radius(), dx, dy);
+            break;
+        default:
+            Debug::assert(false, "aosidnvaosidnao");
+            break;
+        }
+        break;
+    case Square:
+        switch (other->m_shape) {
+        case Shapeless:
+            return;
+        case Circle:
+            entity1 = this;
+            entity2 = other;
+            Physics::squareAndCircle(entity1->intendedCenterX(), entity1->intendedCenterY(), entity1->radius(), entity2->intendedCenterX(), entity2->intendedCenterY(), entity2->radius(), dx, dy);
+            break;
+        case Square:
+            entity1 = this;
+            entity2 = other;
+            Physics::squareAndSquare(entity1->intendedCenterX(), entity1->intendedCenterY(), entity1->radius(), entity2->intendedCenterX(), entity2->intendedCenterY(), entity2->radius(), dx, dy);
+            break;
+        default:
+            Debug::assert(false, "aosidnvaosidnao");
+            break;
+        }
+        break;
+    default:
+        Debug::assert(false, "asfoaiovisnvoasd");
+        break;
     }
+
+    if (Utils::isZero(dx) && Utils::isZero(dy))
+        return;
+
+    // resolve momentum collision
+    double distance = std::sqrt(dx * dx + dy * dy);
+    double normalX = dx / distance, normalY = dy / distance;
+    double mass1 = entity1->mass(), mass2 = entity2->mass();
+    double totalMass = mass1 + mass2;
+    double push1 = -distance * mass2 / totalMass, push2 = distance * mass1 / totalMass;
+    entity1->setVelocity(entity1->velocityX() + push1 * normalX, entity1->velocityY() + push1 * normalY);
+    entity2->setVelocity(entity2->velocityX() + push2 * normalX, entity2->velocityY() + push2 * normalY);
 }
 
 void Entity::draw(double screenX, double screenY) {

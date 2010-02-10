@@ -13,6 +13,10 @@ double Utils::distance2(double x1, double y1, double x2, double y2) {
     return dx * dx + dy * dy;
 }
 
+bool Utils::isZero(double d) {
+    return std::fabs(d) < 0.000001;
+}
+
 int Utils::stringToInt(std::string value) {
     std::stringstream ss;
     ss << value;

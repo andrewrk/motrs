@@ -9,7 +9,6 @@ class EditorEntity : public Entity
 {
 public:
     EditorEntity(QString file);
-    ~EditorEntity();
 
     inline bool isGood() { return m_good; }
 
