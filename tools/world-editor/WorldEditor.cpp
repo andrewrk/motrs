@@ -119,6 +119,7 @@ void WorldEditor::showEvent(QShowEvent * e)
 void WorldEditor::on_actionSettings_triggered()
 {
     SettingsDialog::instance()->exec();
+    refreshWorldList();
 }
 
 void WorldEditor::refreshWorldList()
