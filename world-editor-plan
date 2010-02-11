@@ -1,7 +1,7 @@
  * object composer
+   > handle window closing and application closing better
    > make the plus minus and scroll buttons work with the grid
-   > layers box 
-   > make zooming work in the grid
+   > don't use a single instance for object editor
    > Surface type and surface shape view modes
    > ability to drag art into the grid
    > ability to resize and drag around art

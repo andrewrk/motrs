@@ -118,6 +118,7 @@ void WorldEditor::on_actionSettings_triggered()
 void WorldEditor::on_actionObjectEditor_triggered()
 {
     ObjectEditor::instance()->show();
+    ObjectEditor::instance()->createEmpty();
 }
 
 void WorldEditor::refreshWorldList()

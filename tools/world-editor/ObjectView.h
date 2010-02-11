@@ -27,13 +27,20 @@ public:
     ObjectView(ObjectEditor * window, QWidget * parent = NULL);
     ~ObjectView();
 
+    void createEmpty();
+    void open(QString file);
+
     void setSelectedLayer(int layer);
     void setViewMode(ViewMode mode);
-    void open(QString file);
 
     void setZoom(double zoom);
     void zoomIn();
     void zoomOut();
+
+    // layer operations which operate on the selected layer
+    void addLayer();
+    void deleteLayer(int index);
+    void swapLayers(int i, int j);
 
 protected:
     void paintEvent(QPaintEvent * e);
@@ -81,7 +88,6 @@ private:
     double m_offsetX;
     double m_offsetY;
 
-    void refreshLayersList();
 
     double screenX(double absoluteX);
     double screenY(double absoluteY);
@@ -90,7 +96,9 @@ private:
 
     void drawGrid(QPainter &p);
 
+    void refreshLayersList();
     void setUpScrolling();
+    void setControlEnableStates();
 private slots:
     void on_btnLeftPlus_clicked();
     void on_btnLeftMinus_clicked();

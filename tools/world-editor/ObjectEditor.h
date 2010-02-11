@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QListWidget>
+#include <QPushButton>
 
 class ObjectView;
 
@@ -20,6 +21,14 @@ public:
     void open(QString file);
 
     QListWidget * artList();
+    QListWidget * layersList();
+
+    QPushButton * newLayerButton();
+    QPushButton * deleteLayerButton();
+    QPushButton * moveLayerUpButton();
+    QPushButton * moveLayerDownButton();
+
+    void createEmpty();
 
 protected:
     void changeEvent(QEvent *e);
@@ -33,13 +42,17 @@ private:
     void refreshArt();
 
 private slots:
+    void on_btnDeleteLayer_clicked();
+    void on_btnNewLayer_clicked();
+    void on_btnMoveLayerDown_clicked();
+    void on_btnMoveLayerUp_clicked();
     void on_actionZoomOut_triggered();
     void on_actionZoomIn_triggered();
     void on_actionZoom100_triggered();
     void on_actionShape_triggered();
     void on_actionSurfaceType_triggered();
     void on_actionNormal_triggered();
-    void on_listLayers_currentRowChanged(int currentRow);
+    void on_lstLayers_currentRowChanged(int currentRow);
 
 };
 

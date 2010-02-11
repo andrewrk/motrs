@@ -68,7 +68,33 @@ QListWidget * ObjectEditor::artList()
     return m_ui->lstArt;
 }
 
-void ObjectEditor::on_listLayers_currentRowChanged(int currentRow)
+QListWidget * ObjectEditor::layersList()
+{
+    return m_ui->lstLayers;
+}
+
+
+QPushButton * ObjectEditor::newLayerButton()
+{
+    return m_ui->btnNewLayer;
+}
+
+QPushButton * ObjectEditor::deleteLayerButton()
+{
+    return m_ui->btnDeleteLayer;
+}
+
+QPushButton * ObjectEditor::moveLayerUpButton()
+{
+    return m_ui->btnMoveLayerUp;
+}
+
+QPushButton * ObjectEditor::moveLayerDownButton()
+{
+    return m_ui->btnMoveLayerDown;
+}
+
+void ObjectEditor::on_lstLayers_currentRowChanged(int currentRow)
 {
     m_view->setSelectedLayer(currentRow);
 }
@@ -115,4 +141,31 @@ void ObjectEditor::on_actionZoomIn_triggered()
 void ObjectEditor::on_actionZoomOut_triggered()
 {
     m_view->zoomOut();
+}
+
+void ObjectEditor::createEmpty()
+{
+    m_view->createEmpty();
+}
+
+void ObjectEditor::on_btnMoveLayerUp_clicked()
+{
+    if( m_ui->lstLayers->currentRow() > 0 )
+        m_view->swapLayers(m_ui->lstLayers->currentRow(), m_ui->lstLayers->currentRow()-1);
+}
+
+void ObjectEditor::on_btnMoveLayerDown_clicked()
+{
+    if( m_ui->lstLayers->currentRow() < m_ui->lstLayers->count() - 1 )
+        m_view->swapLayers(m_ui->lstLayers->currentRow(), m_ui->lstLayers->currentRow()+1);
+}
+
+void ObjectEditor::on_btnNewLayer_clicked()
+{
+    m_view->addLayer();
+}
+
+void ObjectEditor::on_btnDeleteLayer_clicked()
+{
+    m_view->deleteLayer(m_ui->lstLayers->currentRow());
 }

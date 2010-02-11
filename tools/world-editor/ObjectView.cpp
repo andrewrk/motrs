@@ -18,7 +18,7 @@
 ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     QWidget(parent),
     m_window(window),
-    m_object(new EditorMap()),
+    m_object(NULL),
     m_dragPixmap(NULL),
     m_btnTopPlus(new QPushButton("+", this)),
     m_btnTopMinus(new QPushButton("-", this)),
@@ -58,14 +58,22 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     connect(m_btnLeftMinus, SIGNAL(clicked()), this, SLOT(on_btnLeftMinus_clicked()));
     connect(m_btnRightPlus, SIGNAL(clicked()), this, SLOT(on_btnRightPlus_clicked()));
     connect(m_btnRightMinus, SIGNAL(clicked()), this, SLOT(on_btnRightMinus_clicked()));
-
-    setUpScrolling();
 }
 
 ObjectView::~ObjectView()
 {
     if( m_object )
         delete m_object;
+}
+
+void ObjectView::createEmpty()
+{
+    if( m_object )
+        delete m_object;
+    m_object = new EditorMap();
+
+    refreshLayersList();
+    setUpScrolling();
 }
 
 void ObjectView::paintEvent(QPaintEvent * e)
@@ -76,16 +84,21 @@ void ObjectView::paintEvent(QPaintEvent * e)
     p.setBackground(Qt::white);
     p.eraseRect(0, 0, this->width(), this->height());
 
-    for(int layer=0; layer<m_object->layerCount(); ++layer) {
-        // draw all art items at this layer
+    if( m_object ) {
+        for(int layer=0; layer<m_object->layerCount(); ++layer) {
+            // draw all art items at this layer
 
-        // draw dragged stuff
-        if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
-            p.drawPixmap(m_dragPixmapX, m_dragPixmapY, *m_dragPixmap);
+            // draw dragged stuff
+            if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
+                p.drawPixmap(m_dragPixmapX, m_dragPixmapY, *m_dragPixmap);
+            }
         }
-    }
 
-    drawGrid(p);
+        drawGrid(p);
+    } else {
+        p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
+            tr("No object loaded"));
+    }
 }
 
 void ObjectView::dropEvent(QDropEvent * e)
@@ -204,6 +217,7 @@ void ObjectView::resizeEvent(QResizeEvent * e)
 void ObjectView::setSelectedLayer(int layer)
 {
     m_selectedLayer = layer;
+    setControlEnableStates();
 }
 
 void ObjectView::open(QString file)
@@ -220,7 +234,36 @@ void ObjectView::open(QString file)
 
 void ObjectView::refreshLayersList()
 {
-    // TODO
+    QListWidget * list = m_window->layersList();
+    list->clear();
+    if( m_object ) {
+        // add the layers from that map
+        for(int i=0; i<m_object->layerCount(); ++i) {
+            QListWidgetItem * newItem = new QListWidgetItem(m_object->layerName(i), list);
+            newItem->setFlags(Qt::ItemIsUserCheckable|Qt::ItemIsSelectable|
+                              Qt::ItemIsEditable|Qt::ItemIsEnabled);
+            newItem->setCheckState(Qt::Checked);
+            list->addItem(newItem);
+        }
+
+        if( m_object->layerCount() > 0 ) {
+            list->item(0)->setSelected(true);
+            m_selectedLayer = 0;
+        } else {
+            m_selectedLayer = -1;
+        }
+    } else {
+        list->addItem(tr("No object loaded"));
+    }
+    setControlEnableStates();
+}
+
+void ObjectView::setControlEnableStates()
+{
+    m_window->moveLayerUpButton()->setEnabled(m_object != NULL && m_selectedLayer > 0);
+    m_window->moveLayerDownButton()->setEnabled(m_object != NULL && m_selectedLayer < m_object->layerCount()-1);
+    m_window->deleteLayerButton()->setEnabled(m_object != NULL && m_selectedLayer > -1);
+    m_window->newLayerButton()->setEnabled(m_object != NULL);
 }
 
 void ObjectView::setViewMode(ViewMode mode)
@@ -361,5 +404,32 @@ void ObjectView::zoomIn()
 void ObjectView::zoomOut()
 {
     m_zoom = Utils::max(m_zoom * 0.8, 0.2);
+    this->update();
+}
+
+void ObjectView::addLayer()
+{
+    Debug::assert(m_object, "Error: Layer manipulations on a null object");
+    m_object->addLayer();
+
+    refreshLayersList();
+    this->update();
+}
+
+void ObjectView::deleteLayer(int index)
+{
+    Debug::assert(m_object, "Error: Layer manipulations on a null object");
+    m_object->deleteLayer(index);
+
+    refreshLayersList();
+    this->update();
+}
+
+void ObjectView::swapLayers(int i, int j)
+{
+    Debug::assert(m_object, "Error: Layer manipulations on a null object");
+    m_object->swapLayer(i, j);
+
+    refreshLayersList();
     this->update();
 }
