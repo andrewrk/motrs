@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QListWidget>
 #include <QPushButton>
+#include <QTableWidget>
 
 class ObjectView;
 
@@ -21,6 +22,7 @@ public:
 
     QListWidget * artList();
     QListWidget * layersList();
+    QTableWidget * propertiesTable();
 
     QPushButton * newLayerButton();
     QPushButton * deleteLayerButton();
@@ -41,6 +43,7 @@ private:
     void refreshArt();
 
 private slots:
+    void on_tblProperties_cellChanged(int row, int column);
     void on_actionClose_triggered();
     void on_btnDeleteLayer_clicked();
     void on_btnNewLayer_clicked();

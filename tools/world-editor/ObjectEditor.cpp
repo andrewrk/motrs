@@ -71,6 +71,10 @@ QListWidget * ObjectEditor::layersList()
     return m_ui->lstLayers;
 }
 
+QTableWidget * ObjectEditor::propertiesTable()
+{
+    return m_ui->tblProperties;
+}
 
 QPushButton * ObjectEditor::newLayerButton()
 {
@@ -179,4 +183,9 @@ void ObjectEditor::closeEvent(QCloseEvent * e)
 void ObjectEditor::on_actionClose_triggered()
 {
     this->close();
+}
+
+void ObjectEditor::on_tblProperties_cellChanged(int row, int column)
+{
+    m_view->propertyChanged(row);
 }

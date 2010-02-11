@@ -131,36 +131,108 @@
         <bool>false</bool>
        </property>
        <attribute name="horizontalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
         <bool>true</bool>
        </attribute>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
        <row>
         <property name="text">
-         <string>Name</string>
+         <string>New Row</string>
         </property>
        </row>
        <row>
         <property name="text">
-         <string>Width</string>
+         <string>New Row</string>
         </property>
        </row>
        <row>
         <property name="text">
-         <string>Height</string>
+         <string>New Row</string>
         </property>
        </row>
        <row>
         <property name="text">
-         <string>Description</string>
+         <string>New Row</string>
         </property>
        </row>
+       <column>
+        <property name="text">
+         <string>Property</string>
+        </property>
+       </column>
        <column>
         <property name="text">
          <string>Value</string>
         </property>
        </column>
+       <item row="0" column="0">
+        <property name="text">
+         <string>Name</string>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsEnabled</set>
+        </property>
+       </item>
+       <item row="0" column="1">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsEnabled</set>
+        </property>
+       </item>
+       <item row="1" column="0">
+        <property name="text">
+         <string>Width</string>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsEnabled</set>
+        </property>
+       </item>
+       <item row="1" column="1">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsEnabled</set>
+        </property>
+       </item>
+       <item row="2" column="0">
+        <property name="text">
+         <string>Height</string>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsEnabled</set>
+        </property>
+       </item>
+       <item row="2" column="1">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsEnabled</set>
+        </property>
+       </item>
+       <item row="3" column="0">
+        <property name="text">
+         <string>Description</string>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsEnabled</set>
+        </property>
+       </item>
+       <item row="3" column="1">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="flags">
+         <set>ItemIsSelectable|ItemIsEditable|ItemIsDragEnabled|ItemIsEnabled</set>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>

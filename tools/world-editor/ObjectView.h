@@ -42,6 +42,11 @@ public:
     void deleteLayer(int index);
     void swapLayers(int i, int j);
 
+    // make sure all the controls and things are correct
+    void refreshGui();
+
+    void propertyChanged(int row);
+
 protected:
     void paintEvent(QPaintEvent * e);
     void resizeEvent(QResizeEvent * e);
@@ -52,6 +57,12 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent * e);
 
 private:
+    enum TableProperty {
+        Name,
+        Width,
+        Height,
+        Description,
+    };
 
     // the host window for this view
     ObjectEditor * m_window;
@@ -82,6 +93,8 @@ private:
     int m_selectedLayer;
 
     ViewMode m_viewMode;
+
+    QString m_objectName;
 
     // where is the editor scrolled to, in absolute coordinates
     double m_zoom;

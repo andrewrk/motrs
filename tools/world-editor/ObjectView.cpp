@@ -10,6 +10,7 @@
 #include <QFileInfo>
 #include <QDebug>
 #include <QMessageBox>
+#include <QTableWidget>
 
 #include <cmath>
 
@@ -72,8 +73,16 @@ void ObjectView::createEmpty()
         delete m_object;
     m_object = new EditorMap();
 
+    m_objectName = QObject::tr("New Object");
+    refreshGui();
+}
+
+void ObjectView::refreshGui()
+{
     refreshLayersList();
+    refreshProperties();
     setUpScrolling();
+    this->update();
 }
 
 void ObjectView::paintEvent(QPaintEvent * e)
@@ -227,9 +236,8 @@ void ObjectView::open(QString file)
     m_object = new EditorMap(file);
     // TODO: if (! m_object.isGood) delete m_object; m_object = NULL;
 
-    setUpScrolling();
-    refreshLayersList();
-    update();
+    m_objectName = file;
+    refreshGui();
 }
 
 void ObjectView::refreshLayersList()
@@ -452,5 +460,36 @@ void ObjectView::swapLayers(int i, int j)
 
 void ObjectView::refreshProperties()
 {
-    // TODO
+    QTableWidget * tbl = m_window->propertiesTable();
+    tbl->item(Name, 1)->setText(m_objectName);
+    tbl->item(Width, 1)->setText(QString::number((int) m_object->width() / Tile::size));
+    tbl->item(Height, 1)->setText(QString::number((int) m_object->height() / Tile::size));
+    tbl->item(Description, 1)->setText(QObject::tr("description not supported yet"));
+}
+
+void ObjectView::propertyChanged(int row)
+{
+    TableProperty prop = (TableProperty) row;
+
+    QTableWidget * tbl = m_window->propertiesTable();
+    QString value = tbl->item(row, 1)->text();
+    switch(prop) {
+        case Name:
+            m_objectName = value;
+            break;
+        case Width:
+            m_object->setWidth(value.toInt() * Tile::size);
+            break;
+        case Height:
+            m_object->setHeight(value.toInt() * Tile::size);
+            break;
+        case Description:
+            // TODO: handle this case
+            break;
+        default:
+            Debug::assert(false, "unhandled property");
+            break;
+    }
+
+    refreshGui();
 }
