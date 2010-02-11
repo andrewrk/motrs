@@ -1,6 +1,6 @@
  * object composer
-   > display the grid
    > make the plus minus and scroll buttons work with the grid
+   > make zooming work in the grid
    > Surface type and surface shape view modes
    > ability to drag art into the grid
    > ability to resize and drag around art

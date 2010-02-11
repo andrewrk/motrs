@@ -182,7 +182,6 @@ void WorldView::drawGrid(QPainter &p)
         else
             p.setPen(QColor(128, 128, 128));
 
-        // vertical lines
         double gameLeft = absoluteX(0);
         double gameTop = absoluteY(0);
         double gameRight = absoluteX(this->width());

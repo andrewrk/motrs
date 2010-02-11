@@ -3,6 +3,7 @@
 #include "EditorResourceManager.h"
 #include "ObjectEditor.h"
 #include "EditorSettings.h"
+#include "Utils.h"
 
 #include <QPainter>
 #include <QStandardItemModel>
@@ -68,6 +69,8 @@ void ObjectView::paintEvent(QPaintEvent * e)
             p.drawPixmap(m_dragPixmapX, m_dragPixmapY, *m_dragPixmap);
         }
     }
+
+    drawGrid(p);
 }
 
 void ObjectView::dropEvent(QDropEvent * e)
@@ -218,24 +221,23 @@ void ObjectView::drawGrid(QPainter &p)
         else
             p.setPen(QColor(128, 128, 128));
 
-        // vertical lines
         double gameLeft = absoluteX(0);
         double gameTop = absoluteY(0);
-        double gameRight = absoluteX(this->width());
-        double gameBottom = absoluteY(this->height());
+        double gameRight = Utils::min(absoluteX(this->width()), absoluteX(m_object->width())) + 0.1; // add 0.1 to make up for double precision
+        double gameBottom = Utils::min(absoluteY(this->height()), absoluteY(m_object->height())) + 0.1;
         double gridX = gameLeft - std::fmod(gameLeft, Tile::size);
         double gridY = gameTop - std::fmod(gameTop, Tile::size);
 
         if( gridType == EditorSettings::Pretty ) {
             while(gridX < gameRight) {
                 double drawX = screenX(gridX);
-                p.drawLine((int)drawX, 0, (int)drawX, this->height());
+                p.drawLine((int)drawX, 0, (int)drawX, screenX(gameRight));
                 gridX += Tile::size;
             }
 
             while(gridY < gameBottom) {
                 double drawY = screenY(gridY);
-                p.drawLine(0, (int)drawY, this->width(), (int)drawY);
+                p.drawLine(0, (int)drawY, screenY(gameBottom), (int)drawY);
                 gridY += Tile::size;
             }
         } else if( gridType == EditorSettings::Fast ) {

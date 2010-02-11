@@ -14,7 +14,6 @@ EditorMap::EditorMap()
     m_palette.clear();
     m_palette.push_back(Tile::nullTile());
 
-
     m_layerNames.clear();
     m_entities.clear();
 
@@ -30,6 +29,8 @@ EditorMap::EditorMap()
             }
         }
     }
+
+    calculateBoundaries();
 }
 
 EditorMap::EditorMap(QString file)
