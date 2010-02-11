@@ -13,6 +13,8 @@
 
 #include <cmath>
 
+#include "moc_ObjectView.cxx"
+
 ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     QWidget(parent),
     m_window(window),
@@ -45,6 +47,19 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
 
     m_hsb->show();
     m_vsb->show();
+
+    connect(m_vsb, SIGNAL(valueChanged(int)), this, SLOT(verticalScroll(int)));
+    connect(m_hsb, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
+    connect(m_btnTopPlus, SIGNAL(clicked()), this, SLOT(on_btnTopPlus_clicked()));
+    connect(m_btnTopMinus, SIGNAL(clicked()), this, SLOT(on_btnTopMinus_clicked()));
+    connect(m_btnBottomPlus, SIGNAL(clicked()), this, SLOT(on_btnBottomPlus_clicked()));
+    connect(m_btnBottomMinus, SIGNAL(clicked()), this, SLOT(on_btnBottomMinus_clicked()));
+    connect(m_btnLeftPlus, SIGNAL(clicked()), this, SLOT(on_btnLeftPlus_clicked()));
+    connect(m_btnLeftMinus, SIGNAL(clicked()), this, SLOT(on_btnLeftMinus_clicked()));
+    connect(m_btnRightPlus, SIGNAL(clicked()), this, SLOT(on_btnRightPlus_clicked()));
+    connect(m_btnRightMinus, SIGNAL(clicked()), this, SLOT(on_btnRightMinus_clicked()));
+
+    setUpScrolling();
 }
 
 ObjectView::~ObjectView()
@@ -197,6 +212,8 @@ void ObjectView::open(QString file)
         delete m_object;
     m_object = new EditorMap(file);
     // TODO: if (! m_object.isGood) delete m_object; m_object = NULL;
+
+    setUpScrolling();
     refreshLayersList();
     update();
 }
@@ -267,4 +284,68 @@ double ObjectView::absoluteX(double screenX)
 double ObjectView::absoluteY(double screenY)
 {
     return (screenY / m_zoom) + m_offsetY;
+}
+
+void ObjectView::on_btnLeftPlus_clicked()
+{
+
+}
+
+void ObjectView::on_btnLeftMinus_clicked()
+{
+
+}
+
+void ObjectView::on_btnRightPlus_clicked()
+{
+
+}
+
+void ObjectView::on_btnRightMinus_clicked()
+{
+
+}
+
+void ObjectView::on_btnTopPlus_clicked()
+{
+
+}
+
+void ObjectView::on_btnTopMinus_clicked()
+{
+
+}
+
+void ObjectView::on_btnBottomPlus_clicked()
+{
+
+}
+
+void ObjectView::on_btnBottomMinus_clicked()
+{
+
+}
+
+void ObjectView::verticalScroll(int value)
+{
+    m_offsetY = value;
+    this->update();
+}
+
+void ObjectView::horizontalScroll(int value)
+{
+    m_offsetX = value;
+    this->update();
+}
+
+void ObjectView::setUpScrolling()
+{
+    // set up scroll bars
+    const int bufferRoom = 800;
+    m_hsb->setMinimum((int)(-bufferRoom));
+    m_hsb->setMaximum((int)(m_object->width()));
+    m_hsb->setValue((int)0);
+    m_vsb->setMinimum((int)(-bufferRoom));
+    m_vsb->setMaximum((int)(m_object->height()));
+    m_vsb->setValue((int)0);
 }

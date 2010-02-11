@@ -16,6 +16,7 @@ class ObjectEditor;
 
 class ObjectView : public QWidget
 {
+    Q_OBJECT
 public:
     enum ViewMode {
         Normal,
@@ -84,6 +85,20 @@ private:
     double absoluteY(double screenY);
 
     void drawGrid(QPainter &p);
+
+    void setUpScrolling();
+private slots:
+    void on_btnLeftPlus_clicked();
+    void on_btnLeftMinus_clicked();
+    void on_btnRightPlus_clicked();
+    void on_btnRightMinus_clicked();
+    void on_btnTopPlus_clicked();
+    void on_btnTopMinus_clicked();
+    void on_btnBottomPlus_clicked();
+    void on_btnBottomMinus_clicked();
+
+    void verticalScroll(int value);
+    void horizontalScroll(int value);
 };
 
 #endif // OBJECTVIEW_H

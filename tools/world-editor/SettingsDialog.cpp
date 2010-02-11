@@ -4,7 +4,6 @@
 #include "WorldView.h"
 #include "EditorSettings.h"
 
-#include <QSettings>
 #include <QFileDialog>
 
 #include "moc_SettingsDialog.cxx"
@@ -38,8 +37,7 @@ void SettingsDialog::changeEvent(QEvent *e)
 
 void SettingsDialog::showEvent(QShowEvent * e)
 {
-    QSettings settings;
-    m_ui->txtDataFolder->setText(settings.value("paths/data", ".").toString());
+    m_ui->txtDataFolder->setText(EditorSettings::dataFolder());
 
     EditorSettings::GridRenderType grid = EditorSettings::gridRenderType();
 
@@ -65,10 +63,9 @@ SettingsDialog * SettingsDialog::instance()
 
 void SettingsDialog::on_btnOK_clicked()
 {
-    QSettings settings;
-    settings.setValue("paths/data", m_ui->txtDataFolder->text());
+    EditorSettings::setDataFolder(m_ui->txtDataFolder->text());
 
-    int grid;
+    EditorSettings::GridRenderType grid;
     if( m_ui->optGridOff->isChecked() )
         grid = EditorSettings::None;
     else if(m_ui->optGridFast->isChecked() )
@@ -76,7 +73,7 @@ void SettingsDialog::on_btnOK_clicked()
     else if(m_ui->optGridPretty->isChecked() )
         grid = EditorSettings::Pretty;
 
-    settings.setValue("editor/grid", grid);
+    EditorSettings::setGridRenderType(grid);
 
     accept();
 }

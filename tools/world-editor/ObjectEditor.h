@@ -37,6 +37,7 @@ private slots:
     void on_actionSurfaceType_triggered();
     void on_actionNormal_triggered();
     void on_listLayers_currentRowChanged(int currentRow);
+
 };
 
 #endif // OBJECTEDITOR_H
