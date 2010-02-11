@@ -5,6 +5,7 @@
 #include "ObjectView.h"
 
 #include <QDir>
+#include <QSettings>
 
 #include "moc_ObjectEditor.cxx"
 
@@ -18,6 +19,11 @@ ObjectEditor::ObjectEditor(QWidget *parent) :
     m_ui->setupUi(this);
 
     this->setCentralWidget(m_view);
+
+    QSettings settings;
+    this->restoreState(settings.value("ObjectEditor/windowState").toByteArray());
+    this->restoreGeometry(settings.value("ObjectEditor/windowGeometry").toByteArray());
+
 }
 
 ObjectEditor::~ObjectEditor()
@@ -168,4 +174,12 @@ void ObjectEditor::on_btnNewLayer_clicked()
 void ObjectEditor::on_btnDeleteLayer_clicked()
 {
     m_view->deleteLayer(m_ui->lstLayers->currentRow());
+}
+
+void ObjectEditor::closeEvent(QCloseEvent * e)
+{
+    QSettings settings;
+    settings.setValue("ObjectEditor/windowState", this->saveState());
+    settings.setValue("ObjectEditor/windowGeometry", this->saveGeometry());
+
 }
