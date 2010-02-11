@@ -31,6 +31,10 @@ public:
     void setViewMode(ViewMode mode);
     void open(QString file);
 
+    void setZoom(double zoom);
+    void zoomIn();
+    void zoomOut();
+
 protected:
     void paintEvent(QPaintEvent * e);
     void resizeEvent(QResizeEvent * e);

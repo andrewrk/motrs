@@ -38,8 +38,17 @@
     <addaction name="actionSurfaceType"/>
     <addaction name="actionShape"/>
    </widget>
+   <widget class="QMenu" name="menu_Zoom">
+    <property name="title">
+     <string>&amp;Zoom</string>
+    </property>
+    <addaction name="actionZoomIn"/>
+    <addaction name="actionZoomOut"/>
+    <addaction name="actionZoom100"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_View"/>
+   <addaction name="menu_Zoom"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockArt">
@@ -195,6 +204,33 @@
    </property>
    <property name="toolTip">
     <string>Shape</string>
+   </property>
+  </action>
+  <action name="actionZoomIn">
+   <property name="text">
+    <string>Zoom &amp;In</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl++</string>
+   </property>
+  </action>
+  <action name="actionZoomOut">
+   <property name="text">
+    <string>Zoom &amp;Out</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="actionZoom100">
+   <property name="text">
+    <string>Zoom &amp;100%</string>
+   </property>
+   <property name="toolTip">
+    <string>Go back to normal zoom</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+0</string>
    </property>
   </action>
  </widget>

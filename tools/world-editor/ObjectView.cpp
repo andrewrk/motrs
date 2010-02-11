@@ -233,34 +233,30 @@ void ObjectView::drawGrid(QPainter &p)
 {
     EditorSettings::GridRenderType gridType = EditorSettings::gridRenderType();
     if( gridType != EditorSettings::None ) {
-        if( gridType == EditorSettings::Pretty )
-            p.setPen(QColor(128, 128, 128, 64));
-        else
-            p.setPen(QColor(128, 128, 128));
-
-        double gameLeft = absoluteX(0);
-        double gameTop = absoluteY(0);
-        double gameRight = Utils::min(absoluteX(this->width()), absoluteX(m_object->width())) + 0.1; // add 0.1 to make up for double precision
-        double gameBottom = Utils::min(absoluteY(this->height()), absoluteY(m_object->height())) + 0.1;
-        double gridX = gameLeft - std::fmod(gameLeft, Tile::size);
-        double gridY = gameTop - std::fmod(gameTop, Tile::size);
+        int sizeX = m_object->width() / Tile::size;
+        int sizeY = m_object->height() / Tile::size;
 
         if( gridType == EditorSettings::Pretty ) {
-            while(gridX < gameRight) {
-                double drawX = screenX(gridX);
-                p.drawLine((int)drawX, 0, (int)drawX, screenX(gameRight));
-                gridX += Tile::size;
+            p.setPen(QColor(128, 128, 128, 64));
+
+            // vertical
+            for(int x=0; x<=sizeX; ++x) {
+                double sx = screenX(x*Tile::size);
+                p.drawLine(sx, screenY(0), sx, screenY(m_object->height()));
             }
 
-            while(gridY < gameBottom) {
-                double drawY = screenY(gridY);
-                p.drawLine(0, (int)drawY, screenY(gameBottom), (int)drawY);
-                gridY += Tile::size;
+            // horizontal
+            for(int y=0; y<=sizeY; ++y) {
+                double sy = screenY(y*Tile::size);
+                p.drawLine(screenX(0), sy, screenX(m_object->width()), sy);
             }
+
         } else if( gridType == EditorSettings::Fast ) {
-            for(double y = gridY; y < gameBottom; y+=Tile::size) {
-                for(double x = gridX; x < gameRight; x+=Tile::size)
-                    p.drawPoint((int)screenX(x), (int)screenY(y));
+            p.setPen(QColor(128, 128, 128));
+
+            for(int y = 0; y <= sizeY; ++y) {
+                for(int x = 0; x <= sizeX; ++x)
+                    p.drawPoint((int)screenX(x*Tile::size), (int)screenY(y*Tile::size));
             }
         }
     }
@@ -348,4 +344,22 @@ void ObjectView::setUpScrolling()
     m_vsb->setMinimum((int)(-bufferRoom));
     m_vsb->setMaximum((int)(m_object->height()));
     m_vsb->setValue((int)0);
+}
+
+void ObjectView::setZoom(double zoom)
+{
+    m_zoom = zoom;
+    this->update();
+}
+
+void ObjectView::zoomIn()
+{
+    m_zoom = Utils::min(m_zoom * 1.2, 100.0);
+    this->update();
+}
+
+void ObjectView::zoomOut()
+{
+    m_zoom = Utils::max(m_zoom * 0.8, 0.2);
+    this->update();
 }

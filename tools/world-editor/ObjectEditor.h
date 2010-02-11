@@ -33,6 +33,9 @@ private:
     void refreshArt();
 
 private slots:
+    void on_actionZoomOut_triggered();
+    void on_actionZoomIn_triggered();
+    void on_actionZoom100_triggered();
     void on_actionShape_triggered();
     void on_actionSurfaceType_triggered();
     void on_actionNormal_triggered();

@@ -101,3 +101,18 @@ void ObjectEditor::on_actionShape_triggered()
     m_ui->actionShape->setChecked(true);
     m_view->setViewMode(ObjectView::Shape);
 }
+
+void ObjectEditor::on_actionZoom100_triggered()
+{
+    m_view->setZoom(1.0);
+}
+
+void ObjectEditor::on_actionZoomIn_triggered()
+{
+    m_view->zoomIn();
+}
+
+void ObjectEditor::on_actionZoomOut_triggered()
+{
+    m_view->zoomOut();
+}
