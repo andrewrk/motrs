@@ -21,6 +21,8 @@ WorldEditor::WorldEditor(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
+    m_ui->actionQuit->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_F4));
+
     m_view->setFocusPolicy(Qt::StrongFocus);
 
     setCentralWidget(m_view);
@@ -204,4 +206,9 @@ void WorldEditor::on_btnDeleteLayer_clicked()
 {
     if( m_ui->list_layers->currentRow() > -1 )
         m_view->deleteLayer(m_ui->list_layers->currentRow());
+}
+
+void WorldEditor::on_actionQuit_triggered()
+{
+    QApplication::quit();
 }

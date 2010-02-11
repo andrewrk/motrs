@@ -61,6 +61,7 @@ private:
     QPushButton * moveLayerDownButton();
 
 private slots:
+    void on_actionQuit_triggered();
     void on_btnDeleteLayer_clicked();
     void on_btnNewLayer_clicked();
     void on_btnMoveLayerDown_clicked();
