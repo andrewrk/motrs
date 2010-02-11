@@ -111,6 +111,7 @@ private:
 
     void refreshLayersList();
     void refreshProperties();
+    void refreshArt();
     void setUpScrolling();
     void setControlEnableStates();
 private slots:

@@ -64,7 +64,14 @@
       <widget class="QLineEdit" name="txtFilterArt"/>
      </item>
      <item>
-      <widget class="QListWidget" name="lstArt"/>
+      <widget class="QListWidget" name="lstArt">
+       <property name="dragEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DragOnly</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>

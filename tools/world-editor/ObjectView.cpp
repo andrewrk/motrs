@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QTableWidget>
+#include <QDir>
 
 #include <cmath>
 
@@ -77,8 +78,31 @@ void ObjectView::createEmpty()
     refreshGui();
 }
 
+void ObjectView::refreshArt()
+{
+    QListWidget * artList = m_window->artList();
+
+    // do a directory listing of data/art
+    QDir dir(EditorResourceManager::dataDir());
+    dir.cd("art");
+    QStringList filters;
+    filters << "*.bmp" << "*.png" << "*.jpg";
+    QStringList entries = dir.entryList(filters, QDir::Files | QDir::Readable,
+        QDir::Name | QDir::IgnoreCase);
+    artList->clear();
+    for(int i=0; i<entries.size(); ++i) {
+        // create item
+        QString file = dir.absoluteFilePath(entries[i]);
+        QPixmap * pixmap = new QPixmap(file);
+        QListWidgetItem * item = new QListWidgetItem(QIcon(*pixmap), entries[i], artList);
+        item->setData(Qt::UserRole, QVariant(file));
+        artList->addItem(item);
+    }
+}
+
 void ObjectView::refreshGui()
 {
+    refreshArt();
     refreshLayersList();
     refreshProperties();
     setUpScrolling();

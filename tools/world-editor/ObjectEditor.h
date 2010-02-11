@@ -40,8 +40,6 @@ private:
 
     ObjectView * m_view;
 
-    void refreshArt();
-
 private slots:
     void on_tblProperties_cellChanged(int row, int column);
     void on_actionClose_triggered();

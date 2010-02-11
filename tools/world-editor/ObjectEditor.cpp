@@ -42,25 +42,6 @@ void ObjectEditor::changeEvent(QEvent *e)
     }
 }
 
-void ObjectEditor::refreshArt()
-{
-    // do a directory listing of data/art
-    QDir dir(EditorResourceManager::dataDir());
-    dir.cd("art");
-    QStringList filters;
-    filters << "*.bmp" << "*.png" << "*.jpg";
-    QStringList entries = dir.entryList(filters, QDir::Files | QDir::Readable,
-        QDir::Name | QDir::IgnoreCase);
-    for(int i=0; i<entries.size(); ++i) {
-        // create item
-        QString file = dir.absoluteFilePath(entries[i]);
-        QPixmap * pixmap = new QPixmap(file);
-        QListWidgetItem * item = new QListWidgetItem(QIcon(*pixmap), entries[i], m_ui->lstArt);
-        item->setData(Qt::UserRole, QVariant(file));
-        m_ui->lstArt->addItem(item);
-    }
-}
-
 QListWidget * ObjectEditor::artList()
 {
     return m_ui->lstArt;
