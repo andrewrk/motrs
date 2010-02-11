@@ -15,10 +15,11 @@ class ObjectEditor : public QMainWindow {
 public:
     ObjectEditor(QWidget *parent = 0);
     ~ObjectEditor();
+    static ObjectEditor * instance();
+
+    void open(QString file);
 
     QListWidget * artList();
-
-    static ObjectEditor * instance();
 
 protected:
     void changeEvent(QEvent *e);
@@ -30,6 +31,9 @@ private:
     ObjectView * m_view;
 
     void refreshArt();
+
+private slots:
+    void on_listLayers_currentRowChanged(int currentRow);
 };
 
 #endif // OBJECTEDITOR_H

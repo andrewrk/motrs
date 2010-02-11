@@ -30,7 +30,16 @@
     <addaction name="actionSave"/>
     <addaction name="actionClose"/>
    </widget>
+   <widget class="QMenu" name="menu_View">
+    <property name="title">
+     <string>&amp;View Mode</string>
+    </property>
+    <addaction name="actionNormal"/>
+    <addaction name="actionSurfaceType"/>
+    <addaction name="actionSurfaceShape"/>
+   </widget>
    <addaction name="menu_File"/>
+   <addaction name="menu_View"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockArt">
@@ -118,12 +127,6 @@
        <attribute name="verticalHeaderVisible">
         <bool>true</bool>
        </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="horizontalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
        <row>
         <property name="text">
          <string>Name</string>
@@ -165,6 +168,30 @@
   <action name="actionClose">
    <property name="text">
     <string>&amp;Close</string>
+   </property>
+  </action>
+  <action name="actionNormal">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Normal</string>
+   </property>
+  </action>
+  <action name="actionSurfaceType">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Surface &amp;Type</string>
+   </property>
+  </action>
+  <action name="actionSurfaceShape">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Surface &amp;Shape</string>
    </property>
   </action>
  </widget>

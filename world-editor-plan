@@ -1,3 +1,10 @@
  * object composer
+   > display the grid
+   > make the plus minus and scroll buttons work with the grid
+   > Surface type and surface shape view modes
+   > ability to drag art into the grid
+   > ability to resize and drag around art
+   > snap
+   > save button which breaks up the art into tiles
  * entity composer
  * ability to save the world

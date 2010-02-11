@@ -12,9 +12,12 @@ ObjectEditor * ObjectEditor::s_inst = NULL;
 
 ObjectEditor::ObjectEditor(QWidget *parent) :
     QMainWindow(parent),
-    m_ui(new Ui::ObjectEditor)
+    m_ui(new Ui::ObjectEditor),
+    m_view(new ObjectView(this, this))
 {
     m_ui->setupUi(this);
+
+    this->setCentralWidget(m_view);
 }
 
 ObjectEditor::~ObjectEditor()
@@ -65,3 +68,12 @@ QListWidget * ObjectEditor::artList()
     return m_ui->lstArt;
 }
 
+void ObjectEditor::on_listLayers_currentRowChanged(int currentRow)
+{
+    m_view->setSelectedLayer(currentRow);
+}
+
+void ObjectEditor::open(QString file)
+{
+    m_view->open(file);
+}

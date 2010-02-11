@@ -9,21 +9,58 @@
 #include <QDebug>
 #include <QMessageBox>
 
-ObjectView::ObjectView() :
-    m_dragPixmap(NULL)
+ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
+    QWidget(parent),
+    m_window(window),
+    m_object(new EditorMap()),
+    m_dragPixmap(NULL),
+    m_btnTopPlus(new QPushButton("+", this)),
+    m_btnTopMinus(new QPushButton("-", this)),
+    m_btnBottomPlus(new QPushButton("+", this)),
+    m_btnBottomMinus(new QPushButton("-", this)),
+    m_btnLeftPlus(new QPushButton("+", this)),
+    m_btnLeftMinus(new QPushButton("-", this)),
+    m_btnRightPlus(new QPushButton("+", this)),
+    m_btnRightMinus(new QPushButton("-", this)),
+    m_hsb(new QScrollBar(Qt::Horizontal, this)),
+    m_vsb(new QScrollBar(Qt::Vertical, this)),
+    m_selectedLayer(-1)
 {
+    m_btnTopPlus->show();
+    m_btnTopMinus->show();
+    m_btnBottomPlus->show();
+    m_btnBottomMinus->show();
+    m_btnLeftPlus->show();
+    m_btnLeftMinus->show();
+    m_btnRightPlus->show();
+    m_btnRightMinus->show();
+
+    m_hsb->show();
+    m_vsb->show();
+}
+
+ObjectView::~ObjectView()
+{
+    if( m_object )
+        delete m_object;
 }
 
 void ObjectView::paintEvent(QPaintEvent * e)
 {
     QPainter p(this);
+
+    // clear the screen
     p.setBackground(Qt::white);
     p.eraseRect(0, 0, this->width(), this->height());
 
-    // draw dragged stuff
-    //if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
-        p.drawPixmap(m_dragPixmapX, m_dragPixmapY, *m_dragPixmap);
-    //}
+    for(int layer=0; layer<m_object->layerCount(); ++layer) {
+        // draw all art items at this layer
+
+        // draw dragged stuff
+        if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
+            p.drawPixmap(m_dragPixmapX, m_dragPixmapY, *m_dragPixmap);
+        }
+    }
 }
 
 void ObjectView::dropEvent(QDropEvent * e)
@@ -114,4 +151,47 @@ void ObjectView::dragMoveEvent(QDragMoveEvent * e)
 void ObjectView::dragLeaveEvent(QDragLeaveEvent * e)
 {
     m_dragPixmap = NULL;
+}
+
+void ObjectView::resizeEvent(QResizeEvent * e)
+{
+    // move the scroll bars and +/- buttons into position
+    int sqWidth = m_vsb->width();
+    int sqHeight = m_hsb->height();
+    int bottomLine = this->height()-sqHeight;
+    int rightLine = this->width()-sqWidth;
+
+    m_btnLeftPlus->setGeometry(0, bottomLine, sqWidth, sqHeight);
+    m_btnLeftMinus->setGeometry(sqWidth, bottomLine, sqWidth, sqHeight);
+    m_btnRightPlus->setGeometry(rightLine-sqWidth, bottomLine, sqWidth, sqHeight);
+    m_btnRightMinus->setGeometry(rightLine-sqWidth*2, bottomLine, sqWidth, sqHeight);
+    m_btnTopPlus->setGeometry(rightLine, 0, sqWidth, sqHeight);
+    m_btnTopMinus->setGeometry(rightLine, sqHeight, sqWidth, sqHeight);
+    m_btnBottomPlus->setGeometry(rightLine, bottomLine-sqHeight, sqWidth, sqHeight);
+    m_btnBottomMinus->setGeometry(rightLine, bottomLine-sqHeight*2, sqWidth, sqHeight);
+
+    m_hsb->setGeometry(sqWidth*2, bottomLine, this->width()-sqWidth*5, sqHeight);
+    m_vsb->setGeometry(rightLine, sqHeight*2, sqWidth, this->height()-sqHeight*5);
+
+    update();
+}
+
+void ObjectView::setSelectedLayer(int layer)
+{
+    m_selectedLayer = layer;
+}
+
+void ObjectView::open(QString file)
+{
+    if( m_object )
+        delete m_object;
+    m_object = new EditorMap(file);
+    // TODO: if (! m_object.isGood) delete m_object; m_object = NULL;
+    refreshLayersList();
+    update();
+}
+
+void ObjectView::refreshLayersList()
+{
+    // TODO
 }

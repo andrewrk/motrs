@@ -9,6 +9,29 @@
 #include <QDebug>
 #include <QPainter>
 
+EditorMap::EditorMap()
+{
+    m_palette.clear();
+    m_palette.push_back(Tile::nullTile());
+
+
+    m_layerNames.clear();
+    m_entities.clear();
+
+    int defaultSizeX = 2;
+    int defaultSizeY = 2;
+    int defaultLayerCount = 1;
+    m_tiles = new Array3<int>(defaultSizeX, defaultSizeY, defaultLayerCount);
+    for(int z=0; z<defaultLayerCount; ++z) {
+        m_layerNames.append(QObject::tr("Layer %1").arg(QString::number(z)));
+        for(int y=0; y<defaultSizeY; ++y) {
+            for(int x=0; x<defaultSizeX; ++x) {
+                m_tiles->set(x, y, z, 0); // null tile
+            }
+        }
+    }
+}
+
 EditorMap::EditorMap(QString file)
 {
     QVector< QPair<QString, QString> > props;
@@ -161,3 +184,7 @@ QString EditorMap::layerName(int index)
     return m_layerNames.at(index);
 }
 
+void EditorMap::save(QString file)
+{
+    // TODO
+}
