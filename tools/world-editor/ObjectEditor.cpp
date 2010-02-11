@@ -9,14 +9,13 @@
 
 #include "moc_ObjectEditor.cxx"
 
-ObjectEditor * ObjectEditor::s_inst = NULL;
-
 ObjectEditor::ObjectEditor(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::ObjectEditor),
     m_view(new ObjectView(this, this))
 {
     m_ui->setupUi(this);
+    m_ui->actionClose->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_F4));
 
     this->setCentralWidget(m_view);
 
@@ -29,13 +28,6 @@ ObjectEditor::ObjectEditor(QWidget *parent) :
 ObjectEditor::~ObjectEditor()
 {
     delete m_ui;
-}
-
-ObjectEditor * ObjectEditor::instance()
-{
-    if( s_inst == NULL )
-        s_inst = new ObjectEditor();
-    return s_inst;
 }
 
 void ObjectEditor::changeEvent(QEvent *e)
@@ -182,4 +174,9 @@ void ObjectEditor::closeEvent(QCloseEvent * e)
     settings.setValue("ObjectEditor/windowState", this->saveState());
     settings.setValue("ObjectEditor/windowGeometry", this->saveGeometry());
 
+}
+
+void ObjectEditor::on_actionClose_triggered()
+{
+    this->close();
 }

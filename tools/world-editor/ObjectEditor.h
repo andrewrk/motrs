@@ -16,7 +16,6 @@ class ObjectEditor : public QMainWindow {
 public:
     ObjectEditor(QWidget *parent = 0);
     ~ObjectEditor();
-    static ObjectEditor * instance();
 
     void open(QString file);
 
@@ -36,13 +35,13 @@ protected:
 
 private:
     Ui::ObjectEditor *m_ui;
-    static ObjectEditor * s_inst;
 
     ObjectView * m_view;
 
     void refreshArt();
 
 private slots:
+    void on_actionClose_triggered();
     void on_btnDeleteLayer_clicked();
     void on_btnNewLayer_clicked();
     void on_btnMoveLayerDown_clicked();

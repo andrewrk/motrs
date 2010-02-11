@@ -61,6 +61,8 @@ private:
     QPushButton * moveLayerDownButton();
 
 private slots:
+    void on_btnNewEntity_clicked();
+    void on_btnNewObject_clicked();
     void on_actionQuit_triggered();
     void on_btnDeleteLayer_clicked();
     void on_btnNewLayer_clicked();
@@ -71,7 +73,6 @@ private slots:
     void on_list_worlds_doubleClicked(QModelIndex index);
 
     void on_actionSettings_triggered();
-    void on_actionObjectEditor_triggered();
 
     void on_cboLeftClick_currentIndexChanged(int index);
     void on_cboMiddleClick_currentIndexChanged(int index);

@@ -73,6 +73,12 @@ void WorldEditor::closeEvent(QCloseEvent * e)
     settings.setValue("state/tool/left", m_toolLeftClick);
     settings.setValue("state/tool/middle", m_toolMiddleClick);
     settings.setValue("state/tool/right", m_toolRightClick);
+
+    // TODO: make sure we're not going to clobber someone's work
+
+    // close all other forms
+    QApplication::quit();
+
 }
 
 void WorldEditor::fillToolComboBox(QComboBox & cbo)
@@ -113,12 +119,6 @@ void WorldEditor::showEvent(QShowEvent * e)
 void WorldEditor::on_actionSettings_triggered()
 {
     SettingsDialog::instance()->exec();
-}
-
-void WorldEditor::on_actionObjectEditor_triggered()
-{
-    ObjectEditor::instance()->show();
-    ObjectEditor::instance()->createEmpty();
 }
 
 void WorldEditor::refreshWorldList()
@@ -212,4 +212,16 @@ void WorldEditor::on_btnDeleteLayer_clicked()
 void WorldEditor::on_actionQuit_triggered()
 {
     QApplication::quit();
+}
+
+void WorldEditor::on_btnNewObject_clicked()
+{
+    ObjectEditor * editor = new ObjectEditor(this);
+    editor->createEmpty();
+    editor->show();
+}
+
+void WorldEditor::on_btnNewEntity_clicked()
+{
+    // TODO: create a new entity and open it up in the editor
 }

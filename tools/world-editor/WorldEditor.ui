@@ -47,9 +47,6 @@
     <addaction name="actionTriggers"/>
     <addaction name="actionLayers"/>
     <addaction name="actionTools"/>
-    <addaction name="separator"/>
-    <addaction name="actionEntityEditor"/>
-    <addaction name="actionObjectEditor"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menu_Tools"/>
@@ -114,6 +111,13 @@
      </item>
      <item>
       <widget class="QListWidget" name="lstObjects"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnNewObject">
+       <property name="text">
+        <string>New &amp;Object</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -201,28 +205,28 @@
        <item>
         <widget class="QPushButton" name="btnMoveLayerUp">
          <property name="text">
-          <string>Up</string>
+          <string>&amp;Up</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="btnMoveLayerDown">
          <property name="text">
-          <string>Down</string>
+          <string>&amp;Down</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="btnNewLayer">
          <property name="text">
-          <string>New</string>
+          <string>&amp;New</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="btnDeleteLayer">
          <property name="text">
-          <string>Delete</string>
+          <string>De&amp;lete</string>
          </property>
         </widget>
        </item>
@@ -268,6 +272,13 @@
        </property>
        <property name="sortingEnabled">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnNewEntity">
+       <property name="text">
+        <string>New &amp;Entity</string>
        </property>
       </widget>
      </item>
@@ -345,16 +356,6 @@
    </property>
    <property name="shortcut">
     <string>F5</string>
-   </property>
-  </action>
-  <action name="actionEntityEditor">
-   <property name="text">
-    <string>E&amp;ntity Editor</string>
-   </property>
-  </action>
-  <action name="actionObjectEditor">
-   <property name="text">
-    <string>O&amp;bject Editor</string>
    </property>
   </action>
   <action name="actionSetStartingPoint">
