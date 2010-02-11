@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef WORLDEDITOR_H
+#define WORLDEDITOR_H
 
 #include <QtGui/QMainWindow>
 #include <QListWidget>
@@ -12,16 +12,16 @@ class WorldView;
 
 namespace Ui
 {
-    class MainWindow;
+    class WorldEditor;
 }
 
-class MainWindow : public QMainWindow
+class WorldEditor : public QMainWindow
 {
     Q_OBJECT
     friend class WorldView;
 public:
-    MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    WorldEditor(QWidget *parent = 0);
+    ~WorldEditor();
 
 protected:
     void resizeEvent(QResizeEvent * e);
@@ -39,7 +39,7 @@ private:
         Brush,
     };
 
-    Ui::MainWindow *ui;
+    Ui::WorldEditor * m_ui;
 
     WorldView * m_view;
 
@@ -79,4 +79,4 @@ private slots:
 
 };
 
-#endif // MAINWINDOW_H
+#endif // WORLDEDITOR_H

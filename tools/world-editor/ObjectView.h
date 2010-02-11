@@ -71,8 +71,19 @@ private:
 
     ViewMode m_viewMode;
 
+    // where is the editor scrolled to, in absolute coordinates
+    double m_zoom;
+    double m_offsetX;
+    double m_offsetY;
 
     void refreshLayersList();
+
+    double screenX(double absoluteX);
+    double screenY(double absoluteY);
+    double absoluteX(double screenX);
+    double absoluteY(double screenY);
+
+    void drawGrid(QPainter &p);
 };
 
 #endif // OBJECTVIEW_H

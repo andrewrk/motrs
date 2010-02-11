@@ -2,12 +2,15 @@
 
 #include "EditorResourceManager.h"
 #include "ObjectEditor.h"
+#include "EditorSettings.h"
 
 #include <QPainter>
 #include <QStandardItemModel>
 #include <QFileInfo>
 #include <QDebug>
 #include <QMessageBox>
+
+#include <cmath>
 
 ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     QWidget(parent),
@@ -25,7 +28,10 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     m_hsb(new QScrollBar(Qt::Horizontal, this)),
     m_vsb(new QScrollBar(Qt::Vertical, this)),
     m_selectedLayer(-1),
-    m_viewMode(Normal)
+    m_viewMode(Normal),
+    m_zoom(1.0),
+    m_offsetX(0),
+    m_offsetY(0)
 {
     m_btnTopPlus->show();
     m_btnTopMinus->show();
@@ -201,4 +207,62 @@ void ObjectView::setViewMode(ViewMode mode)
 {
     m_viewMode = mode;
     update();
+}
+
+void ObjectView::drawGrid(QPainter &p)
+{
+    EditorSettings::GridRenderType gridType = EditorSettings::gridRenderType();
+    if( gridType != EditorSettings::None ) {
+        if( gridType == EditorSettings::Pretty )
+            p.setPen(QColor(128, 128, 128, 64));
+        else
+            p.setPen(QColor(128, 128, 128));
+
+        // vertical lines
+        double gameLeft = absoluteX(0);
+        double gameTop = absoluteY(0);
+        double gameRight = absoluteX(this->width());
+        double gameBottom = absoluteY(this->height());
+        double gridX = gameLeft - std::fmod(gameLeft, Tile::size);
+        double gridY = gameTop - std::fmod(gameTop, Tile::size);
+
+        if( gridType == EditorSettings::Pretty ) {
+            while(gridX < gameRight) {
+                double drawX = screenX(gridX);
+                p.drawLine((int)drawX, 0, (int)drawX, this->height());
+                gridX += Tile::size;
+            }
+
+            while(gridY < gameBottom) {
+                double drawY = screenY(gridY);
+                p.drawLine(0, (int)drawY, this->width(), (int)drawY);
+                gridY += Tile::size;
+            }
+        } else if( gridType == EditorSettings::Fast ) {
+            for(double y = gridY; y < gameBottom; y+=Tile::size) {
+                for(double x = gridX; x < gameRight; x+=Tile::size)
+                    p.drawPoint((int)screenX(x), (int)screenY(y));
+            }
+        }
+    }
+}
+
+double ObjectView::screenX(double absoluteX)
+{
+    return (absoluteX - m_offsetX) * m_zoom;
+}
+
+double ObjectView::screenY(double absoluteY)
+{
+    return (absoluteY - m_offsetY) * m_zoom;
+}
+
+double ObjectView::absoluteX(double screenX)
+{
+    return (screenX / m_zoom) + m_offsetX;
+}
+
+double ObjectView::absoluteY(double screenY)
+{
+    return (screenY / m_zoom) + m_offsetY;
 }

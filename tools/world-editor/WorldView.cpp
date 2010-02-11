@@ -1,11 +1,11 @@
 #include "WorldView.h"
 
-#include "MainWindow.h"
+#include "WorldEditor.h"
 #include "EditorResourceManager.h"
+#include "EditorSettings.h"
 
 #include <QPainter>
 #include <QDebug>
-#include <QSettings>
 #include <QListWidget>
 #include <QList>
 #include <QUrl>
@@ -19,7 +19,7 @@
 const int WorldView::s_lineSelectRadius = 4;
 QPainter * WorldView::s_painter = NULL;
 
-WorldView::WorldView(MainWindow * window, QWidget * parent) :
+WorldView::WorldView(WorldEditor * window, QWidget * parent) :
     QWidget(parent),
     m_hsb(new QScrollBar(Qt::Horizontal, this)),
     m_vsb(new QScrollBar(Qt::Vertical, this)),
@@ -30,7 +30,7 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
     m_offsetY(0),
     m_mapCache(),
     m_selectedMap(NULL),
-    m_mouseDownTool(MainWindow::Nothing),
+    m_mouseDownTool(WorldEditor::Nothing),
     m_mouseState(Normal)
 {
     m_hsb->show();
@@ -39,7 +39,6 @@ WorldView::WorldView(MainWindow * window, QWidget * parent) :
     connect(m_vsb, SIGNAL(valueChanged(int)), this, SLOT(verticalScroll(int)));
     connect(m_hsb, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
 
-    readSettings();
     updateViewCache();
 
     this->setMouseTracking(true);
@@ -50,15 +49,6 @@ WorldView::~WorldView()
 {
     if( m_world )
         delete m_world;
-}
-
-void WorldView::readSettings()
-{
-
-    QSettings settings;
-    m_grid = (GridRenderType)settings.value("editor/grid", Pretty).toInt();
-
-    this->update();
 }
 
 void WorldView::resizeEvent(QResizeEvent * e)
@@ -185,8 +175,9 @@ void WorldView::paintEvent(QPaintEvent * e)
 
 void WorldView::drawGrid(QPainter &p)
 {
-    if( m_grid != None ) {
-        if( m_grid == Pretty )
+    EditorSettings::GridRenderType gridType = EditorSettings::gridRenderType();
+    if( gridType != EditorSettings::None ) {
+        if( gridType == EditorSettings::Pretty )
             p.setPen(QColor(128, 128, 128, 64));
         else
             p.setPen(QColor(128, 128, 128));
@@ -199,7 +190,7 @@ void WorldView::drawGrid(QPainter &p)
         double gridX = gameLeft - std::fmod(gameLeft, Tile::size);
         double gridY = gameTop - std::fmod(gameTop, Tile::size);
 
-        if( m_grid == Pretty ) {
+        if( gridType == EditorSettings::Pretty ) {
             while(gridX < gameRight) {
                 double drawX = screenX(gridX);
                 p.drawLine((int)drawX, 0, (int)drawX, this->height());
@@ -211,7 +202,7 @@ void WorldView::drawGrid(QPainter &p)
                 p.drawLine(0, (int)drawY, this->width(), (int)drawY);
                 gridY += Tile::size;
             }
-        } else if( m_grid == Fast ) {
+        } else if( gridType == EditorSettings::Fast ) {
             for(double y = gridY; y < gameBottom; y+=Tile::size) {
                 for(double x = gridX; x < gameRight; x+=Tile::size)
                     p.drawPoint((int)screenX(x), (int)screenY(y));
@@ -321,12 +312,12 @@ void WorldView::determineCursor()
     switch(m_mouseState) {
         case Normal: {
             switch(m_mouseDownTool) {
-                case MainWindow::Nothing: {
+                case WorldEditor::Nothing: {
                     // change mouse cursor to sizers if over map boundaries
                     // if the user could use the arrow tool
-                    if( m_window->m_toolLeftClick == MainWindow::Arrow ||
-                        m_window->m_toolMiddleClick == MainWindow::Arrow ||
-                        m_window->m_toolRightClick == MainWindow::Arrow )
+                    if( m_window->m_toolLeftClick == WorldEditor::Arrow ||
+                        m_window->m_toolMiddleClick == WorldEditor::Arrow ||
+                        m_window->m_toolRightClick == WorldEditor::Arrow )
                     {
                         if( overMapLeft(m_mouseX, m_mouseY) || overMapRight(m_mouseX, m_mouseY))
                             this->setCursor(Qt::SizeHorCursor);
@@ -338,12 +329,12 @@ void WorldView::determineCursor()
                             this->setCursor(Qt::ArrowCursor);
                     }
                 } break;
-                case MainWindow::Arrow: break;
-                case MainWindow::Eraser: break;
-                case MainWindow::Pan: break;
-                case MainWindow::Center: break;
-                case MainWindow::Pencil: break;
-                case MainWindow::Brush: break;
+                case WorldEditor::Arrow: break;
+                case WorldEditor::Eraser: break;
+                case WorldEditor::Pan: break;
+                case WorldEditor::Center: break;
+                case WorldEditor::Pencil: break;
+                case WorldEditor::Brush: break;
             }
         } break;
         case SetStartPoint: break;
@@ -365,13 +356,13 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
     switch(m_mouseState) {
         case Normal: {
             switch(m_mouseDownTool) {
-                case MainWindow::Nothing: break;
-                case MainWindow::Arrow: break;
-                case MainWindow::Eraser: break;
-                case MainWindow::Pan: break;
-                case MainWindow::Center: break;
-                case MainWindow::Pencil: break;
-                case MainWindow::Brush: break;
+                case WorldEditor::Nothing: break;
+                case WorldEditor::Arrow: break;
+                case WorldEditor::Eraser: break;
+                case WorldEditor::Pan: break;
+                case WorldEditor::Center: break;
+                case WorldEditor::Pencil: break;
+                case WorldEditor::Brush: break;
             }
         } break;
         case SetStartPoint: break;
@@ -389,7 +380,7 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
 
 void WorldView::mouseReleaseEvent(QMouseEvent * e)
 {
-    MainWindow::MouseTool tool = MainWindow::Nothing;
+    WorldEditor::MouseTool tool = WorldEditor::Nothing;
 
     if( e->button() == Qt::LeftButton )
         tool = m_window->m_toolLeftClick;
@@ -425,7 +416,7 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
 
     // return state to normal
     if( tool == m_mouseDownTool ) {
-        m_mouseDownTool = MainWindow::Nothing;
+        m_mouseDownTool = WorldEditor::Nothing;
         m_mouseState = Normal;
         this->setCursor(Qt::ArrowCursor);
     }
@@ -436,10 +427,10 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
 void WorldView::mousePressEvent(QMouseEvent * e)
 {
     // if we are already pressing down the mouse with another tool, return
-    if( m_mouseDownTool != MainWindow::Nothing )
+    if( m_mouseDownTool != WorldEditor::Nothing )
         return;
 
-    MainWindow::MouseTool tool = MainWindow::Nothing;
+    WorldEditor::MouseTool tool = WorldEditor::Nothing;
 
     if( e->button() == Qt::LeftButton )
         tool = m_window->m_toolLeftClick;
@@ -455,9 +446,9 @@ void WorldView::mousePressEvent(QMouseEvent * e)
     m_mouseDownTool = tool;
 
     switch( tool ){
-        case MainWindow::Nothing:
+        case WorldEditor::Nothing:
             break;
-        case MainWindow::Arrow: {
+        case WorldEditor::Arrow: {
             // are we stretching the boundaries of a map?
             if( overMapLeft(e->x(), e->y()) )
                 m_mouseState = StretchMapLeft;
@@ -472,19 +463,19 @@ void WorldView::mousePressEvent(QMouseEvent * e)
             else
                 selectMap(mapAt(e->x(), e->y())); // if they clicked inside a map, select it
         } break;
-        case MainWindow::Eraser:
+        case WorldEditor::Eraser:
 
             break;
-        case MainWindow::Pan:
+        case WorldEditor::Pan:
 
             break;
-        case MainWindow::Center:
+        case WorldEditor::Center:
 
             break;
-        case MainWindow::Pencil:
+        case WorldEditor::Pencil:
 
             break;
-        case MainWindow::Brush:
+        case WorldEditor::Brush:
 
             break;
         default:
