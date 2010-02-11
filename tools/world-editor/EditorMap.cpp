@@ -189,3 +189,27 @@ void EditorMap::save(QString file)
 {
     // TODO
 }
+
+void EditorMap::addTilesLeft(int amount)
+{
+    m_tiles->expandLeft(amount, 0);
+    calculateBoundaries();
+}
+
+void EditorMap::addTilesRight(int amount)
+{
+    m_tiles->expandRight(amount, 0);
+    calculateBoundaries();
+}
+
+void EditorMap::addTilesTop(int amount)
+{
+    m_tiles->expandTop(amount, 0);
+    calculateBoundaries();
+}
+
+void EditorMap::addTilesBottom(int amount)
+{
+    m_tiles->expandBottom(amount, 0);
+    calculateBoundaries();
+}

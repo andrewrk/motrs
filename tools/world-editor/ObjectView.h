@@ -97,6 +97,7 @@ private:
     void drawGrid(QPainter &p);
 
     void refreshLayersList();
+    void refreshProperties();
     void setUpScrolling();
     void setControlEnableStates();
 private slots:

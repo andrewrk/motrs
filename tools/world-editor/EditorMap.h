@@ -31,6 +31,12 @@ public:
 
     // save in text format
     void save(QString file);
+
+    // add/remove (negative) tiles
+    void addTilesLeft(int amount);
+    void addTilesRight(int amount);
+    void addTilesTop(int amount);
+    void addTilesBottom(int amount);
 private:
     QStringList m_layerNames;
 

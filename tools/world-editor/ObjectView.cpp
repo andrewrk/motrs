@@ -327,42 +327,58 @@ double ObjectView::absoluteY(double screenY)
 
 void ObjectView::on_btnLeftPlus_clicked()
 {
-
+    m_object->addTilesLeft(1);
+    refreshProperties();
+    update();
 }
 
 void ObjectView::on_btnLeftMinus_clicked()
 {
-
+    m_object->addTilesLeft(-1);
+    refreshProperties();
+    update();
 }
 
 void ObjectView::on_btnRightPlus_clicked()
 {
-
+    m_object->addTilesRight(1);
+    refreshProperties();
+    update();
 }
 
 void ObjectView::on_btnRightMinus_clicked()
 {
-
+    m_object->addTilesRight(-1);
+    refreshProperties();
+    update();
 }
 
 void ObjectView::on_btnTopPlus_clicked()
 {
-
+    m_object->addTilesTop(1);
+    refreshProperties();
+    update();
 }
 
 void ObjectView::on_btnTopMinus_clicked()
 {
-
+    m_object->addTilesTop(-1);
+    refreshProperties();
+    update();
 }
 
 void ObjectView::on_btnBottomPlus_clicked()
 {
-
+    m_object->addTilesBottom(1);
+    refreshProperties();
+    update();
 }
 
 void ObjectView::on_btnBottomMinus_clicked()
 {
-
+    m_object->addTilesBottom(-1);
+    refreshProperties();
+    update();
 }
 
 void ObjectView::verticalScroll(int value)
@@ -432,4 +448,9 @@ void ObjectView::swapLayers(int i, int j)
 
     refreshLayersList();
     this->update();
+}
+
+void ObjectView::refreshProperties()
+{
+    // TODO
 }
