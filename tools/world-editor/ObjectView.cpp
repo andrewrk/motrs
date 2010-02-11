@@ -24,7 +24,8 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     m_btnRightMinus(new QPushButton("-", this)),
     m_hsb(new QScrollBar(Qt::Horizontal, this)),
     m_vsb(new QScrollBar(Qt::Vertical, this)),
-    m_selectedLayer(-1)
+    m_selectedLayer(-1),
+    m_viewMode(Normal)
 {
     m_btnTopPlus->show();
     m_btnTopMinus->show();
@@ -194,4 +195,10 @@ void ObjectView::open(QString file)
 void ObjectView::refreshLayersList()
 {
     // TODO
+}
+
+void ObjectView::setViewMode(ViewMode mode)
+{
+    m_viewMode = mode;
+    update();
 }

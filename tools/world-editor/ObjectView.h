@@ -17,10 +17,17 @@ class ObjectEditor;
 class ObjectView : public QWidget
 {
 public:
+    enum ViewMode {
+        Normal,
+        Shape,
+        SurfaceType,
+    };
+
     ObjectView(ObjectEditor * window, QWidget * parent = NULL);
     ~ObjectView();
 
     void setSelectedLayer(int layer);
+    void setViewMode(ViewMode mode);
     void open(QString file);
 
 protected:
@@ -33,6 +40,7 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent * e);
 
 private:
+
     // the host window for this view
     ObjectEditor * m_window;
 
@@ -60,6 +68,9 @@ private:
 
     // must be kept in sync with the layers list widget
     int m_selectedLayer;
+
+    ViewMode m_viewMode;
+
 
     void refreshLayersList();
 };

@@ -77,3 +77,27 @@ void ObjectEditor::open(QString file)
 {
     m_view->open(file);
 }
+
+void ObjectEditor::on_actionNormal_triggered()
+{
+    m_ui->actionNormal->setChecked(true);
+    m_ui->actionSurfaceType->setChecked(false);
+    m_ui->actionShape->setChecked(false);
+    m_view->setViewMode(ObjectView::Normal);
+}
+
+void ObjectEditor::on_actionSurfaceType_triggered()
+{
+    m_ui->actionNormal->setChecked(false);
+    m_ui->actionSurfaceType->setChecked(true);
+    m_ui->actionShape->setChecked(false);
+    m_view->setViewMode(ObjectView::SurfaceType);
+}
+
+void ObjectEditor::on_actionShape_triggered()
+{
+    m_ui->actionNormal->setChecked(false);
+    m_ui->actionSurfaceType->setChecked(false);
+    m_ui->actionShape->setChecked(true);
+    m_view->setViewMode(ObjectView::Shape);
+}

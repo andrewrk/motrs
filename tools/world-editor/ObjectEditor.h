@@ -33,6 +33,9 @@ private:
     void refreshArt();
 
 private slots:
+    void on_actionShape_triggered();
+    void on_actionSurfaceType_triggered();
+    void on_actionNormal_triggered();
     void on_listLayers_currentRowChanged(int currentRow);
 };
 
