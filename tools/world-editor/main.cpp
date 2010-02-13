@@ -1,5 +1,5 @@
 #include <QtGui/QApplication>
-#include "MainWindow.h"
+#include "WorldEditor.h"
 
 int main(int argc, char *argv[])
 {
@@ -8,9 +8,9 @@ int main(int argc, char *argv[])
     // set these values so we can use default settings constructor
     QCoreApplication::setOrganizationName("Motrs INC");
     QCoreApplication::setOrganizationDomain("motrs.superjoesoftware.com");
-    QCoreApplication::setApplicationName("Motrs World Editor");
+    QCoreApplication::setApplicationName("Motrs Game Editor");
 
-    MainWindow w;
+    WorldEditor w;
     w.show();
     return a.exec();
 }
