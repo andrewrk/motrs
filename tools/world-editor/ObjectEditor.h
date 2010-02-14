@@ -20,14 +20,24 @@ public:
 
     void open(QString file);
 
+    // expose some widgets (used by ObjectView)
     QListWidget * artList();
     QListWidget * layersList();
+    QListWidget * shapesList();
+    QListWidget * surfaceTypesList();
     QTableWidget * propertiesTable();
 
     QPushButton * newLayerButton();
     QPushButton * deleteLayerButton();
     QPushButton * moveLayerUpButton();
     QPushButton * moveLayerDownButton();
+
+    QAction * viewModeNormalAction();
+    QAction * viewModeShapeAction();
+    QAction * viewModeSurfaceTypeAction();
+    QDockWidget * artDock();
+    QDockWidget * shapesDock();
+    QDockWidget * surfaceTypesDock();
 
     void createEmpty();
 

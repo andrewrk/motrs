@@ -61,10 +61,6 @@ bool Tile::hasMinPresence(PhysicalPresence minPresence) {
     case tsFloorRailE: return minPresence <= ppRail;
     case tsFloorRailS: return minPresence <= ppRail;
     case tsFloorRailW: return minPresence <= ppRail;
-    case tsFloorRailNE: return minPresence <= ppRail;
-    case tsFloorRailSE: return minPresence <= ppRail;
-    case tsFloorRailSW: return minPresence <= ppRail;
-    case tsFloorRailNW: return minPresence <= ppRail;
     default: Debug::assert(false, "Bad physical presence value"); return false;
     }
 }
@@ -104,18 +100,6 @@ void Tile::resolveCircleCollision(double tileX, double tileY, double & objectCen
         Debug::assert(false, "TODO: tile shapes");
         break;
     case tsFloorRailW:
-        Debug::assert(false, "TODO: tile shapes");
-        break;
-    case tsFloorRailNE:
-        Debug::assert(false, "TODO: tile shapes");
-        break;
-    case tsFloorRailSE:
-        Debug::assert(false, "TODO: tile shapes");
-        break;
-    case tsFloorRailSW:
-        Debug::assert(false, "TODO: tile shapes");
-        break;
-    case tsFloorRailNW:
         Debug::assert(false, "TODO: tile shapes");
         break;
     default:

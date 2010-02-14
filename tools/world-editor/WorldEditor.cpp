@@ -33,7 +33,8 @@ WorldEditor::WorldEditor(QWidget *parent) :
     fillToolComboBox(*m_ui->cboRightClick);
 
     // load window/dock state
-    QFile defaultLayoutFile("default-layout");
+    QDir localDataDir(EditorResourceManager::localDataDir());
+    QFile defaultLayoutFile(localDataDir.absoluteFilePath("default-layout"));
     QByteArray defaultLayout;
     bool haveDefaultLayout = false;
     if( defaultLayoutFile.open(QIODevice::ReadOnly) ) {

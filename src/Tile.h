@@ -30,10 +30,9 @@ public:
         tsFloorRailE  = 8,
         tsFloorRailS  = 9,
         tsFloorRailW  = 10,
-        tsFloorRailNE = 11,
-        tsFloorRailSE = 12,
-        tsFloorRailSW = 13,
-        tsFloorRailNW = 14,
+
+        // keep track of how many there are
+        tsCount
     };
 
     /** It's important to leave these values alones since they're stored in .map files */
@@ -42,6 +41,9 @@ public:
         stWater     = 1,
         stIce       = 2,
         stQuickSand = 3,
+
+        // keep track of how many there are
+        stCount
     };
 
     static Tile * nullTile();
@@ -55,6 +57,9 @@ public:
     virtual void draw(int screenX, int screenY);
     bool hasMinPresence(PhysicalPresence minPresence);
     void resolveCircleCollision(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
+
+    Shape shape() { return m_shape; }
+    SurfaceType surfaceType() { return m_surfaceType; }
 
 protected:
     static void resolveCircleOnSquare(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
