@@ -245,6 +245,36 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="dockSurfaceTypes">
+   <property name="windowTitle">
+    <string>Surface Types</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_5">
+    <layout class="QVBoxLayout" name="verticalLayout_5">
+     <item>
+      <widget class="QListWidget" name="lstSurfaceTypes"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockShapes">
+   <property name="windowTitle">
+    <string>Shapes</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_6">
+    <layout class="QVBoxLayout" name="verticalLayout_6">
+     <item>
+      <widget class="QListWidget" name="lstShapes"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionSave">
    <property name="text">
     <string>&amp;Save</string>

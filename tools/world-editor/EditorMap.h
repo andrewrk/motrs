@@ -37,6 +37,8 @@ public:
     void addTilesRight(int amount);
     void addTilesTop(int amount);
     void addTilesBottom(int amount);
+
+    Tile * tile(int x, int y, int z);
 private:
     QStringList m_layerNames;
 

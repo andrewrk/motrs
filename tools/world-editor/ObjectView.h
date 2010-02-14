@@ -57,6 +57,9 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent * e);
 
 private:
+    static const char * c_surfaceTypes[];
+    static const char * c_shapes[];
+
     enum TableProperty {
         Name,
         Width,
@@ -101,6 +104,11 @@ private:
     double m_offsetX;
     double m_offsetY;
 
+    // pixmaps used to display surface types and shapes
+    static QVector<QPixmap *> s_surfaceTypePixmaps;
+    static QVector<QPixmap *> s_shapePixmaps;
+    static QStringList s_surfaceTypeNames;
+    static QStringList s_shapeNames;
 
     double screenX(double absoluteX);
     double screenY(double absoluteY);
@@ -112,8 +120,12 @@ private:
     void refreshLayersList();
     void refreshProperties();
     void refreshArt();
+    void refreshSurfaceTypes();
+    void refreshShapes();
     void setUpScrolling();
     void setControlEnableStates();
+
+    static void initializePixmapCache();
 private slots:
     void on_btnLeftPlus_clicked();
     void on_btnLeftMinus_clicked();

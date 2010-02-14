@@ -52,6 +52,16 @@ QListWidget * ObjectEditor::layersList()
     return m_ui->lstLayers;
 }
 
+QListWidget * ObjectEditor::shapesList()
+{
+    return m_ui->lstShapes;
+}
+
+QListWidget * ObjectEditor::surfaceTypesList()
+{
+    return m_ui->lstSurfaceTypes;
+}
+
 QTableWidget * ObjectEditor::propertiesTable()
 {
     return m_ui->tblProperties;
@@ -75,6 +85,37 @@ QPushButton * ObjectEditor::moveLayerUpButton()
 QPushButton * ObjectEditor::moveLayerDownButton()
 {
     return m_ui->btnMoveLayerDown;
+}
+
+
+QAction * ObjectEditor::viewModeNormalAction()
+{
+    return m_ui->actionNormal;
+}
+
+QAction * ObjectEditor::viewModeShapeAction()
+{
+    return m_ui->actionShape;
+}
+
+QAction * ObjectEditor::viewModeSurfaceTypeAction()
+{
+    return m_ui->actionSurfaceType;
+}
+
+QDockWidget * ObjectEditor::artDock()
+{
+    return m_ui->dockArt;
+}
+
+QDockWidget * ObjectEditor::shapesDock()
+{
+    return m_ui->dockShapes;
+}
+
+QDockWidget * ObjectEditor::surfaceTypesDock()
+{
+    return m_ui->dockSurfaceTypes;
 }
 
 void ObjectEditor::on_lstLayers_currentRowChanged(int currentRow)

@@ -213,3 +213,8 @@ void EditorMap::addTilesBottom(int amount)
     m_tiles->expandBottom(amount, 0);
     calculateBoundaries();
 }
+
+Tile * EditorMap::tile(int x, int y, int z)
+{
+    return m_palette.at(m_tiles->get(x,y,z));
+}

@@ -12,10 +12,39 @@
 #include <QMessageBox>
 #include <QTableWidget>
 #include <QDir>
+#include <QAction>
+#include <QDockWidget>
 
 #include <cmath>
 
 #include "moc_ObjectView.cxx"
+
+QVector<QPixmap *> ObjectView::s_surfaceTypePixmaps;
+QStringList ObjectView::s_surfaceTypeNames;
+
+QVector<QPixmap *> ObjectView::s_shapePixmaps;
+QStringList ObjectView::s_shapeNames;
+
+const char * ObjectView::c_shapes[] = {
+    "tsSolidWall",
+    "tsSolidFloor",
+    "tsSolidHole",
+    "tsDiagFloorWallNW",
+    "tsDiagFloorWallNE",
+    "tsDiagFloorWallSE",
+    "tsDiagFloorWallSW",
+    "tsFloorRailN",
+    "tsFloorRailE",
+    "tsFloorRailS",
+    "tsFloorRailW"
+};
+
+const char * ObjectView::c_surfaceTypes[] = {
+    "stNormal",
+    "stWater",
+    "stIce",
+    "stQuickSand"
+};
 
 ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     QWidget(parent),
@@ -60,6 +89,8 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     connect(m_btnLeftMinus, SIGNAL(clicked()), this, SLOT(on_btnLeftMinus_clicked()));
     connect(m_btnRightPlus, SIGNAL(clicked()), this, SLOT(on_btnRightPlus_clicked()));
     connect(m_btnRightMinus, SIGNAL(clicked()), this, SLOT(on_btnRightMinus_clicked()));
+
+    initializePixmapCache();
 }
 
 ObjectView::~ObjectView()
@@ -75,7 +106,35 @@ void ObjectView::createEmpty()
     m_object = new EditorMap();
 
     m_objectName = QObject::tr("New Object");
+    setViewMode(Normal);
     refreshGui();
+}
+
+
+void ObjectView::refreshSurfaceTypes()
+{
+    QListWidget * list = m_window->surfaceTypesList();
+
+    if( list->count() == 0 ) {
+        list->clear();
+        for(int i=0; i<s_surfaceTypePixmaps.size(); ++i) {
+            QListWidgetItem * item = new QListWidgetItem(QIcon(*s_surfaceTypePixmaps.at(i)), s_surfaceTypeNames[i], list);
+            list->addItem(item);
+        }
+    }
+}
+
+void ObjectView::refreshShapes()
+{
+    QListWidget * list = m_window->shapesList();
+
+    if( list->count() == 0 ) {
+        list->clear();
+        for(int i=0; i<s_shapePixmaps.size(); ++i) {
+            QListWidgetItem * item = new QListWidgetItem(QIcon(*s_shapePixmaps.at(i)), s_shapeNames[i], list);
+            list->addItem(item);
+        }
+    }
 }
 
 void ObjectView::refreshArt()
@@ -103,6 +162,8 @@ void ObjectView::refreshArt()
 void ObjectView::refreshGui()
 {
     refreshArt();
+    refreshSurfaceTypes();
+    refreshShapes();
     refreshLayersList();
     refreshProperties();
     setUpScrolling();
@@ -118,13 +179,45 @@ void ObjectView::paintEvent(QPaintEvent * e)
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_object ) {
-        for(int layer=0; layer<m_object->layerCount(); ++layer) {
-            // draw all art items at this layer
+        switch( m_viewMode ) {
+            case Normal:
+                for(int layer=0; layer<m_object->layerCount(); ++layer) {
+                    // draw all art items at this layer
 
-            // draw dragged stuff
-            if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
-                p.drawPixmap(m_dragPixmapX, m_dragPixmapY, *m_dragPixmap);
-            }
+                    // draw dragged stuff
+                    if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
+                        p.drawPixmap(m_dragPixmapX, m_dragPixmapY, *m_dragPixmap);
+                    }
+                }
+            break;
+            case SurfaceType: {
+                // water, ice, etc
+                // only draw the surface type of the selected layer
+                int sizeX = m_object->width() / Tile::size;
+                int sizeY = m_object->height() / Tile::size;
+                for (int x=0; x<sizeX; ++x) {
+                    for(int y=0; y<sizeY; ++y) {
+                        Tile * tile = m_object->tile(x,y,m_selectedLayer);
+                        QPixmap * pixmap = s_surfaceTypePixmaps[tile->surfaceType()];
+                        p.drawPixmap(screenX(x * Tile::size), screenY(y * Tile::size), Tile::size * m_zoom, Tile::size * m_zoom, *pixmap);
+                    }
+                }
+            } break;
+            case Shape: {
+                // solid, triangle, hole, etc
+                // only draw the surface type of the selected layer
+                int sizeX = m_object->width() / Tile::size;
+                int sizeY = m_object->height() / Tile::size;
+                for (int x=0; x<sizeX; ++x) {
+                    for(int y=0; y<sizeY; ++y) {
+                        Tile * tile = m_object->tile(x,y,m_selectedLayer);
+                        QPixmap * pixmap = s_shapePixmaps[tile->shape()];
+                        p.drawPixmap(screenX(x * Tile::size), screenY(y * Tile::size), Tile::size * m_zoom, Tile::size * m_zoom, *pixmap);
+                    }
+                }
+            } break;
+            default:
+                Debug::assert(false, "Unknown view mode");
         }
 
         drawGrid(p);
@@ -261,6 +354,7 @@ void ObjectView::open(QString file)
     // TODO: if (! m_object.isGood) delete m_object; m_object = NULL;
 
     m_objectName = file;
+    setViewMode(Normal);
     refreshGui();
 }
 
@@ -301,6 +395,26 @@ void ObjectView::setControlEnableStates()
 void ObjectView::setViewMode(ViewMode mode)
 {
     m_viewMode = mode;
+    m_window->viewModeNormalAction()->setChecked(false);
+    m_window->viewModeShapeAction()->setChecked(false);
+    m_window->viewModeSurfaceTypeAction()->setChecked(false);
+    m_window->artDock()->hide();
+    m_window->shapesDock()->hide();
+    m_window->surfaceTypesDock()->hide();
+    switch(mode) {
+        case Normal:
+            m_window->viewModeNormalAction()->setChecked(true);
+            m_window->artDock()->show();
+            break;
+        case Shape:
+            m_window->viewModeShapeAction()->setChecked(true);
+            m_window->shapesDock()->show();
+            break;
+        case SurfaceType:
+            m_window->viewModeSurfaceTypeAction()->setChecked(true);
+            m_window->surfaceTypesDock()->show();
+            break;
+    }
     update();
 }
 
@@ -516,4 +630,27 @@ void ObjectView::propertyChanged(int row)
     }
 
     refreshGui();
+}
+
+void ObjectView::initializePixmapCache()
+{
+    if( s_shapePixmaps.size() == 0 ) {
+        QDir dir(EditorResourceManager::localDataDir());
+        for(int i=0; i<Tile::tsCount; ++i) {
+            QString name(c_shapes[i]);
+            s_shapeNames << name;
+            name.append(".png");
+            s_shapePixmaps.append(new QPixmap(dir.absoluteFilePath(name)));
+        }
+    }
+
+    if( s_surfaceTypePixmaps.size() == 0 ) {
+        QDir dir(EditorResourceManager::localDataDir());
+        for(int i=0; i<Tile::stCount; ++i) {
+            QString name(c_surfaceTypes[i]);
+            s_surfaceTypeNames << name;
+            name.append(".png");
+            s_surfaceTypePixmaps.append(new QPixmap(dir.absoluteFilePath(name)));
+        }
+    }
 }
