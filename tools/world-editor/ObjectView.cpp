@@ -193,26 +193,26 @@ void ObjectView::paintEvent(QPaintEvent * e)
             case SurfaceType: {
                 // water, ice, etc
                 // only draw the surface type of the selected layer
-                int sizeX = m_object->width() / Tile::size;
-                int sizeY = m_object->height() / Tile::size;
+                int sizeX = (int)(m_object->width() / Tile::size);
+                int sizeY = (int)(m_object->height() / Tile::size);
                 for (int x=0; x<sizeX; ++x) {
                     for(int y=0; y<sizeY; ++y) {
                         Tile * tile = m_object->tile(x,y,m_selectedLayer);
                         QPixmap * pixmap = s_surfaceTypePixmaps[tile->surfaceType()];
-                        p.drawPixmap(screenX(x * Tile::size), screenY(y * Tile::size), Tile::size * m_zoom, Tile::size * m_zoom, *pixmap);
+                        p.drawPixmap((int)screenX(x * Tile::size), (int)screenY(y * Tile::size), (int)(Tile::size * m_zoom), (int)(Tile::size * m_zoom), *pixmap);
                     }
                 }
             } break;
             case Shape: {
                 // solid, triangle, hole, etc
                 // only draw the surface type of the selected layer
-                int sizeX = m_object->width() / Tile::size;
-                int sizeY = m_object->height() / Tile::size;
+                int sizeX = (int)(m_object->width() / Tile::size);
+                int sizeY = (int)(m_object->height() / Tile::size);
                 for (int x=0; x<sizeX; ++x) {
                     for(int y=0; y<sizeY; ++y) {
                         Tile * tile = m_object->tile(x,y,m_selectedLayer);
                         QPixmap * pixmap = s_shapePixmaps[tile->shape()];
-                        p.drawPixmap(screenX(x * Tile::size), screenY(y * Tile::size), Tile::size * m_zoom, Tile::size * m_zoom, *pixmap);
+                        p.drawPixmap((int)screenX(x * Tile::size), (int)screenY(y * Tile::size), (int)(Tile::size * m_zoom), (int)(Tile::size * m_zoom), *pixmap);
                     }
                 }
             } break;
@@ -422,22 +422,22 @@ void ObjectView::drawGrid(QPainter &p)
 {
     EditorSettings::GridRenderType gridType = EditorSettings::gridRenderType();
     if( gridType != EditorSettings::None ) {
-        int sizeX = m_object->width() / Tile::size;
-        int sizeY = m_object->height() / Tile::size;
+        int sizeX = (int)(m_object->width() / Tile::size);
+        int sizeY = (int)(m_object->height() / Tile::size);
 
         if( gridType == EditorSettings::Pretty ) {
             p.setPen(QColor(128, 128, 128, 64));
 
             // vertical
             for(int x=0; x<=sizeX; ++x) {
-                double sx = screenX(x*Tile::size);
-                p.drawLine(sx, screenY(0), sx, screenY(m_object->height()));
+                int sx = (int)screenX(x*Tile::size);
+                p.drawLine(sx, (int)screenY(0), sx, (int)screenY(m_object->height()));
             }
 
             // horizontal
             for(int y=0; y<=sizeY; ++y) {
-                double sy = screenY(y*Tile::size);
-                p.drawLine(screenX(0), sy, screenX(m_object->width()), sy);
+                int sy = (int)screenY(y*Tile::size);
+                p.drawLine((int)screenX(0), sy, (int)screenX(m_object->width()), sy);
             }
 
         } else if( gridType == EditorSettings::Fast ) {

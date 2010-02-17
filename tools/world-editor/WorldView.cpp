@@ -395,11 +395,11 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
     switch(m_mouseState) {
         case StretchMapLeft:
             m_selectedMap->setLeft(m_selectedMap->left() + deltaX);
-            m_selectedMap->addTilesLeft(-deltaX / Tile::size);
+            m_selectedMap->addTilesLeft((int)(-deltaX / Tile::size));
         break;
         case StretchMapTop:
             m_selectedMap->setTop(m_selectedMap->top() + deltaY);
-            m_selectedMap->addTilesTop(-deltaY / Tile::size);
+            m_selectedMap->addTilesTop((int)(-deltaY / Tile::size));
         break;
         case StretchMapRight:
             m_selectedMap->setWidth(m_selectedMap->width() + deltaX);
