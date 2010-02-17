@@ -50,6 +50,8 @@ public:
 
 
     Tile(const char** cursor);
+    Tile(const Tile &); // copy constructor
+    Tile(); // null constructor - constructs a null tile
     virtual ~Tile();
 
     // screenX and screenY is the absolute coordinates of 0,0 on the screen
@@ -58,7 +60,9 @@ public:
     bool hasMinPresence(PhysicalPresence minPresence);
     void resolveCircleCollision(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
 
+    void setShape(Shape shape) { m_shape = shape; }
     Shape shape() { return m_shape; }
+    void setSurfaceType(SurfaceType surfaceType) { m_surfaceType = surfaceType; }
     SurfaceType surfaceType() { return m_surfaceType; }
 
 protected:
@@ -75,9 +79,6 @@ protected:
     SurfaceType m_surfaceType;
 
     Graphic * m_graphic;
-
-    /** don't use this constructor. It's for making the NullTile */
-    Tile();
 };
 
 #endif

@@ -51,6 +51,9 @@ protected:
     void paintEvent(QPaintEvent * e);
     void resizeEvent(QResizeEvent * e);
 
+    void mousePressEvent(QMouseEvent * e);
+    void mouseMoveEvent(QMouseEvent * e);
+
     void dropEvent(QDropEvent * e);
     void dragEnterEvent(QDragEnterEvent * e);
     void dragMoveEvent(QDragMoveEvent * e);

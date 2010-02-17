@@ -35,6 +35,14 @@ Tile::Tile() :
 {
 }
 
+Tile::Tile(const Tile & tile) :
+    m_good(tile.m_good),
+    m_shape(tile.m_shape),
+    m_surfaceType(tile.m_surfaceType),
+    m_graphic(tile.m_graphic)
+{
+}
+
 Tile::~Tile() {
 }
 

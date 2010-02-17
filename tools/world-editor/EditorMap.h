@@ -39,8 +39,18 @@ public:
     void addTilesBottom(int amount);
 
     Tile * tile(int x, int y, int z);
+
+    // it's about time we have these convenience methods...
+    int tileCountX();
+    int tileCountY();
 private:
     QStringList m_layerNames;
+
+    // use a full array of tiles and then compile into a palette
+    // when we need to use the real Map
+    Array3<Tile *> * m_sourceTiles;
+
+    void correctNullSourceTiles();
 
 };
 

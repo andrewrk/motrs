@@ -91,6 +91,9 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     connect(m_btnRightMinus, SIGNAL(clicked()), this, SLOT(on_btnRightMinus_clicked()));
 
     initializePixmapCache();
+
+    this->setMouseTracking(true);
+    this->setAcceptDrops(true);
 }
 
 ObjectView::~ObjectView()
@@ -121,6 +124,9 @@ void ObjectView::refreshSurfaceTypes()
             QListWidgetItem * item = new QListWidgetItem(QIcon(*s_surfaceTypePixmaps.at(i)), s_surfaceTypeNames[i], list);
             list->addItem(item);
         }
+
+        if( list->count() > 0 )
+            list->setCurrentRow(0);
     }
 }
 
@@ -134,6 +140,9 @@ void ObjectView::refreshShapes()
             QListWidgetItem * item = new QListWidgetItem(QIcon(*s_shapePixmaps.at(i)), s_shapeNames[i], list);
             list->addItem(item);
         }
+
+        if( list->count() > 0 )
+            list->setCurrentRow(0);
     }
 }
 
@@ -343,6 +352,7 @@ void ObjectView::resizeEvent(QResizeEvent * e)
 void ObjectView::setSelectedLayer(int layer)
 {
     m_selectedLayer = layer;
+    this->update();
     setControlEnableStates();
 }
 
@@ -373,7 +383,7 @@ void ObjectView::refreshLayersList()
         }
 
         if( m_object->layerCount() > 0 ) {
-            list->item(0)->setSelected(true);
+            list->setCurrentRow(0);
             m_selectedLayer = 0;
         } else {
             m_selectedLayer = -1;
@@ -652,5 +662,44 @@ void ObjectView::initializePixmapCache()
             name.append(".png");
             s_surfaceTypePixmaps.append(new QPixmap(dir.absoluteFilePath(name)));
         }
+    }
+}
+
+
+void ObjectView::mousePressEvent(QMouseEvent * e)
+{
+    mouseMoveEvent(e);
+}
+
+void ObjectView::mouseMoveEvent(QMouseEvent * e)
+{
+    int tileX = absoluteX(e->x()) / Tile::size;
+    int tileY = absoluteY(e->y()) / Tile::size;
+    int tileZ = m_selectedLayer;
+    bool inRange =  tileX >= 0 && tileX < m_object->tileCountX() &&
+                    tileY >= 0 && tileY < m_object->tileCountY() &&
+                    tileZ >= 0;
+
+    switch(m_viewMode) {
+        case Normal:
+
+            break;
+        case SurfaceType:
+            // are they over a tile?
+            if( inRange && e->button() == Qt::LeftButton ) {
+                // paint the tile they are over with the selected surface type.
+                Tile * tile = m_object->tile(tileX, tileY, tileZ);
+                tile->setSurfaceType((Tile::SurfaceType)m_window->surfaceTypesList()->currentRow());
+                this->update();
+            }
+            break;
+        case Shape:
+            if( inRange && e->button() == Qt::LeftButton ) {
+                // paint the tile they are over with the selected surface type.
+                Tile * tile = m_object->tile(tileX, tileY, tileZ);
+                tile->setShape((Tile::Shape)m_window->shapesList()->currentRow());
+                this->update();
+            }
+            break;
     }
 }
