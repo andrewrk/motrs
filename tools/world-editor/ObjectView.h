@@ -49,6 +49,11 @@ public: //methods
 
     void propertyChanged(int row);
 
+    void deleteSelection();
+    void cutSelection();
+    void copySelection();
+    void pasteSelection();
+
 protected:
     void paintEvent(QPaintEvent * e);
     void resizeEvent(QResizeEvent * e);
@@ -56,6 +61,7 @@ protected:
     void mousePressEvent(QMouseEvent * e);
     void mouseMoveEvent(QMouseEvent * e);
     void mouseReleaseEvent(QMouseEvent * e);
+    void wheelEvent(QWheelEvent * e);
 
     void dropEvent(QDropEvent * e);
     void dragEnterEvent(QDragEnterEvent * e);
@@ -131,6 +137,8 @@ private: //variables
     MouseState m_mouseState;
     double m_startX, m_startY;
     double m_startWidth, m_startHeight;
+
+    EditorObject::ObjectGraphic m_copyBuffer;
 
 private: //methods
 

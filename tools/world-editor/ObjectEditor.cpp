@@ -103,6 +103,27 @@ QAction * ObjectEditor::viewModeSurfaceTypeAction()
     return m_ui->actionSurfaceType;
 }
 
+QAction * ObjectEditor::cutAction()
+{
+    return m_ui->actionCut;
+}
+
+QAction * ObjectEditor::copyAction()
+{
+    return m_ui->actionCopy;
+}
+
+QAction * ObjectEditor::pasteAction()
+{
+    return m_ui->actionPaste;
+}
+
+QAction * ObjectEditor::deleteAction()
+{
+    return m_ui->actionDelete;
+}
+
+
 QDockWidget * ObjectEditor::artDock()
 {
     return m_ui->dockArt;
@@ -215,4 +236,24 @@ void ObjectEditor::on_actionClose_triggered()
 void ObjectEditor::on_tblProperties_cellChanged(int row, int column)
 {
     m_view->propertyChanged(row);
+}
+
+void ObjectEditor::on_actionDelete_triggered()
+{
+    m_view->deleteSelection();
+}
+
+void ObjectEditor::on_actionCut_triggered()
+{
+    m_view->cutSelection();
+}
+
+void ObjectEditor::on_actionCopy_triggered()
+{
+    m_view->copySelection();
+}
+
+void ObjectEditor::on_actionPaste_triggered()
+{
+    m_view->pasteSelection();
 }

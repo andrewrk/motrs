@@ -39,6 +39,11 @@ public:
     QDockWidget * shapesDock();
     QDockWidget * surfaceTypesDock();
 
+    QAction * cutAction();
+    QAction * copyAction();
+    QAction * pasteAction();
+    QAction * deleteAction();
+
     void createEmpty();
 
 protected:
@@ -51,6 +56,10 @@ private:
     ObjectView * m_view;
 
 private slots:
+    void on_actionPaste_triggered();
+    void on_actionCopy_triggered();
+    void on_actionCut_triggered();
+    void on_actionDelete_triggered();
     void on_tblProperties_cellChanged(int row, int column);
     void on_actionClose_triggered();
     void on_btnDeleteLayer_clicked();

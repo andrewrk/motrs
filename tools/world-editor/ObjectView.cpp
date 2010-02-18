@@ -70,6 +70,8 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     m_selectedGraphic(NULL),
     m_mouseState(msNormal)
 {
+    m_copyBuffer.pixmap = NULL;
+
     m_btnTopPlus->show();
     m_btnTopMinus->show();
     m_btnBottomPlus->show();
@@ -243,7 +245,6 @@ void ObjectView::paintEvent(QPaintEvent * e)
     }
 }
 
-
 void ObjectView::dropEvent(QDropEvent * e)
 {
     QStringList pictureExtensions;
@@ -402,6 +403,12 @@ void ObjectView::setControlEnableStates()
     m_window->moveLayerDownButton()->setEnabled(m_object != NULL && m_selectedLayer < m_object->layerCount()-1);
     m_window->deleteLayerButton()->setEnabled(m_object != NULL && m_selectedLayer > -1);
     m_window->newLayerButton()->setEnabled(m_object != NULL);
+
+    // menus
+    m_window->cutAction()->setEnabled(m_object != NULL && m_selectedGraphic != NULL);
+    m_window->copyAction()->setEnabled(m_object != NULL && m_selectedGraphic != NULL);
+    m_window->pasteAction()->setEnabled(m_object != NULL && m_copyBuffer.pixmap != NULL);
+    m_window->deleteAction()->setEnabled(m_object != NULL && m_selectedGraphic != NULL);
 }
 
 void ObjectView::setViewMode(ViewMode mode)
@@ -695,9 +702,10 @@ bool ObjectView::overGraphicLeft(int x, int y)
 
     double absX = absoluteX(x);
     double absY = absoluteY(y);
+    double scaledRadius = g_lineSelectRadius / m_zoom;
 
-    return  absX > m_selectedGraphic->x - g_lineSelectRadius &&
-            absX < m_selectedGraphic->x + g_lineSelectRadius &&
+    return  absX > m_selectedGraphic->x - scaledRadius &&
+            absX < m_selectedGraphic->x + scaledRadius &&
             absY > m_selectedGraphic->y && absY < m_selectedGraphic->y + m_selectedGraphic->height;
 }
 
@@ -708,10 +716,11 @@ bool ObjectView::overGraphicTop(int x, int y)
 
     double absX = absoluteX(x);
     double absY = absoluteY(y);
+    double scaledRadius = g_lineSelectRadius / m_zoom;
 
     return  absX > m_selectedGraphic->x && absX < m_selectedGraphic->x + m_selectedGraphic->width &&
-            absY > m_selectedGraphic->y - g_lineSelectRadius &&
-            absY < m_selectedGraphic->y + g_lineSelectRadius;
+            absY > m_selectedGraphic->y - scaledRadius &&
+            absY < m_selectedGraphic->y + scaledRadius;
 }
 bool ObjectView::overGraphicRight(int x, int y)
 {
@@ -720,9 +729,10 @@ bool ObjectView::overGraphicRight(int x, int y)
 
     double absX = absoluteX(x);
     double absY = absoluteY(y);
+    double scaledRadius = g_lineSelectRadius / m_zoom;
 
-    return  absX > m_selectedGraphic->x + m_selectedGraphic->width - g_lineSelectRadius &&
-            absX < m_selectedGraphic->x + m_selectedGraphic->width + g_lineSelectRadius &&
+    return  absX > m_selectedGraphic->x + m_selectedGraphic->width - scaledRadius &&
+            absX < m_selectedGraphic->x + m_selectedGraphic->width + scaledRadius &&
             absY > m_selectedGraphic->y && absY < m_selectedGraphic->y + m_selectedGraphic->height;
 
 }
@@ -733,10 +743,11 @@ bool ObjectView::overGraphicBottom(int x, int y)
 
     double absX = absoluteX(x);
     double absY = absoluteY(y);
+    double scaledRadius = g_lineSelectRadius / m_zoom;
 
     return  absX > m_selectedGraphic->x && absX < m_selectedGraphic->x + m_selectedGraphic->width &&
-            absY > m_selectedGraphic->y + m_selectedGraphic->height - g_lineSelectRadius &&
-            absY < m_selectedGraphic->y + m_selectedGraphic->height + g_lineSelectRadius;
+            absY > m_selectedGraphic->y + m_selectedGraphic->height - scaledRadius &&
+            absY < m_selectedGraphic->y + m_selectedGraphic->height + scaledRadius;
 }
 
 bool ObjectView::overSelectedGraphic(int x, int y)
@@ -749,6 +760,24 @@ bool ObjectView::overSelectedGraphic(int x, int y)
 
     return  absX > m_selectedGraphic->x && absX < m_selectedGraphic->x + m_selectedGraphic->width &&
             absY > m_selectedGraphic->y && absY < m_selectedGraphic->y + m_selectedGraphic->height;
+}
+
+void ObjectView::wheelEvent(QWheelEvent * e)
+{
+    double degrees = e->delta() / 8;
+    double steps = degrees / 15;
+
+    if( e->modifiers() & Qt::ControlModifier ) {
+        // zoom
+        m_zoom = Utils::max(Utils::min(m_zoom * std::pow(1.2, steps), 100.0), 0.2);
+    } else if( e->orientation() == Qt::Vertical ) {
+        m_vsb->setValue(m_vsb->value() - steps * 100 / m_zoom);
+    } else if( e->orientation() == Qt::Horizontal ) {
+        m_hsb->setValue(m_hsb->value() - steps * 100 / m_zoom);
+    }
+
+    this->update();
+    e->accept();
 }
 
 void ObjectView::mousePressEvent(QMouseEvent * e)
@@ -783,9 +812,10 @@ void ObjectView::mousePressEvent(QMouseEvent * e)
 
             this->update();
             determineCursor();
+            setControlEnableStates();
         }
     } else {
-        Debug::assert(false, "Invalid viewMode");
+        Debug::assert(false, "Invalid viewMode in mousePressEvent");
     }
 }
 
@@ -800,16 +830,16 @@ void ObjectView::mouseReleaseEvent(QMouseEvent * e)
 
 void ObjectView::doDragAction(int x, int y)
 {
-    double deltaX = (x - m_mouseDownX) * m_zoom;
-    double deltaY = (y - m_mouseDownY) * m_zoom;
+    double deltaX = (x - m_mouseDownX) / m_zoom;
+    double deltaY = (y - m_mouseDownY) / m_zoom;
     switch(m_mouseState) {
         case msStretchGraphicLeft:
             m_selectedGraphic->x = m_startX + deltaX;
-            m_selectedGraphic->width = m_startWidth + deltaX;
+            m_selectedGraphic->width = m_startWidth - deltaX;
         break;
         case msStretchGraphicTop:
             m_selectedGraphic->y = m_startY + deltaY;
-            m_selectedGraphic->height = m_startHeight + deltaY;
+            m_selectedGraphic->height = m_startHeight - deltaY;
         break;
         case msStretchGraphicRight:
             m_selectedGraphic->width = m_startWidth + deltaX;
@@ -843,8 +873,9 @@ void ObjectView::determineCursor()
         case vmShape:
         case vmSurfaceType:
             this->setCursor(Qt::ArrowCursor);
+            break;
         default:
-            Debug::assert(false, "invalid viewMode");
+            Debug::assert(false, "invalid viewMode in determineCursor");
     }
 }
 
@@ -883,4 +914,60 @@ void ObjectView::mouseMoveEvent(QMouseEvent * e)
     } else {
         Debug::assert(false, "Invalid viewMode");
     }
+}
+
+void ObjectView::deleteSelection()
+{
+    if( m_selectedGraphic == NULL )
+        return;
+
+    QList<EditorObject::ObjectGraphic *> * list = m_object->graphics()->value(m_selectedGraphic->layer);
+    for(int i=0; i<list->size(); ++i) {
+        if( list->at(i) == m_selectedGraphic ) {
+            list->removeAt(i);
+            delete m_selectedGraphic;
+            m_selectedGraphic = NULL;
+            setControlEnableStates();
+            this->update();
+            return;
+        }
+    }
+
+    Debug::assert(false, "Couldn't find graphic to delete");
+}
+
+void ObjectView::cutSelection()
+{
+    copySelection();
+    deleteSelection();
+}
+
+void ObjectView::copySelection()
+{
+    if( m_selectedGraphic == NULL)
+        return;
+
+    m_copyBuffer = *m_selectedGraphic;
+    setControlEnableStates();
+}
+
+void ObjectView::pasteSelection()
+{
+    if( m_copyBuffer.pixmap == NULL )
+        return;
+
+    // copy the copyBuffer
+    EditorObject::ObjectGraphic * graphic = new EditorObject::ObjectGraphic;
+    *graphic = m_copyBuffer;
+
+//    // change the x y coordinates to be the center of the screen
+//    graphic->x = absoluteX(this->width() / 2);
+//    graphic->y = absoluteY(this->height() / 2);
+
+    m_object->graphics()->value(m_copyBuffer.layer)->append(graphic);
+
+    m_selectedGraphic = graphic;
+
+    this->update();
+    setControlEnableStates();
 }
