@@ -18,7 +18,8 @@ namespace Debug
 #ifndef RELEASE
         if( ! value ) {
             std::cerr << message << std::endl;
-            std::exit(-1);
+            // abort ensures we get a stack trace
+            abort();
         }
 #endif
     }
