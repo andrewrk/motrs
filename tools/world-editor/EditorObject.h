@@ -16,6 +16,8 @@ public: //variables
     typedef struct {
         double x;
         double y;
+        double width;
+        double height;
         QString pixmapFile;
         QPixmap * pixmap;
         int layer;

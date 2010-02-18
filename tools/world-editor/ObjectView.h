@@ -17,12 +17,14 @@ class ObjectEditor;
 class ObjectView : public QWidget
 {
     Q_OBJECT
-public:
+public: //variables
     enum ViewMode {
         Normal,
         Shape,
         SurfaceType,
     };
+
+public: //methods
 
     ObjectView(ObjectEditor * window, QWidget * parent = NULL);
     ~ObjectView();
@@ -59,7 +61,7 @@ protected:
     void dragMoveEvent(QDragMoveEvent * e);
     void dragLeaveEvent(QDragLeaveEvent * e);
 
-private:
+private: //variables
     static const char * c_surfaceTypes[];
     static const char * c_shapes[];
 
@@ -111,7 +113,9 @@ private:
     static QStringList s_surfaceTypeNames;
     static QStringList s_shapeNames;
 
+    EditorObject::ObjectGraphic * m_selectedGraphic;
 
+private: //methods
 
     double screenX(double absoluteX);
     double screenY(double absoluteY);
@@ -129,6 +133,9 @@ private:
     void setControlEnableStates();
 
     static void initializePixmapCache();
+
+    EditorObject::ObjectGraphic * graphicUnder(int x, int y);
+
 private slots:
     void on_btnLeftPlus_clicked();
     void on_btnLeftMinus_clicked();

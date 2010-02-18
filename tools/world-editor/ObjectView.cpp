@@ -65,7 +65,8 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     m_viewMode(Normal),
     m_zoom(1.0),
     m_offsetX(0),
-    m_offsetY(0)
+    m_offsetY(0),
+    m_selectedGraphic(NULL)
 {
     m_btnTopPlus->show();
     m_btnTopMinus->show();
@@ -195,8 +196,7 @@ void ObjectView::paintEvent(QPaintEvent * e)
                     for(int i=0; i<thisLayerGraphics->size(); ++i) {
                         EditorObject::ObjectGraphic * graphic = thisLayerGraphics->at(i);
                         p.drawPixmap(screenX(graphic->x), screenY(graphic->y),
-                            graphic->pixmap->width() * m_zoom,
-                            graphic->pixmap->height() * m_zoom,
+                            graphic->width * m_zoom, graphic->height * m_zoom,
                             *graphic->pixmap);
                     }
 
@@ -207,6 +207,14 @@ void ObjectView::paintEvent(QPaintEvent * e)
                             m_dragPixmap->height() * m_zoom, *m_dragPixmap);
                     }
                 }
+            }
+
+            // draw selection rectangle around selected graphic
+            if( m_selectedGraphic != NULL ) {
+                p.setPen(QPen(Qt::blue,2));
+                p.drawRect(screenX(m_selectedGraphic->x), screenY(m_selectedGraphic->y),
+                    m_selectedGraphic->width * m_zoom,
+                    m_selectedGraphic->height * m_zoom);
             }
         } else if( m_viewMode == SurfaceType || m_viewMode == Shape ) {
             int sizeX = m_object->tileCountX();
@@ -254,6 +262,8 @@ void ObjectView::dropEvent(QDropEvent * e)
             graphic->pixmap = EditorResourceManager::pixmapForArt(graphic->pixmapFile);
             graphic->x = absoluteX(e->pos().x());
             graphic->y = absoluteY(e->pos().y());
+            graphic->width = graphic->pixmap->width();
+            graphic->height = graphic->pixmap->height();
             graphic->layer = m_selectedLayer;
 
             m_object->graphics()->value(m_selectedLayer)->append(graphic);
@@ -311,6 +321,7 @@ void ObjectView::dragMoveEvent(QDragMoveEvent * e)
 void ObjectView::dragLeaveEvent(QDragLeaveEvent * e)
 {
     m_dragPixmap = NULL;
+    this->update();
 }
 
 void ObjectView::resizeEvent(QResizeEvent * e)
@@ -650,10 +661,39 @@ void ObjectView::initializePixmapCache()
     }
 }
 
+EditorObject::ObjectGraphic * ObjectView::graphicUnder(int x, int y)
+{
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+    QHash<int, QList<EditorObject::ObjectGraphic *> *> * graphics = m_object->graphics();
+    for(int layer=m_object->layerCount()-1; layer >= 0; --layer) {
+        if( m_window->layersList()->item(layer)->checkState() == Qt::Checked ) {
+            QList<EditorObject::ObjectGraphic *> * list = graphics->value(layer);
+            for(int i=0; i<list->size(); ++i) {
+                EditorObject::ObjectGraphic * graphic = list->at(i);
+                if( absX >= graphic->x && absX <= graphic->x + graphic->width &&
+                    absY >= graphic->y && absY <= graphic->y + graphic->height )
+                {
+                    return graphic;
+                }
+            }
+        }
+    }
+    return NULL;
+}
 
 void ObjectView::mousePressEvent(QMouseEvent * e)
 {
-    mouseMoveEvent(e);
+    if( m_viewMode == SurfaceType || m_viewMode == Shape ) {
+        mouseMoveEvent(e);
+    } else if( m_viewMode == Normal ) {
+        // select a graphic if they click on it
+        EditorObject::ObjectGraphic * graphic = graphicUnder(e->x(), e->y());
+        m_selectedGraphic = graphic;
+        this->update();
+    } else {
+        Debug::assert(false, "Invalid viewMode");
+    }
 }
 
 void ObjectView::mouseMoveEvent(QMouseEvent * e)
