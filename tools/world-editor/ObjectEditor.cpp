@@ -257,3 +257,8 @@ void ObjectEditor::on_actionPaste_triggered()
 {
     m_view->pasteSelection();
 }
+
+void ObjectEditor::on_actionSave_triggered()
+{
+    m_view->saveObject();
+}

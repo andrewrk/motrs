@@ -56,6 +56,7 @@ private:
     ObjectView * m_view;
 
 private slots:
+    void on_actionSave_triggered();
     void on_actionPaste_triggered();
     void on_actionCopy_triggered();
     void on_actionCut_triggered();

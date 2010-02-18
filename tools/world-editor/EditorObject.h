@@ -60,7 +60,7 @@ public: //methods
 
     // you are free to mess with the graphics list directly
     // maps layer number to a list of graphics
-    QHash<int, QList<ObjectGraphic *> *> * graphics() { return &m_graphics; }
+    QList<QList<ObjectGraphic *> *> * graphics() { return &m_graphics; }
 
     // properties
     QString name() { return m_name; }
@@ -80,7 +80,7 @@ private: //variables
     QString m_name;
     QString m_description;
 
-    QHash<int, QList<ObjectGraphic *> *> m_graphics;
+    QList<QList<ObjectGraphic *> *> m_graphics;
 
 private: //methods
 

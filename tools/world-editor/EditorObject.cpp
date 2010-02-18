@@ -1,5 +1,8 @@
 #include "EditorObject.h"
 
+#include <QFile>
+#include <QDebug>
+
 EditorObject::EditorObject() :
     m_layerNames(),
     m_surfaceTypes(new Array3<Tile::SurfaceType>(1,1,1)),
@@ -23,10 +26,59 @@ EditorObject * EditorObject::load(QString file)
     // TODO
 }
 
-void EditorObject::save(QString file)
+void EditorObject::save(QString filename)
 {
-    // TODO
+    QFile file(filename);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    if( ! file.isOpen() ){
+        qDebug() << "Unable to open " << filename << " for writing";
+        return;
+    }
+
+    QTextStream out(&file);
+
+    out << "version=1\n";
+    out << "name=" << m_name << "\n";
+    out << "size=" << tileCountX() << "," << tileCountY() << "," << layerCount() << "\n";
+    out << "description=" << m_description << "\n";
+
+    out << "\n# flatten a 3d grid in z,y,x order\n";
+    QString surfaceTypes = "";
+    QString shapes = "";
+    for(int z=0; z<layerCount(); ++z) {
+        for(int y=0; y<tileCountY(); ++y) {
+            for(int x=0; x<tileCountX(); ++x) {
+                surfaceTypes += QString::number(m_surfaceTypes->get(x,y,z)) + QString(",");
+                shapes += QString::number(m_shapes->get(x,y,z)) + QString(",");
+            }
+            surfaceTypes += " \\\n";
+            shapes += " \\\n";
+        }
+        surfaceTypes += "\\\n";
+        shapes += "\\\n";
+    }
+    out << "surfaceTypes=" << surfaceTypes << "\n";
+    out << "shapes=" << shapes << "\n";
+
+    out << "\n# list of graphics and their locations\n";
+    out << "# graphic=x,y,width,height,layer,graphicFile\n";
+    for(int z=0; z<layerCount(); ++z) {
+        QList<ObjectGraphic *> * list = m_graphics.at(z);
+        for(int i=0; i<list->size(); ++i) {
+            ObjectGraphic * graphic = list->at(i);
+            out << "graphic=" << graphic->x << "," << graphic->y << ","
+                << graphic->width << "," << graphic->height << "," << z
+                << "," << graphic->pixmapFile << "\n";
+        }
+    }
+
+    out << "\n# layer names\n";
+    for(int z=0; z<layerCount(); ++z) {
+        out << "layerName=" << m_layerNames.at(z) << "\n";
+    }
 }
+
 
 Tile::Shape EditorObject::shape(int x, int y, int z)
 {
@@ -63,7 +115,7 @@ void EditorObject::deleteLayer(int index)
     m_shapes->deleteRowZ(index);
     m_surfaceTypes->deleteRowZ(index);
     m_layerNames.removeAt(index);
-    m_graphics.remove(index); // TODO: fix this memory leak
+    m_graphics.removeAt(index); // TODO: fix this memory leak
 }
 
 void EditorObject::swapLayer(int i, int j)

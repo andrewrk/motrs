@@ -25,7 +25,6 @@ public: //variables
     };
 
 public: //methods
-
     ObjectView(ObjectEditor * window, QWidget * parent = NULL);
     ~ObjectView();
 
@@ -53,6 +52,9 @@ public: //methods
     void cutSelection();
     void copySelection();
     void pasteSelection();
+
+    // save the object
+    void saveObject();
 
 protected:
     void paintEvent(QPaintEvent * e);

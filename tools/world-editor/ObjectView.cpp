@@ -192,11 +192,11 @@ void ObjectView::paintEvent(QPaintEvent * e)
 
     if( m_object ) {
         if( m_viewMode == vmNormal ) {
-            QHash<int, QList<EditorObject::ObjectGraphic *> *> * graphics = m_object->graphics();
+            QList<QList<EditorObject::ObjectGraphic *> *> * graphics = m_object->graphics();
             for(int layer=0; layer<m_object->layerCount(); ++layer) {
                 if( m_window->layersList()->item(layer)->checkState() == Qt::Checked ) {
                     // draw all art items at this layer
-                    QList<EditorObject::ObjectGraphic *> * thisLayerGraphics = graphics->value(layer);
+                    QList<EditorObject::ObjectGraphic *> * thisLayerGraphics = graphics->at(layer);
                     for(int i=0; i<thisLayerGraphics->size(); ++i) {
                         EditorObject::ObjectGraphic * graphic = thisLayerGraphics->at(i);
                         p.drawPixmap(screenX(graphic->x), screenY(graphic->y),
@@ -678,10 +678,10 @@ EditorObject::ObjectGraphic * ObjectView::graphicAt(int x, int y)
 {
     double absX = absoluteX(x);
     double absY = absoluteY(y);
-    QHash<int, QList<EditorObject::ObjectGraphic *> *> * graphics = m_object->graphics();
+    QList<QList<EditorObject::ObjectGraphic *> *> * graphics = m_object->graphics();
     for(int layer=m_object->layerCount()-1; layer >= 0; --layer) {
         if( m_window->layersList()->item(layer)->checkState() == Qt::Checked ) {
-            QList<EditorObject::ObjectGraphic *> * list = graphics->value(layer);
+            QList<EditorObject::ObjectGraphic *> * list = graphics->at(layer);
             for(int i=0; i<list->size(); ++i) {
                 EditorObject::ObjectGraphic * graphic = list->at(i);
                 if( absX >= graphic->x && absX <= graphic->x + graphic->width &&
@@ -964,10 +964,24 @@ void ObjectView::pasteSelection()
 //    graphic->x = absoluteX(this->width() / 2);
 //    graphic->y = absoluteY(this->height() / 2);
 
+    // change the layer to be the selected layer
+    graphic->layer = m_selectedLayer;
+
     m_object->graphics()->value(m_copyBuffer.layer)->append(graphic);
 
     m_selectedGraphic = graphic;
 
     this->update();
     setControlEnableStates();
+}
+
+void ObjectView::saveObject()
+{
+    QString filename = m_object->name();
+
+    // strip unacceptable characters
+    filename.remove(QRegExp("[^\\w\\d \\-_]"));
+
+    filename.append(".object");
+    m_object->save(QDir(EditorResourceManager::objectsDir()).absoluteFilePath(filename));
 }

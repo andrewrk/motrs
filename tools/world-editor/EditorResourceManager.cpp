@@ -117,6 +117,11 @@ QString EditorResourceManager::dataDir()
     return settings.value("paths/data", ".").toString();
 }
 
+QString EditorResourceManager::objectsDir()
+{
+    QDir dir(dataDir());
+    return dir.absoluteFilePath("objects");
+}
 
 QString EditorResourceManager::localDataDir()
 {
