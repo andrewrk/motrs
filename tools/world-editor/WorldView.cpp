@@ -3,6 +3,7 @@
 #include "WorldEditor.h"
 #include "EditorResourceManager.h"
 #include "EditorSettings.h"
+#include "EditorGlobals.h"
 
 #include <QPainter>
 #include <QDebug>
@@ -16,7 +17,6 @@
 
 #include "moc_WorldView.cxx"
 
-const int WorldView::s_lineSelectRadius = 4;
 QPainter * WorldView::s_painter = NULL;
 
 WorldView::WorldView(WorldEditor * window, QWidget * parent) :
@@ -238,8 +238,8 @@ bool WorldView::overMapLeft(int x, int y)
     double absX = absoluteX(x);
     double absY = absoluteY(y);
 
-    return  absX > m_selectedMap->left() - s_lineSelectRadius &&
-            absX < m_selectedMap->left() + s_lineSelectRadius &&
+    return  absX > m_selectedMap->left() - g_lineSelectRadius &&
+            absX < m_selectedMap->left() + g_lineSelectRadius &&
             absY > m_selectedMap->top() && absY < m_selectedMap->top() + m_selectedMap->height();
 }
 
@@ -252,8 +252,8 @@ bool WorldView::overMapTop(int x, int y)
     double absY = absoluteY(y);
 
     return  absX > m_selectedMap->left() && absX < m_selectedMap->left() + m_selectedMap->width() &&
-            absY > m_selectedMap->top() - s_lineSelectRadius &&
-            absY < m_selectedMap->top() + s_lineSelectRadius;
+            absY > m_selectedMap->top() - g_lineSelectRadius &&
+            absY < m_selectedMap->top() + g_lineSelectRadius;
 }
 bool WorldView::overMapRight(int x, int y)
 {
@@ -263,8 +263,8 @@ bool WorldView::overMapRight(int x, int y)
     double absX = absoluteX(x);
     double absY = absoluteY(y);
 
-    return  absX > m_selectedMap->left() + m_selectedMap->width() - s_lineSelectRadius &&
-            absX < m_selectedMap->left() + m_selectedMap->width() + s_lineSelectRadius &&
+    return  absX > m_selectedMap->left() + m_selectedMap->width() - g_lineSelectRadius &&
+            absX < m_selectedMap->left() + m_selectedMap->width() + g_lineSelectRadius &&
             absY > m_selectedMap->top() && absY < m_selectedMap->top() + m_selectedMap->height();
 
 }
@@ -277,8 +277,8 @@ bool WorldView::overMapBottom(int x, int y)
     double absY = absoluteY(y);
 
     return  absX > m_selectedMap->left() && absX < m_selectedMap->left() + m_selectedMap->width() &&
-            absY > m_selectedMap->top() + m_selectedMap->height() - s_lineSelectRadius &&
-            absY < m_selectedMap->top() + m_selectedMap->height() + s_lineSelectRadius;
+            absY > m_selectedMap->top() + m_selectedMap->height() - g_lineSelectRadius &&
+            absY < m_selectedMap->top() + m_selectedMap->height() + g_lineSelectRadius;
 }
 
 bool WorldView::overSelectedMap(int x, int y)
@@ -397,7 +397,7 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
             m_selectedMap->setLeft(m_selectedMap->left() + deltaX);
             m_selectedMap->addTilesLeft(-deltaX / Tile::size);
         break;
-        case StretchMapTop:
+        case StretchMapTop:this->setCursor(Qt::ArrowCursor);
             m_selectedMap->setTop(m_selectedMap->top() + deltaY);
             m_selectedMap->addTilesTop(-deltaY / Tile::size);
         break;
@@ -417,7 +417,7 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
     if( tool == m_mouseDownTool ) {
         m_mouseDownTool = WorldEditor::Nothing;
         m_mouseState = Normal;
-        this->setCursor(Qt::ArrowCursor);
+        determineCursor();
     }
 
     this->update();

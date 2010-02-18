@@ -19,9 +19,9 @@ class ObjectView : public QWidget
     Q_OBJECT
 public: //variables
     enum ViewMode {
-        Normal,
-        Shape,
-        SurfaceType,
+        vmNormal,
+        vmShape,
+        vmSurfaceType,
     };
 
 public: //methods
@@ -55,6 +55,7 @@ protected:
 
     void mousePressEvent(QMouseEvent * e);
     void mouseMoveEvent(QMouseEvent * e);
+    void mouseReleaseEvent(QMouseEvent * e);
 
     void dropEvent(QDropEvent * e);
     void dragEnterEvent(QDragEnterEvent * e);
@@ -62,8 +63,14 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent * e);
 
 private: //variables
-    static const char * c_surfaceTypes[];
-    static const char * c_shapes[];
+    enum MouseState {
+        msNormal,
+        msStretchGraphicLeft,
+        msStretchGraphicTop,
+        msStretchGraphicRight,
+        msStretchGraphicBottom,
+        msMoveGraphic,
+    };
 
     enum TableProperty {
         Name,
@@ -71,6 +78,9 @@ private: //variables
         Height,
         Description,
     };
+
+    static const char * c_surfaceTypes[];
+    static const char * c_shapes[];
 
     // the host window for this view
     ObjectEditor * m_window;
@@ -115,6 +125,13 @@ private: //variables
 
     EditorObject::ObjectGraphic * m_selectedGraphic;
 
+    // cache the location of the mouse on mouse move
+    int m_mouseX, m_mouseY;
+    int m_mouseDownX, m_mouseDownY;
+    MouseState m_mouseState;
+    double m_startX, m_startY;
+    double m_startWidth, m_startHeight;
+
 private: //methods
 
     double screenX(double absoluteX);
@@ -134,7 +151,17 @@ private: //methods
 
     static void initializePixmapCache();
 
-    EditorObject::ObjectGraphic * graphicUnder(int x, int y);
+    EditorObject::ObjectGraphic * graphicAt(int x, int y);
+
+    bool overGraphicLeft(int x, int y);
+    bool overGraphicTop(int x, int y);
+    bool overGraphicRight(int x, int y);
+    bool overGraphicBottom(int x, int y);
+    bool overSelectedGraphic(int x, int y);
+
+    void determineCursor();
+
+    void doDragAction(int x, int y);
 
 private slots:
     void on_btnLeftPlus_clicked();

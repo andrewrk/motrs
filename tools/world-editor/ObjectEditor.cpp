@@ -138,7 +138,7 @@ void ObjectEditor::on_actionNormal_triggered()
     m_ui->actionNormal->setChecked(true);
     m_ui->actionSurfaceType->setChecked(false);
     m_ui->actionShape->setChecked(false);
-    m_view->setViewMode(ObjectView::Normal);
+    m_view->setViewMode(ObjectView::vmNormal);
 }
 
 void ObjectEditor::on_actionSurfaceType_triggered()
@@ -146,7 +146,7 @@ void ObjectEditor::on_actionSurfaceType_triggered()
     m_ui->actionNormal->setChecked(false);
     m_ui->actionSurfaceType->setChecked(true);
     m_ui->actionShape->setChecked(false);
-    m_view->setViewMode(ObjectView::SurfaceType);
+    m_view->setViewMode(ObjectView::vmSurfaceType);
 }
 
 void ObjectEditor::on_actionShape_triggered()
@@ -154,7 +154,7 @@ void ObjectEditor::on_actionShape_triggered()
     m_ui->actionNormal->setChecked(false);
     m_ui->actionSurfaceType->setChecked(false);
     m_ui->actionShape->setChecked(true);
-    m_view->setViewMode(ObjectView::Shape);
+    m_view->setViewMode(ObjectView::vmShape);
 }
 
 void ObjectEditor::on_actionZoom100_triggered()

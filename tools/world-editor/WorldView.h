@@ -58,9 +58,6 @@ private:
         EditorMap * map;
     } ArtItem;
 
-    // how far away from border lines can you be to be able to use stretch tools
-    static const int s_lineSelectRadius;
-
     QScrollBar * m_hsb;
     QScrollBar * m_vsb;
 

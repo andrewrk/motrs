@@ -4,6 +4,7 @@
 #include "ObjectEditor.h"
 #include "EditorSettings.h"
 #include "Utils.h"
+#include "EditorGlobals.h"
 
 #include <QPainter>
 #include <QStandardItemModel>
@@ -62,11 +63,12 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     m_hsb(new QScrollBar(Qt::Horizontal, this)),
     m_vsb(new QScrollBar(Qt::Vertical, this)),
     m_selectedLayer(-1),
-    m_viewMode(Normal),
+    m_viewMode(vmNormal),
     m_zoom(1.0),
     m_offsetX(0),
     m_offsetY(0),
-    m_selectedGraphic(NULL)
+    m_selectedGraphic(NULL),
+    m_mouseState(msNormal)
 {
     m_btnTopPlus->show();
     m_btnTopMinus->show();
@@ -108,7 +110,7 @@ void ObjectView::createEmpty()
     if( m_object )
         delete m_object;
     m_object = new EditorObject();
-    setViewMode(Normal);
+    setViewMode(vmNormal);
     refreshGui();
 }
 
@@ -187,7 +189,7 @@ void ObjectView::paintEvent(QPaintEvent * e)
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_object ) {
-        if( m_viewMode == Normal ) {
+        if( m_viewMode == vmNormal ) {
             QHash<int, QList<EditorObject::ObjectGraphic *> *> * graphics = m_object->graphics();
             for(int layer=0; layer<m_object->layerCount(); ++layer) {
                 if( m_window->layersList()->item(layer)->checkState() == Qt::Checked ) {
@@ -212,16 +214,19 @@ void ObjectView::paintEvent(QPaintEvent * e)
             // draw selection rectangle around selected graphic
             if( m_selectedGraphic != NULL ) {
                 p.setPen(QPen(Qt::blue,2));
-                p.drawRect(screenX(m_selectedGraphic->x), screenY(m_selectedGraphic->y),
+
+                QRect outline(screenX(m_selectedGraphic->x), screenY(m_selectedGraphic->y),
                     m_selectedGraphic->width * m_zoom,
                     m_selectedGraphic->height * m_zoom);
+
+                p.drawRect(outline);
             }
-        } else if( m_viewMode == SurfaceType || m_viewMode == Shape ) {
+        } else if( m_viewMode == vmSurfaceType || m_viewMode == vmShape ) {
             int sizeX = m_object->tileCountX();
             int sizeY = m_object->tileCountY();
             for (int x=0; x<sizeX; ++x) {
                 for(int y=0; y<sizeY; ++y) {
-                    QPixmap * pixmap = (m_viewMode == SurfaceType) ?
+                    QPixmap * pixmap = (m_viewMode == vmSurfaceType) ?
                         s_surfaceTypePixmaps[m_object->surfaceType(x,y,m_selectedLayer)] :
                         s_shapePixmaps[m_object->shape(x,y,m_selectedLayer)];
                     p.drawPixmap(screenX(x * Tile::size), screenY(y * Tile::size), Tile::size * m_zoom, Tile::size * m_zoom, *pixmap);
@@ -237,6 +242,7 @@ void ObjectView::paintEvent(QPaintEvent * e)
             tr("No object loaded"));
     }
 }
+
 
 void ObjectView::dropEvent(QDropEvent * e)
 {
@@ -360,7 +366,7 @@ void ObjectView::open(QString file)
         delete m_object;
     m_object = EditorObject::load(file);
 
-    setViewMode(Normal);
+    setViewMode(vmNormal);
     refreshGui();
 }
 
@@ -408,15 +414,15 @@ void ObjectView::setViewMode(ViewMode mode)
     m_window->shapesDock()->hide();
     m_window->surfaceTypesDock()->hide();
     switch(mode) {
-        case Normal:
+        case vmNormal:
             m_window->viewModeNormalAction()->setChecked(true);
             m_window->artDock()->show();
             break;
-        case Shape:
+        case vmShape:
             m_window->viewModeShapeAction()->setChecked(true);
             m_window->shapesDock()->show();
             break;
-        case SurfaceType:
+        case vmSurfaceType:
             m_window->viewModeSurfaceTypeAction()->setChecked(true);
             m_window->surfaceTypesDock()->show();
             break;
@@ -608,7 +614,7 @@ void ObjectView::refreshProperties()
     tbl->item(Name, 1)->setText(m_object->name());
     tbl->item(Width, 1)->setText(QString::number(m_object->tileCountX()));
     tbl->item(Height, 1)->setText(QString::number(m_object->tileCountY()));
-    tbl->item(Description, 1)->setText(QObject::tr("description not supported yet"));
+    tbl->item(Description, 1)->setText(m_object->description());
 }
 
 void ObjectView::propertyChanged(int row)
@@ -661,7 +667,7 @@ void ObjectView::initializePixmapCache()
     }
 }
 
-EditorObject::ObjectGraphic * ObjectView::graphicUnder(int x, int y)
+EditorObject::ObjectGraphic * ObjectView::graphicAt(int x, int y)
 {
     double absX = absoluteX(x);
     double absY = absoluteY(y);
@@ -682,25 +688,179 @@ EditorObject::ObjectGraphic * ObjectView::graphicUnder(int x, int y)
     return NULL;
 }
 
+bool ObjectView::overGraphicLeft(int x, int y)
+{
+    if( ! m_selectedGraphic )
+        return false;
+
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+
+    return  absX > m_selectedGraphic->x - g_lineSelectRadius &&
+            absX < m_selectedGraphic->x + g_lineSelectRadius &&
+            absY > m_selectedGraphic->y && absY < m_selectedGraphic->y + m_selectedGraphic->height;
+}
+
+bool ObjectView::overGraphicTop(int x, int y)
+{
+    if( ! m_selectedGraphic )
+        return false;
+
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+
+    return  absX > m_selectedGraphic->x && absX < m_selectedGraphic->x + m_selectedGraphic->width &&
+            absY > m_selectedGraphic->y - g_lineSelectRadius &&
+            absY < m_selectedGraphic->y + g_lineSelectRadius;
+}
+bool ObjectView::overGraphicRight(int x, int y)
+{
+    if( ! m_selectedGraphic )
+        return false;
+
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+
+    return  absX > m_selectedGraphic->x + m_selectedGraphic->width - g_lineSelectRadius &&
+            absX < m_selectedGraphic->x + m_selectedGraphic->width + g_lineSelectRadius &&
+            absY > m_selectedGraphic->y && absY < m_selectedGraphic->y + m_selectedGraphic->height;
+
+}
+bool ObjectView::overGraphicBottom(int x, int y)
+{
+    if( ! m_selectedGraphic )
+        return false;
+
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+
+    return  absX > m_selectedGraphic->x && absX < m_selectedGraphic->x + m_selectedGraphic->width &&
+            absY > m_selectedGraphic->y + m_selectedGraphic->height - g_lineSelectRadius &&
+            absY < m_selectedGraphic->y + m_selectedGraphic->height + g_lineSelectRadius;
+}
+
+bool ObjectView::overSelectedGraphic(int x, int y)
+{
+    if( ! m_selectedGraphic )
+        return false;
+
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+
+    return  absX > m_selectedGraphic->x && absX < m_selectedGraphic->x + m_selectedGraphic->width &&
+            absY > m_selectedGraphic->y && absY < m_selectedGraphic->y + m_selectedGraphic->height;
+}
+
 void ObjectView::mousePressEvent(QMouseEvent * e)
 {
-    if( m_viewMode == SurfaceType || m_viewMode == Shape ) {
+    m_mouseDownX = e->x();
+    m_mouseDownY = e->y();
+
+    if( m_viewMode == vmSurfaceType || m_viewMode == vmShape ) {
         mouseMoveEvent(e);
-    } else if( m_viewMode == Normal ) {
-        // select a graphic if they click on it
-        EditorObject::ObjectGraphic * graphic = graphicUnder(e->x(), e->y());
-        m_selectedGraphic = graphic;
-        this->update();
+    } else if( m_viewMode == vmNormal ) {
+        if( m_mouseState == msNormal ) {
+            // are we stretching the boundaries of a graphic?
+            if( m_selectedGraphic ) {
+                m_startX = m_selectedGraphic->x;
+                m_startY = m_selectedGraphic->y;
+                m_startWidth = m_selectedGraphic->width;
+                m_startHeight = m_selectedGraphic->height;
+            }
+
+            if( overGraphicLeft(e->x(), e->y()) )
+                m_mouseState = msStretchGraphicLeft;
+            else if( overGraphicRight(e->x(), e->y()) )
+                m_mouseState = msStretchGraphicRight;
+            else if( overGraphicTop(e->x(), e->y()) )
+                m_mouseState = msStretchGraphicTop;
+            else if( overGraphicBottom(e->x(), e->y()) )
+                m_mouseState = msStretchGraphicBottom;
+            else if( overSelectedGraphic(e->x(), e->y()) )
+                m_mouseState = msMoveGraphic;
+            else
+                m_selectedGraphic = graphicAt(e->x(), e->y()); // select a graphic if they click it
+
+            this->update();
+            determineCursor();
+        }
     } else {
         Debug::assert(false, "Invalid viewMode");
     }
 }
 
+void ObjectView::mouseReleaseEvent(QMouseEvent * e)
+{
+    doDragAction(e->x(), e->y());
+
+    // return state to normal
+    m_mouseState = msNormal;
+    determineCursor();
+}
+
+void ObjectView::doDragAction(int x, int y)
+{
+    double deltaX = (x - m_mouseDownX) * m_zoom;
+    double deltaY = (y - m_mouseDownY) * m_zoom;
+    switch(m_mouseState) {
+        case msStretchGraphicLeft:
+            m_selectedGraphic->x = m_startX + deltaX;
+            m_selectedGraphic->width = m_startWidth + deltaX;
+        break;
+        case msStretchGraphicTop:
+            m_selectedGraphic->y = m_startY + deltaY;
+            m_selectedGraphic->height = m_startHeight + deltaY;
+        break;
+        case msStretchGraphicRight:
+            m_selectedGraphic->width = m_startWidth + deltaX;
+        break;
+        case msStretchGraphicBottom:
+            m_selectedGraphic->height = m_startHeight + deltaY;
+        break;
+        case msMoveGraphic:
+            m_selectedGraphic->x = m_startX + deltaX;
+            m_selectedGraphic->y = m_startY + deltaY;
+        break;
+        case msNormal: // do nothing
+        break;
+    }
+}
+
+void ObjectView::determineCursor()
+{
+    switch(m_viewMode) {
+        case vmNormal:
+            // change mouse cursor to sizers if over graphic boundaries
+            if( overGraphicLeft(m_mouseX, m_mouseY) || overGraphicRight(m_mouseX, m_mouseY))
+                this->setCursor(Qt::SizeHorCursor);
+            else if( overGraphicTop(m_mouseX, m_mouseY) || overGraphicBottom(m_mouseX, m_mouseY))
+                this->setCursor(Qt::SizeVerCursor);
+            else if( overSelectedGraphic(m_mouseX, m_mouseY))
+                this->setCursor(Qt::SizeAllCursor);
+            else
+                this->setCursor(Qt::ArrowCursor);
+            break;
+        case vmShape:
+        case vmSurfaceType:
+            this->setCursor(Qt::ArrowCursor);
+        default:
+            Debug::assert(false, "invalid viewMode");
+    }
+}
+
 void ObjectView::mouseMoveEvent(QMouseEvent * e)
 {
-    if( m_viewMode == Normal ) {
+    m_mouseX = e->x();
+    m_mouseY = e->y();
 
-    } else if( m_viewMode == SurfaceType || m_viewMode == Shape ) {
+    determineCursor();
+
+    if( m_viewMode == vmNormal ) {
+        if( m_mouseState != msNormal ) {
+            doDragAction(e->x(), e->y());
+            this->update();
+        }
+    } else if( m_viewMode == vmSurfaceType || m_viewMode == vmShape ) {
         int tileX = absoluteX(e->x()) / Tile::size;
         int tileY = absoluteY(e->y()) / Tile::size;
         int tileZ = m_selectedLayer;
@@ -711,7 +871,7 @@ void ObjectView::mouseMoveEvent(QMouseEvent * e)
         // are they over a tile and clicking the mouse?
         if( inRange && (e->buttons() & Qt::LeftButton) ) {
             // paint the tile they are over with the selected surface type or shape
-            if( m_viewMode == SurfaceType ) {
+            if( m_viewMode == vmSurfaceType ) {
                 m_object->setSurfaceType(tileX, tileY, tileZ,
                     (Tile::SurfaceType)m_window->surfaceTypesList()->currentRow());
             } else {
