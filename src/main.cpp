@@ -1,6 +1,7 @@
 #include "SDL.h"
 #include "Gameplay.h"
 #include "Utils.h"
+#include "ArgumentParser.h"
 
 #include <iostream>
 #include <string>
@@ -9,11 +10,10 @@
 const int fps = 48;
 
 int main(int argc, char* argv[]) {
+    ArgumentParser ap(argc, argv);
 
     //grab parameters
-    bool windowMode = false;
-    for (int i = 1; i < argc; i++)
-        windowMode |= std::string(argv[i]).compare("--windowed") == 0;
+    bool windowMode = ap.contains("windowed", 'w');
 
     // init SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
