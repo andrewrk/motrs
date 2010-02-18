@@ -6,9 +6,21 @@
 
 #include <QtCore/QString>
 #include <QtCore/QStringList>
+#include <QtCore/QHash>
+#include <QtCore/QList>
+#include <QtGui/QPixmap>
 
 class EditorObject
 {
+public: //variables
+    typedef struct {
+        double x;
+        double y;
+        QString pixmapFile;
+        QPixmap * pixmap;
+        int layer;
+    } ObjectGraphic;
+
 public: //methods
     // default Object. arbitrary defaults.
     EditorObject();
@@ -44,6 +56,10 @@ public: //methods
     Tile::SurfaceType surfaceType(int x, int y, int z);
     void setSurfaceType(int x, int y, int z, Tile::SurfaceType);
 
+    // you are free to mess with the graphics list directly
+    // maps layer number to a list of graphics
+    QHash<int, QList<ObjectGraphic *> *> * graphics() { return &m_graphics; }
+
     // properties
     QString name() { return m_name; }
     void setName(QString name) { m_name = name; }
@@ -52,6 +68,7 @@ public: //methods
     void setDescription(QString description) { m_description = description; }
 
 private: //variables
+
     QStringList m_layerNames;
 
     // use a full array of tiles and then later we can compile it into a map
@@ -60,6 +77,8 @@ private: //variables
 
     QString m_name;
     QString m_description;
+
+    QHash<int, QList<ObjectGraphic *> *> m_graphics;
 
 private: //methods
 

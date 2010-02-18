@@ -5,11 +5,13 @@ EditorObject::EditorObject() :
     m_surfaceTypes(new Array3<Tile::SurfaceType>(1,1,1)),
     m_shapes(new Array3<Tile::Shape>(1,1,1)),
     m_name(QObject::tr("New Object")),
-    m_description("")
+    m_description(""),
+    m_graphics()
 {
     m_surfaceTypes->clear();
     m_shapes->clear();
     m_layerNames << QObject::tr("Layer 1");
+    m_graphics.insert(0, new QList<ObjectGraphic *>());
 }
 
 EditorObject::~EditorObject()
@@ -50,6 +52,7 @@ void EditorObject::addLayer(QString name)
 {
     QString newLayerName = name.isEmpty() ? QObject::tr("Layer %1").arg(QString::number(layerCount()+1))
         : name;
+    m_graphics.insert(m_shapes->sizeZ(), new QList<ObjectGraphic *>());
     m_shapes->redim(m_shapes->sizeX(), m_shapes->sizeY(), m_shapes->sizeZ()+1, (Tile::Shape) 0);
     m_surfaceTypes->redim(m_shapes->sizeX(), m_shapes->sizeY(), m_shapes->sizeZ(), (Tile::SurfaceType) 0);
     m_layerNames << newLayerName;
@@ -60,6 +63,7 @@ void EditorObject::deleteLayer(int index)
     m_shapes->deleteRowZ(index);
     m_surfaceTypes->deleteRowZ(index);
     m_layerNames.removeAt(index);
+    m_graphics.remove(index); // TODO: fix this memory leak
 }
 
 void EditorObject::swapLayer(int i, int j)
@@ -67,6 +71,11 @@ void EditorObject::swapLayer(int i, int j)
     m_shapes->swapRowZ(i, j);
     m_surfaceTypes->swapRowZ(i, j);
     m_layerNames.swap(i, j);
+
+    // swap graphics list pointers
+    QList<ObjectGraphic *> * tmp = m_graphics.value(i);
+    m_graphics.insert(i, m_graphics.value(j));
+    m_graphics.insert(j, tmp);
 }
 
 void EditorObject::addTilesLeft(int amount)

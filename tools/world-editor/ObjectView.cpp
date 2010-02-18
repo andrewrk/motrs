@@ -187,8 +187,17 @@ void ObjectView::paintEvent(QPaintEvent * e)
 
     if( m_object ) {
         if( m_viewMode == Normal ) {
+            QHash<int, QList<EditorObject::ObjectGraphic *> *> * graphics = m_object->graphics();
             for(int layer=0; layer<m_object->layerCount(); ++layer) {
                 // draw all art items at this layer
+                QList<EditorObject::ObjectGraphic *> * thisLayerGraphics = graphics->value(layer);
+                for(int i=0; i<thisLayerGraphics->size(); ++i) {
+                    EditorObject::ObjectGraphic * graphic = thisLayerGraphics->at(i);
+                    p.drawPixmap(screenX(graphic->x), screenY(graphic->y),
+                        graphic->pixmap->width() * m_zoom,
+                        graphic->pixmap->height() * m_zoom,
+                        *graphic->pixmap);
+                }
 
                 // draw dragged stuff
                 if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
@@ -237,16 +246,15 @@ void ObjectView::dropEvent(QDropEvent * e)
         QFileInfo info(file);
         QString ext = info.suffix();
         if( pictureExtensions.contains(ext, Qt::CaseInsensitive) ) {
-            // it's art
-            QString title = info.fileName();
-            QPixmap * pixmap = EditorResourceManager::pixmapForArt(title);
+            // it's art. create a new ObjectGraphic and add it to the object
+            EditorObject::ObjectGraphic * graphic = new EditorObject::ObjectGraphic;
+            graphic->pixmapFile = info.fileName();
+            graphic->pixmap = EditorResourceManager::pixmapForArt(graphic->pixmapFile);
+            graphic->x = absoluteX(e->pos().x());
+            graphic->y = absoluteY(e->pos().y());
+            graphic->layer = m_selectedLayer;
 
-        } else if( ext.compare("entity", Qt::CaseInsensitive) ) {
-            // it's an entity
-            // TODO
-        } else if( ext.compare("map", Qt::CaseInsensitive) ) {
-            // it's a map
-            // TODO
+            m_object->graphics()->value(m_selectedLayer)->append(graphic);
         } else {
             qDebug() << "Unable to drag drop extension " << ext;
             QMessageBox::warning(this, tr("error"), tr("Uh oh, we don't support %1 yet.").arg(ext));
@@ -279,12 +287,6 @@ void ObjectView::dragEnterEvent(QDragEnterEvent * e)
                 qDebug() << title;
                 QPixmap * pixmap = EditorResourceManager::pixmapForArt(title);
                 m_dragPixmap = pixmap;
-            } else if( ext.compare("entity", Qt::CaseInsensitive) ) {
-                // it's an entity
-                // TODO
-            } else if( ext.compare("map", Qt::CaseInsensitive) ) {
-                // it's a map
-                // TODO
             } else {
                 qDebug() << "Unable to drag drop extension " << ext;
                 QMessageBox::warning(this, tr("error"), tr("Uh oh, we don't support %1 yet.").arg(ext));
