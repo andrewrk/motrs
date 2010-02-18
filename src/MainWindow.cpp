@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 
+#include "Config.h"
 #include "Gameplay.h"
 
 #include <iostream>
@@ -10,15 +11,13 @@ const int MainWindow::c_height = 600;
 const int MainWindow::c_colorDepth = 32;
 const char * MainWindow::c_caption = "Myth of the Ruby Sword";
 
-MainWindow::MainWindow(int argc, char * argv[]) :
-    m_arguments(argc, argv),
+MainWindow::MainWindow() :
     m_screen(NULL)
 {
     Uint32 videoModeFlags = SDL_HWSURFACE | SDL_DOUBLEBUF;
 
     // set fullscreen flag
-    m_fullscreen = ! m_arguments.contains("windowed", 'w');
-    m_fullscreen = false; // TODO remove this and default to full screen
+    m_fullscreen = Config::instance()->fullscreen();
     if (m_fullscreen)
         videoModeFlags |= SDL_FULLSCREEN;
 

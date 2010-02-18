@@ -21,8 +21,7 @@ public:
         Key_size
     };
 
-    // returns whether the config loaded ok
-    static bool init();
+    static void init();
 
     // call this at the start of each frame.
     static void refresh();

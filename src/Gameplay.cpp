@@ -37,6 +37,8 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps, MainWindow * owner) :
 {
     Debug::assert(s_inst == NULL, "only one Gameplay allowed");
     s_inst = this;
+
+    // initialize gameplay
     m_universe = ResourceManager::loadUniverse(ResourceFilePath, "main.universe");
     if (!(m_universe != NULL && m_universe->isGood())) {
         m_good = false;
@@ -55,8 +57,7 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps, MainWindow * owner) :
 
     m_player = m_universe->player();
 
-    if (!Input::init())
-        std::cerr << "Warning: Input did not initialize properly." << std::endl;
+    Input::init();
 }
 
 Gameplay::~Gameplay() {

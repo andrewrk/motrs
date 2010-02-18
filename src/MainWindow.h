@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "ArgumentParser.h"
 #include "SDL.h"
 
 class Gameplay;
@@ -11,7 +10,7 @@ class Gameplay;
 class MainWindow
 {
 public:
-    MainWindow(int argc, char * argv[]);
+    MainWindow();
     ~MainWindow();
 
     // main loop and window processing
@@ -25,7 +24,6 @@ private:
     static const char * c_caption;
     static const int c_colorDepth;
 
-    ArgumentParser m_arguments;
     bool m_fullscreen;
     SDL_Surface * m_screen;
     Gameplay * m_gameplay;

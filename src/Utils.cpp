@@ -3,21 +3,25 @@
 #include <fstream>
 
 
-double Utils::distance(double x1, double y1, double x2, double y2) {
+double Utils::distance(double x1, double y1, double x2, double y2)
+{
     return std::sqrt(Utils::distance2(x1, y1, x2, y2));
 }
 
-double Utils::distance2(double x1, double y1, double x2, double y2) {
+double Utils::distance2(double x1, double y1, double x2, double y2)
+{
     double dx = x2 - x1;
     double dy = y2 - y1;
     return dx * dx + dy * dy;
 }
 
-bool Utils::isZero(double d) {
+bool Utils::isZero(double d)
+{
     return std::fabs(d) < 0.000001;
 }
 
-int Utils::stringToInt(std::string value) {
+int Utils::stringToInt(std::string value)
+{
     std::stringstream ss;
     ss << value;
     int out;
@@ -25,39 +29,87 @@ int Utils::stringToInt(std::string value) {
     return out;
 }
 
-std::string Utils::intToString(int value) {
+std::string Utils::intToString(int value)
+{
     std::stringstream ss;
     ss << value;
     return ss.str();
 }
 
-std::string Utils::readString(const char ** cursor) {
+bool Utils::stringToBool(std::string value)
+{
+    std::string lower = toLower(value);
+    return  lower.compare("true") == 0 ||
+            lower.compare("on") == 0 ||
+            lower.compare("1") == 0 ||
+            lower.compare("yes") == 0 ||
+            lower.compare("y") == 0 ||
+            lower.compare("t") == 0;
+}
+
+std::string Utils::boolToString(bool value)
+{
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
+
+std::string Utils::toLower(std::string s)
+{
+    for(unsigned int i=0; i<s.size(); ++i) {
+        s[i] = std::tolower(s[i]);
+    }
+    return s;
+}
+
+std::string Utils::toUpper(std::string s)
+{
+    for(unsigned int i=0; i<s.size(); ++i) {
+        s[i] = std::toupper(s[i]);
+    }
+    return s;
+}
+
+std::string Utils::readString(const char ** cursor)
+{
     int size = readInt(cursor);
     std::string value(*cursor, size);
     *cursor += size;
     return value;
 }
 
-int Utils::readInt(const char ** cursor) {
+int Utils::readInt(const char ** cursor)
+{
     int value = *(int*)*cursor;
     *cursor += sizeof(int);
     return value;
 }
 
-double Utils::readDouble(const char ** cursor) {
+double Utils::readDouble(const char ** cursor)
+{
     double value = *(double*)*cursor;
     *cursor += sizeof(double);
     return value;
 }
 
-std::string Utils::trim(std::string s) {
+bool Utils::isSpace(char c)
+{
+    return std::isspace(c) || c == '\r';
+}
+
+std::string Utils::trim(std::string s)
+{
     return ltrim(rtrim(s));
 }
 
-std::string Utils::ltrim(std::string s) {
+std::string Utils::ltrim(std::string s)
+{
+    if (s.size() == 1 && isSpace(s[0]))
+        return "";
+
     unsigned int goodStart = 0;
     for (unsigned int i = goodStart; i < s.size(); i++) {
-        if (std::isspace(s[i]))
+        if (isSpace(s[i]))
             continue;
         goodStart = i;
         break;
@@ -67,10 +119,14 @@ std::string Utils::ltrim(std::string s) {
     return s.substr(goodStart);
 }
 
-std::string Utils::rtrim(std::string s) {
+std::string Utils::rtrim(std::string s)
+{
+    if (s.size() == 1 && isSpace(s[0]))
+        return "";
+
     unsigned int goodEnd = s.size();
     for (unsigned int i = goodEnd; i > 0; i--) {
-        if (std::isspace(s[i - 1]))
+        if (isSpace(s[i - 1]))
             continue;
         goodEnd = i;
         break;
@@ -78,35 +134,4 @@ std::string Utils::rtrim(std::string s) {
     if (goodEnd == s.size())
         return s;
     return s.substr(0, goodEnd);
-}
-
-bool Utils::loadProperties(std::string path, std::map<std::string, std::string> & propsMap) {
-    std::ifstream in(path.c_str());
-    if (!in.good()) {
-        std::cerr << "file not found: \"" << path << "\"." << std::endl;
-        return false;
-    }
-    std::string line;
-    int lineNumber = 0;
-    while (std::getline(in, line)) {
-        lineNumber++;
-        // strip comments
-        unsigned int commentStart = line.find('#');
-        if (commentStart != std::string::npos)
-            line = line.substr(0, commentStart);
-        // trim leading whitespace (indentation)
-        line = ltrim(line);
-        // skip blank lines
-        if (line.size() == 0)
-            continue;
-        unsigned int equalsIndex = line.find('=');
-        if (equalsIndex == std::string::npos) {
-            std::cerr << "Parse error in file \"" << path << "\" line " << lineNumber << "." << std::endl;
-            return false;
-        }
-        std::string key = rtrim(line.substr(0, equalsIndex));
-        std::string value = trim(line.substr(equalsIndex + 1));
-        propsMap[key] = value;
-    }
-    return true;
 }

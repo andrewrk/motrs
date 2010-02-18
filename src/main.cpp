@@ -1,7 +1,7 @@
 #include "MainWindow.h"
+#include "Config.h"
 
 int main(int argc, char* argv[]) {
-    MainWindow w(argc, argv);
-    return w.exec();
+    Config::initialize(argc, argv, "config.ini");
+    return MainWindow().exec();
 }
-
