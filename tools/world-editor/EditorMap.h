@@ -6,6 +6,10 @@
 #include <QString>
 #include <QStringList>
 
+// An EditorMap has a list of EditorObjects that are tile-aligned.
+// The game editor can use this class to edit maps that have movable EditorObjects
+// Call the compile() method to turn it into a real Map which will break
+// the EditorObjects into tiles
 class EditorMap : public Map
 {
 public:
@@ -29,10 +33,7 @@ public:
     void renameLayer(int index, QString newName);
     QString layerName(int index);
 
-    // save in text format
-    void save(QString file);
-
-    // add/remove (negative) tiles
+    // add / remove(negative amount) tiles
     void addTilesLeft(int amount);
     void addTilesRight(int amount);
     void addTilesTop(int amount);
@@ -46,11 +47,6 @@ public:
 private:
     QStringList m_layerNames;
 
-    // use a full array of tiles and then compile into a palette
-    // when we need to use the real Map
-    Array3<Tile *> * m_sourceTiles;
-
-    void correctNullSourceTiles();
 
 };
 

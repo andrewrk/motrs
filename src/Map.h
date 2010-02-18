@@ -68,7 +68,7 @@ protected:
                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom);
 
     // cache the width and height of the map
-    void calculateBoundaries();
+    virtual void calculateBoundaries();
 };
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef OBJECTVIEW_H
 #define OBJECTVIEW_H
 
-#include "EditorMap.h"
+#include "EditorObject.h"
 
 #include <QWidget>
 #include <QPaintEvent>
@@ -74,7 +74,7 @@ private:
     ObjectEditor * m_window;
 
     // the object we are editing
-    EditorMap * m_object;
+    EditorObject * m_object;
 
     // contains a pixmap to draw when dragging art and such
     QPixmap * m_dragPixmap;
@@ -100,8 +100,6 @@ private:
 
     ViewMode m_viewMode;
 
-    QString m_objectName;
-
     // where is the editor scrolled to, in absolute coordinates
     double m_zoom;
     double m_offsetX;
@@ -112,6 +110,8 @@ private:
     static QVector<QPixmap *> s_shapePixmaps;
     static QStringList s_surfaceTypeNames;
     static QStringList s_shapeNames;
+
+
 
     double screenX(double absoluteX);
     double screenY(double absoluteY);

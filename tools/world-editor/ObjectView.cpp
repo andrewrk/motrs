@@ -106,9 +106,7 @@ void ObjectView::createEmpty()
 {
     if( m_object )
         delete m_object;
-    m_object = new EditorMap();
-
-    m_objectName = QObject::tr("New Object");
+    m_object = new EditorObject();
     setViewMode(Normal);
     refreshGui();
 }
@@ -188,45 +186,30 @@ void ObjectView::paintEvent(QPaintEvent * e)
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_object ) {
-        switch( m_viewMode ) {
-            case Normal:
-                for(int layer=0; layer<m_object->layerCount(); ++layer) {
-                    // draw all art items at this layer
+        if( m_viewMode == Normal ) {
+            for(int layer=0; layer<m_object->layerCount(); ++layer) {
+                // draw all art items at this layer
 
-                    // draw dragged stuff
-                    if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
-                        p.drawPixmap(m_dragPixmapX, m_dragPixmapY, *m_dragPixmap);
-                    }
+                // draw dragged stuff
+                if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
+                    p.drawPixmap(m_dragPixmapX, m_dragPixmapY,
+                        m_dragPixmap->width() * m_zoom,
+                        m_dragPixmap->height() * m_zoom, *m_dragPixmap);
                 }
-            break;
-            case SurfaceType: {
-                // water, ice, etc
-                // only draw the surface type of the selected layer
-                int sizeX = m_object->width() / Tile::size;
-                int sizeY = m_object->height() / Tile::size;
-                for (int x=0; x<sizeX; ++x) {
-                    for(int y=0; y<sizeY; ++y) {
-                        Tile * tile = m_object->tile(x,y,m_selectedLayer);
-                        QPixmap * pixmap = s_surfaceTypePixmaps[tile->surfaceType()];
-                        p.drawPixmap(screenX(x * Tile::size), screenY(y * Tile::size), Tile::size * m_zoom, Tile::size * m_zoom, *pixmap);
-                    }
+            }
+        } else if( m_viewMode == SurfaceType || m_viewMode == Shape ) {
+            int sizeX = m_object->tileCountX();
+            int sizeY = m_object->tileCountY();
+            for (int x=0; x<sizeX; ++x) {
+                for(int y=0; y<sizeY; ++y) {
+                    QPixmap * pixmap = (m_viewMode == SurfaceType) ?
+                        s_surfaceTypePixmaps[m_object->surfaceType(x,y,m_selectedLayer)] :
+                        s_shapePixmaps[m_object->shape(x,y,m_selectedLayer)];
+                    p.drawPixmap(screenX(x * Tile::size), screenY(y * Tile::size), Tile::size * m_zoom, Tile::size * m_zoom, *pixmap);
                 }
-            } break;
-            case Shape: {
-                // solid, triangle, hole, etc
-                // only draw the surface type of the selected layer
-                int sizeX = m_object->width() / Tile::size;
-                int sizeY = m_object->height() / Tile::size;
-                for (int x=0; x<sizeX; ++x) {
-                    for(int y=0; y<sizeY; ++y) {
-                        Tile * tile = m_object->tile(x,y,m_selectedLayer);
-                        QPixmap * pixmap = s_shapePixmaps[tile->shape()];
-                        p.drawPixmap(screenX(x * Tile::size), screenY(y * Tile::size), Tile::size * m_zoom, Tile::size * m_zoom, *pixmap);
-                    }
-                }
-            } break;
-            default:
-                Debug::assert(false, "Unknown view mode");
+            }
+        } else {
+            Debug::assert(false, "Unknown view mode");
         }
 
         drawGrid(p);
@@ -360,10 +343,8 @@ void ObjectView::open(QString file)
 {
     if( m_object )
         delete m_object;
-    m_object = new EditorMap(file);
-    // TODO: if (! m_object.isGood) delete m_object; m_object = NULL;
+    m_object = EditorObject::load(file);
 
-    m_objectName = file;
     setViewMode(Normal);
     refreshGui();
 }
@@ -432,8 +413,8 @@ void ObjectView::drawGrid(QPainter &p)
 {
     EditorSettings::GridRenderType gridType = EditorSettings::gridRenderType();
     if( gridType != EditorSettings::None ) {
-        int sizeX = m_object->width() / Tile::size;
-        int sizeY = m_object->height() / Tile::size;
+        int sizeX = m_object->tileCountX();
+        int sizeY = m_object->tileCountY();
 
         if( gridType == EditorSettings::Pretty ) {
             p.setPen(QColor(128, 128, 128, 64));
@@ -441,13 +422,13 @@ void ObjectView::drawGrid(QPainter &p)
             // vertical
             for(int x=0; x<=sizeX; ++x) {
                 double sx = screenX(x*Tile::size);
-                p.drawLine(sx, screenY(0), sx, screenY(m_object->height()));
+                p.drawLine(sx, screenY(0), sx, screenY(sizeY * Tile::size));
             }
 
             // horizontal
             for(int y=0; y<=sizeY; ++y) {
                 double sy = screenY(y*Tile::size);
-                p.drawLine(screenX(0), sy, screenX(m_object->width()), sy);
+                p.drawLine(screenX(0), sy, screenX(sizeX * Tile::size), sy);
             }
 
         } else if( gridType == EditorSettings::Fast ) {
@@ -554,10 +535,10 @@ void ObjectView::setUpScrolling()
     // set up scroll bars
     const int bufferRoom = 800;
     m_hsb->setMinimum((int)(-bufferRoom));
-    m_hsb->setMaximum((int)(m_object->width()));
+    m_hsb->setMaximum((int)(m_object->tileCountX()*Tile::size));
     m_hsb->setValue((int)0);
     m_vsb->setMinimum((int)(-bufferRoom));
-    m_vsb->setMaximum((int)(m_object->height()));
+    m_vsb->setMaximum((int)(m_object->tileCountY()*Tile::size));
     m_vsb->setValue((int)0);
 }
 
@@ -609,9 +590,9 @@ void ObjectView::swapLayers(int i, int j)
 void ObjectView::refreshProperties()
 {
     QTableWidget * tbl = m_window->propertiesTable();
-    tbl->item(Name, 1)->setText(m_objectName);
-    tbl->item(Width, 1)->setText(QString::number((int) m_object->width() / Tile::size));
-    tbl->item(Height, 1)->setText(QString::number((int) m_object->height() / Tile::size));
+    tbl->item(Name, 1)->setText(m_object->name());
+    tbl->item(Width, 1)->setText(QString::number(m_object->tileCountX()));
+    tbl->item(Height, 1)->setText(QString::number(m_object->tileCountY()));
     tbl->item(Description, 1)->setText(QObject::tr("description not supported yet"));
 }
 
@@ -623,16 +604,16 @@ void ObjectView::propertyChanged(int row)
     QString value = tbl->item(row, 1)->text();
     switch(prop) {
         case Name:
-            m_objectName = value;
+            m_object->setName(value);
             break;
         case Width:
-            m_object->setWidth(value.toInt() * Tile::size);
+            m_object->addTilesRight(value.toInt() - m_object->tileCountX());
             break;
         case Height:
-            m_object->setHeight(value.toInt() * Tile::size);
+            m_object->addTilesBottom(value.toInt() - m_object->tileCountY());
             break;
         case Description:
-            // TODO: handle this case
+            m_object->setDescription(value);
             break;
         default:
             Debug::assert(false, "unhandled property");
@@ -673,33 +654,29 @@ void ObjectView::mousePressEvent(QMouseEvent * e)
 
 void ObjectView::mouseMoveEvent(QMouseEvent * e)
 {
-    int tileX = absoluteX(e->x()) / Tile::size;
-    int tileY = absoluteY(e->y()) / Tile::size;
-    int tileZ = m_selectedLayer;
-    bool inRange =  tileX >= 0 && tileX < m_object->tileCountX() &&
-                    tileY >= 0 && tileY < m_object->tileCountY() &&
-                    tileZ >= 0;
+    if( m_viewMode == Normal ) {
 
-    switch(m_viewMode) {
-        case Normal:
+    } else if( m_viewMode == SurfaceType || m_viewMode == Shape ) {
+        int tileX = absoluteX(e->x()) / Tile::size;
+        int tileY = absoluteY(e->y()) / Tile::size;
+        int tileZ = m_selectedLayer;
+        bool inRange =  tileX >= 0 && tileX < m_object->tileCountX() &&
+                        tileY >= 0 && tileY < m_object->tileCountY() &&
+                        tileZ >= 0;
 
-            break;
-        case SurfaceType:
-            // are they over a tile?
-            if( inRange && e->button() == Qt::LeftButton ) {
-                // paint the tile they are over with the selected surface type.
-                Tile * tile = m_object->tile(tileX, tileY, tileZ);
-                tile->setSurfaceType((Tile::SurfaceType)m_window->surfaceTypesList()->currentRow());
-                this->update();
+        // are they over a tile and clicking the mouse?
+        if( inRange && (e->buttons() & Qt::LeftButton) ) {
+            // paint the tile they are over with the selected surface type or shape
+            if( m_viewMode == SurfaceType ) {
+                m_object->setSurfaceType(tileX, tileY, tileZ,
+                    (Tile::SurfaceType)m_window->surfaceTypesList()->currentRow());
+            } else {
+                m_object->setShape(tileX, tileY, tileZ,
+                    (Tile::Shape)m_window->shapesList()->currentRow());
             }
-            break;
-        case Shape:
-            if( inRange && e->button() == Qt::LeftButton ) {
-                // paint the tile they are over with the selected surface type.
-                Tile * tile = m_object->tile(tileX, tileY, tileZ);
-                tile->setShape((Tile::Shape)m_window->shapesList()->currentRow());
-                this->update();
-            }
-            break;
+            this->update();
+        }
+    } else {
+        Debug::assert(false, "Invalid viewMode");
     }
 }
