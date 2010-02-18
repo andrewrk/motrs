@@ -12,6 +12,7 @@ class EditorResourceManager
 public:
     static bool loadTextFile(QString file, QVector< QPair<QString, QString> > & v);
     static QString dataDir();
+    static QString localDataDir();
 
     // create a new QPixmap that represents the graphic in graphicName
     static QPixmap * pixmapForGraphic(QString graphicName);

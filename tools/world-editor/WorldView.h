@@ -9,21 +9,14 @@
 #include "EditorWorld.h"
 #include "EditorMap.h"
 #include "EditorEntity.h"
-#include "MainWindow.h"
+#include "WorldEditor.h"
 
 class WorldView : public QWidget
 {
     Q_OBJECT
-    friend class MainWindow;
+    friend class WorldEditor;
 public:
-
-    enum GridRenderType {
-        None,
-        Fast,
-        Pretty,
-    };
-
-    WorldView(MainWindow * window, QWidget * parent = NULL);
+    WorldView(WorldEditor * window, QWidget * parent = NULL);
     ~WorldView();
 
     void setWorld(EditorWorld * world);
@@ -42,10 +35,6 @@ protected:
     void mouseMoveEvent(QMouseEvent * e);
     void keyPressEvent(QKeyEvent * e);
     void keyReleaseEvent(QKeyEvent * e);
-    void dropEvent(QDropEvent * e);
-    void dragEnterEvent(QDragEnterEvent * e);
-    void dragMoveEvent(QDragMoveEvent * e);
-    void dragLeaveEvent(QDragLeaveEvent * e);
 private:
     enum MouseState {
         Normal,
@@ -69,21 +58,16 @@ private:
         EditorMap * map;
     } ArtItem;
 
-    // how far away from border lines can you be to be able to use stretch tools
-    static const int s_lineSelectRadius;
-
     QScrollBar * m_hsb;
     QScrollBar * m_vsb;
 
-    MainWindow * m_window;
+    WorldEditor * m_window;
     EditorWorld * m_world;
-    double m_zoom;
 
     // where is the editor scrolled to, in absolute coordinates
+    double m_zoom;
     double m_offsetX;
     double m_offsetY;
-
-    GridRenderType m_grid;
 
     // saved list of maps that are visible for fast rendering
     QVector<EditorMap *> m_mapCache;
@@ -96,7 +80,7 @@ private:
 
     int m_mouseDownX;
     int m_mouseDownY;
-    MainWindow::MouseTool m_mouseDownTool;
+    WorldEditor::MouseTool m_mouseDownTool;
     int m_mouseState;
 
     // location of the mouse
@@ -107,11 +91,6 @@ private:
     // holds QPainter object for drawing
     static QPainter * s_painter;
 
-    // contains a pixmap to draw when dragging art and such
-    QPixmap * m_dragPixmap;
-    int m_dragPixmapX;
-    int m_dragPixmapY;
-
     // art that has not been converted into objects or entities yet.
     ArtItem m_tempArt;
 
@@ -121,8 +100,6 @@ private:
     double screenY(double absoluteY);
     double absoluteX(double screenX);
     double absoluteY(double screenY);
-
-    void readSettings();
 
     void drawGrid(QPainter &p);
 

@@ -9,6 +9,30 @@
 #include <QDebug>
 #include <QPainter>
 
+EditorMap::EditorMap()
+{
+    m_palette.clear();
+    m_palette.push_back(Tile::nullTile());
+    m_layerNames.clear();
+    m_entities.clear();
+
+    int defaultSizeX = 2;
+    int defaultSizeY = 2;
+    int defaultLayerCount = 1;
+    m_tiles = new Array3<int>(defaultSizeX, defaultSizeY, defaultLayerCount);
+
+    for(int z=0; z<defaultLayerCount; ++z) {
+        m_layerNames.append(QObject::tr("Layer %1").arg(QString::number(z)));
+        for(int y=0; y<defaultSizeY; ++y) {
+            for(int x=0; x<defaultSizeX; ++x) {
+                m_tiles->set(x,y,z,0); // null tile
+            }
+        }
+    }
+
+    calculateBoundaries();
+}
+
 EditorMap::EditorMap(QString file)
 {
     QVector< QPair<QString, QString> > props;
@@ -119,6 +143,7 @@ void EditorMap::setWidth(double value)
     int tileCount = (int)(value / Tile::size);
     if (tileCount > 0)
         m_tiles->redim(tileCount, m_tiles->sizeY(), m_tiles->sizeZ(), 0);
+
     calculateBoundaries();
 }
 
@@ -127,9 +152,9 @@ void EditorMap::setHeight(double value)
     int tileCount = (int)(value / Tile::size);
     if (tileCount > 0)
         m_tiles->redim(m_tiles->sizeX(), tileCount, m_tiles->sizeZ(), 0);
+
     calculateBoundaries();
 }
-
 
 void EditorMap::addLayer(QString name)
 {
@@ -161,3 +186,41 @@ QString EditorMap::layerName(int index)
     return m_layerNames.at(index);
 }
 
+void EditorMap::addTilesLeft(int amount)
+{
+    m_tiles->expandLeft(amount, 0);
+    calculateBoundaries();
+}
+
+void EditorMap::addTilesRight(int amount)
+{
+    m_tiles->expandRight(amount, 0);
+    calculateBoundaries();
+}
+
+void EditorMap::addTilesTop(int amount)
+{
+    m_tiles->expandTop(amount, 0);
+    calculateBoundaries();
+}
+
+void EditorMap::addTilesBottom(int amount)
+{
+    m_tiles->expandBottom(amount, 0);
+    calculateBoundaries();
+}
+
+Tile * EditorMap::tile(int x, int y, int z)
+{
+    return m_palette.at(m_tiles->get(x,y,z));
+}
+
+int EditorMap::tileCountX()
+{
+    return m_tiles->sizeX();
+}
+
+int EditorMap::tileCountY()
+{
+    return m_tiles->sizeY();
+}

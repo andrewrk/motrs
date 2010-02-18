@@ -30,10 +30,9 @@ public:
         tsFloorRailE  = 8,
         tsFloorRailS  = 9,
         tsFloorRailW  = 10,
-        tsFloorRailNE = 11,
-        tsFloorRailSE = 12,
-        tsFloorRailSW = 13,
-        tsFloorRailNW = 14,
+
+        // keep track of how many there are
+        tsCount
     };
 
     /** It's important to leave these values alones since they're stored in .map files */
@@ -42,12 +41,17 @@ public:
         stWater     = 1,
         stIce       = 2,
         stQuickSand = 3,
+
+        // keep track of how many there are
+        stCount
     };
 
     static Tile * nullTile();
 
 
     Tile(const char** cursor);
+    Tile(const Tile &); // copy constructor
+    Tile(); // null constructor - constructs a null tile
     virtual ~Tile();
 
     // screenX and screenY is the absolute coordinates of 0,0 on the screen
@@ -55,6 +59,11 @@ public:
     virtual void draw(int screenX, int screenY);
     bool hasMinPresence(PhysicalPresence minPresence);
     void resolveCircleCollision(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
+
+    void setShape(Shape shape) { m_shape = shape; }
+    Shape shape() { return m_shape; }
+    void setSurfaceType(SurfaceType surfaceType) { m_surfaceType = surfaceType; }
+    SurfaceType surfaceType() { return m_surfaceType; }
 
 protected:
     static void resolveCircleOnSquare(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
@@ -70,9 +79,6 @@ protected:
     SurfaceType m_surfaceType;
 
     Graphic * m_graphic;
-
-    /** don't use this constructor. It's for making the NullTile */
-    Tile();
 };
 
 #endif

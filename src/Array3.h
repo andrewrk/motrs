@@ -27,6 +27,12 @@ public:
     void redim(int newSizeX, int newSizeY, int newSizeZ, T fillValue);
     void redim(int newSizeX, int newSizeY, int newSizeZ);
 
+    // add or remove columns, shifting the data to the right
+    void expandLeft(int amount, T fillValue);
+    void expandTop(int amount, T fillValue);
+    void expandRight(int amount, T fillValue);
+    void expandBottom(int amount, T fillValue);
+
     inline int sizeX(){ return m_sizeX; }
     inline int sizeY(){ return m_sizeY; }
     inline int sizeZ(){ return m_sizeZ; }
@@ -171,5 +177,82 @@ void Array3<T>::swapRowZ(int i, int j)
     }
 }
 
+template <class T>
+void Array3<T>::expandLeft(int amount, T fill)
+{
+    int newSizeX = m_sizeX + amount;
+    T * new_arr = new T[newSizeX * m_sizeY * m_sizeZ];
+    for(int x=0; x<m_sizeX; ++x) {
+        for(int y=0; y<m_sizeY; ++y) {
+            for(int z=0; z<m_sizeZ; ++z) {
+                int newX = x + amount;
+
+                if( newX >= 0 && newX < newSizeX ) {
+                    new_arr[newX + y * newSizeX + z * m_sizeY * newSizeX] =
+                            m_arr[x + y * m_sizeX + z * m_sizeY * m_sizeX];
+                }
+            }
+        }
+    }
+
+    // add the fill
+    for(int x=0; x<amount; ++x) {
+        for(int y=0; y<m_sizeY; ++y) {
+            for(int z=0; z<m_sizeZ; ++z) {
+                new_arr[x + y * newSizeX + z * m_sizeY * newSizeX] = fill;
+            }
+        }
+    }
+
+
+    delete[] m_arr;
+    m_arr = new_arr;
+    m_sizeX = newSizeX;
+}
+
+template <class T>
+void Array3<T>::expandTop(int amount, T fill)
+{
+    int newSizeY = m_sizeY + amount;
+    T * new_arr = new T[m_sizeX * newSizeY * m_sizeZ];
+    for(int x=0; x<m_sizeX; ++x) {
+        for(int y=0; y<m_sizeY; ++y) {
+            for(int z=0; z<m_sizeZ; ++z) {
+                int newY = y + amount;
+
+                if( newY >= 0 && newY < newSizeY ) {
+                    new_arr[x + newY * m_sizeX + z * newSizeY * m_sizeX] =
+                            m_arr[x + y * m_sizeX + z * m_sizeY * m_sizeX];
+                }
+            }
+        }
+    }
+
+    // add the fill
+    for(int y=0; y<amount; ++y) {
+        for(int x=0; x<m_sizeX; ++x) {
+            for(int z=0; z<m_sizeZ; ++z) {
+                new_arr[x + y * m_sizeX + z * newSizeY * m_sizeX] = fill;
+            }
+        }
+    }
+
+
+    delete[] m_arr;
+    m_arr = new_arr;
+    m_sizeY = newSizeY;
+}
+
+template <class T>
+void Array3<T>::expandRight(int amount, T fill)
+{
+    redim(m_sizeX + amount, m_sizeY, m_sizeZ, fill);
+}
+
+template <class T>
+void Array3<T>::expandBottom(int amount, T fill)
+{
+    redim(m_sizeX, m_sizeY + amount, m_sizeZ, fill);
+}
 
 #endif
