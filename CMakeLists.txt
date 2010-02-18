@@ -117,6 +117,8 @@ SET(REUSABLE_CLASSES
     ${CMAKE_SOURCE_DIR}/src/Input.cpp
     ${CMAKE_SOURCE_DIR}/src/Entity.cpp
     ${CMAKE_SOURCE_DIR}/src/Physics.cpp
+    ${CMAKE_SOURCE_DIR}/src/MainWindow.cpp
+    ${CMAKE_SOURCE_DIR}/src/ArgumentParser.cpp
 )
 
 FILE(GLOB_RECURSE EDITOR_UI_FILES ${CMAKE_SOURCE_DIR}/tools/world-editor/*.ui)

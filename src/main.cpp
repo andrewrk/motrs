@@ -1,47 +1,7 @@
-#include "SDL.h"
-#include "Gameplay.h"
-#include "Utils.h"
-#include "ArgumentParser.h"
-
-#include <iostream>
-#include <string>
-#include <cstdlib>
-
-const int fps = 48;
+#include "MainWindow.h"
 
 int main(int argc, char* argv[]) {
-    ArgumentParser ap(argc, argv);
-
-    //grab parameters
-    bool windowMode = ap.contains("windowed", 'w');
-
-    // init SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cerr << "Unable to init SDL: " << SDL_GetError() << std::endl;
-        std::exit(1);
-    }
-    atexit(SDL_Quit);
-
-    // create screen
-    Uint32 vmflags = SDL_HWSURFACE | SDL_DOUBLEBUF;
-    // TODO tmp force windowed mode
-    windowMode = true;
-    if (!windowMode)
-        vmflags |= SDL_FULLSCREEN;
-
-    SDL_Surface * screen = SDL_SetVideoMode(800, 600, 32, vmflags);
-    if (screen == NULL) {
-        std::cerr << "Unable to create SDL video surface: "
-            << SDL_GetError() << std::endl;
-        std::exit(1);
-    }
-
-    Gameplay * gameplay = new Gameplay(screen, fps);
-    bool good = gameplay->isGood();
-    if (good)
-        gameplay->mainLoop();
-
-    delete gameplay;
-    return good ? 0 : 1;
+    MainWindow w(argc, argv);
+    return w.exec();
 }
 

@@ -11,16 +11,17 @@
 
 #include <set>
 
+class MainWindow;
+
 class Gameplay
 {
 public:
-
     static Gameplay * instance() {
         Debug::assert(s_inst != NULL, "Gameplay::instance() s_inst null");
         return s_inst;
     }
 
-    Gameplay(SDL_Surface * screen, int fps);
+    Gameplay(SDL_Surface * screen, int fps, MainWindow * owner);
     ~Gameplay();
 
     void mainLoop();
@@ -32,7 +33,7 @@ public:
 
     double screenWidth() { return 800.0; }
     double screenHeight() { return 600.0; }
-private:
+private: //variables
 
     static const char * ResourceFilePath;
     static Gameplay * s_inst;
@@ -57,6 +58,9 @@ private:
     std::vector<Entity*> m_entities;
     Entity * m_player;
 
+    MainWindow * m_window;
+
+private: //methods
     bool processEvents();
     void updateDisplay();
     void nextFrame();

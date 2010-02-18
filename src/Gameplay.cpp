@@ -6,6 +6,7 @@
 #include "os_config.h"
 #include "Debug.h"
 #include "Utils.h"
+#include "MainWindow.h"
 
 #include <cmath>
 
@@ -19,7 +20,7 @@ const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
 
 Gameplay * Gameplay::s_inst = NULL;
 
-Gameplay::Gameplay(SDL_Surface * screen, int fps) :
+Gameplay::Gameplay(SDL_Surface * screen, int fps, MainWindow * owner) :
     m_good(true),
     m_screen(screen),
     m_fps(fps),
@@ -31,7 +32,8 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps) :
     m_loadedMaps(),
     m_loadedMapsCache(),
     m_entities(),
-    m_player(NULL)
+    m_player(NULL),
+    m_window(owner)
 {
     Debug::assert(s_inst == NULL, "only one Gameplay allowed");
     s_inst = this;
@@ -66,30 +68,17 @@ Gameplay::~Gameplay() {
 void Gameplay::mainLoop() {
     Uint32 next_time = 0;
     while (true) {
-        //input
+        // input
         if (!processEvents())
             return;
 
-        //set up an interval
+        // set up an interval
         Uint32 now = SDL_GetTicks();
         if (now >= next_time) {
-            SDL_Flip(m_screen); //show the frame that is already drawn
+            // show the frame that is already drawn
+            SDL_Flip(m_screen);
 
-            // cache loaded maps
-            m_loadedMapsCache.clear();
-            for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
-                m_loadedMapsCache.push_back(*iMap);
-            // cache loaded entities
-            m_entities.clear();
-            m_entities.push_back(m_player);
-            for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++) {
-                std::vector<Entity*>* mapEntities = m_loadedMapsCache[i]->entities();
-                for (unsigned int j = 0; j < mapEntities->size(); j++)
-                    m_entities.push_back((*mapEntities)[j]);
-            }
-
-
-            //main gameplay loop
+            // perform calculations
             nextFrame();
 
             // draw next frame
@@ -114,6 +103,8 @@ bool Gameplay::processEvents() {
                 // Handle Alt+F4 for windows
                 if (event.key.keysym.sym == SDLK_F4 && (event.key.keysym.mod & KMOD_ALT))
                     return false;
+                else if (event.key.keysym.sym == SDLK_RETURN && (event.key.keysym.mod & KMOD_ALT) )
+                    m_window->toggleFullscreen();
                 break;
             case SDL_QUIT:
                 return false;
@@ -124,6 +115,20 @@ bool Gameplay::processEvents() {
 }
 
 void Gameplay::nextFrame() {
+    // cache loaded maps
+    m_loadedMapsCache.clear();
+    for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
+        m_loadedMapsCache.push_back(*iMap);
+    // cache loaded entities
+    m_entities.clear();
+    m_entities.push_back(m_player);
+    for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++) {
+        std::vector<Entity*>* mapEntities = m_loadedMapsCache[i]->entities();
+        for (unsigned int j = 0; j < mapEntities->size(); j++)
+            m_entities.push_back((*mapEntities)[j]);
+    }
+
+
     // refresh the input state
     Input::refresh();
 
