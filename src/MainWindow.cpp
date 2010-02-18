@@ -12,14 +12,11 @@ const int MainWindow::c_colorDepth = 32;
 const char * MainWindow::c_caption = "Myth of the Ruby Sword";
 
 MainWindow::MainWindow() :
-    m_screen(NULL)
+    m_screen(NULL),
+    m_videoModeFlags(SDL_HWSURFACE | SDL_DOUBLEBUF)
 {
-    Uint32 videoModeFlags = SDL_HWSURFACE | SDL_DOUBLEBUF;
-
     // set fullscreen flag
-    m_fullscreen = Config::instance()->fullscreen();
-    if (m_fullscreen)
-        videoModeFlags |= SDL_FULLSCREEN;
+    setFullscreenFlags(Config::instance()->fullscreen());
 
     // initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -31,7 +28,7 @@ MainWindow::MainWindow() :
     // create and display the window
     SDL_WM_SetCaption(c_caption, c_caption);
     // TODO: SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL); http://sdl.beuc.net/sdl.wiki/SDL_WM_SetIcon
-    m_screen = SDL_SetVideoMode(c_width, c_height, c_colorDepth, videoModeFlags);
+    m_screen = SDL_SetVideoMode(c_width, c_height, c_colorDepth, m_videoModeFlags);
     if (m_screen == NULL) {
         std::cerr << "Unable to create SDL video surface: "
             << SDL_GetError() << std::endl;
@@ -62,8 +59,18 @@ int MainWindow::exec()
 
 void MainWindow::toggleFullscreen()
 {
-    m_fullscreen = ! m_fullscreen;
-    SDL_WM_ToggleFullScreen(m_screen);
+    setFullscreenFlags(! m_fullscreen);
+    m_screen = SDL_SetVideoMode(c_width, c_height, c_colorDepth, m_videoModeFlags);
+    //SDL_WM_ToggleFullScreen(m_screen);
+}
+
+void MainWindow::setFullscreenFlags(bool fullscreen)
+{
+    m_fullscreen = fullscreen;
+    if( m_fullscreen )
+        m_videoModeFlags |= SDL_FULLSCREEN;
+    else
+        m_videoModeFlags &= ~SDL_FULLSCREEN;
 }
 
 

@@ -17,7 +17,7 @@ public:
     int exec();
 
     void toggleFullscreen();
-private:
+private: //variables
     static const int c_fps;
     static const int c_width;
     static const int c_height;
@@ -27,6 +27,9 @@ private:
     bool m_fullscreen;
     SDL_Surface * m_screen;
     Gameplay * m_gameplay;
+    Uint32 m_videoModeFlags;
+private: //methods
+    void setFullscreenFlags(bool fullscreen);
 };
 
 #endif // MAINWINDOW_H
