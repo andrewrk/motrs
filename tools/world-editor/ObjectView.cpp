@@ -189,21 +189,23 @@ void ObjectView::paintEvent(QPaintEvent * e)
         if( m_viewMode == Normal ) {
             QHash<int, QList<EditorObject::ObjectGraphic *> *> * graphics = m_object->graphics();
             for(int layer=0; layer<m_object->layerCount(); ++layer) {
-                // draw all art items at this layer
-                QList<EditorObject::ObjectGraphic *> * thisLayerGraphics = graphics->value(layer);
-                for(int i=0; i<thisLayerGraphics->size(); ++i) {
-                    EditorObject::ObjectGraphic * graphic = thisLayerGraphics->at(i);
-                    p.drawPixmap(screenX(graphic->x), screenY(graphic->y),
-                        graphic->pixmap->width() * m_zoom,
-                        graphic->pixmap->height() * m_zoom,
-                        *graphic->pixmap);
-                }
+                if( m_window->layersList()->item(layer)->checkState() == Qt::Checked ) {
+                    // draw all art items at this layer
+                    QList<EditorObject::ObjectGraphic *> * thisLayerGraphics = graphics->value(layer);
+                    for(int i=0; i<thisLayerGraphics->size(); ++i) {
+                        EditorObject::ObjectGraphic * graphic = thisLayerGraphics->at(i);
+                        p.drawPixmap(screenX(graphic->x), screenY(graphic->y),
+                            graphic->pixmap->width() * m_zoom,
+                            graphic->pixmap->height() * m_zoom,
+                            *graphic->pixmap);
+                    }
 
-                // draw dragged stuff
-                if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
-                    p.drawPixmap(m_dragPixmapX, m_dragPixmapY,
-                        m_dragPixmap->width() * m_zoom,
-                        m_dragPixmap->height() * m_zoom, *m_dragPixmap);
+                    // draw dragged stuff
+                    if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
+                        p.drawPixmap(m_dragPixmapX, m_dragPixmapY,
+                            m_dragPixmap->width() * m_zoom,
+                            m_dragPixmap->height() * m_zoom, *m_dragPixmap);
+                    }
                 }
             }
         } else if( m_viewMode == SurfaceType || m_viewMode == Shape ) {

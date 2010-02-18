@@ -64,6 +64,7 @@ private slots:
     void on_actionSurfaceType_triggered();
     void on_actionNormal_triggered();
     void on_lstLayers_currentRowChanged(int currentRow);
+    void on_lstLayers_itemChanged(QListWidgetItem *);
 
 };
 

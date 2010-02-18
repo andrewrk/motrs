@@ -123,6 +123,11 @@ void ObjectEditor::on_lstLayers_currentRowChanged(int currentRow)
     m_view->setSelectedLayer(currentRow);
 }
 
+void ObjectEditor::on_lstLayers_itemChanged(QListWidgetItem *)
+{
+    m_view->update();
+}
+
 void ObjectEditor::open(QString file)
 {
     m_view->open(file);
