@@ -1,7 +1,7 @@
 #ifndef EDITORRESOURCEMANAGER_H
 #define EDITORRESOURCEMANAGER_H
 
-#include <QVector>
+#include <QList>
 #include <QString>
 #include <QPair>
 #include <QPixmap>
@@ -10,7 +10,7 @@
 class EditorResourceManager
 {
 public:
-    static bool loadTextFile(QString file, QVector< QPair<QString, QString> > & v);
+    static bool loadTextFile(QString file, QList< QPair<QString, QString> > & out_list);
     static QString dataDir();
     static QString localDataDir();
     static QString objectsDir();

@@ -8,7 +8,7 @@
 
 EditorEntity::EditorEntity(QString file)
 {
-    QVector< QPair<QString, QString> > props;
+    QList< QPair<QString, QString> > props;
 
     m_good = EditorResourceManager::loadTextFile(file, props);
 

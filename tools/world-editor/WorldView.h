@@ -88,8 +88,8 @@ private: //variables
     double m_offsetY;
 
     // saved list of maps that are visible for fast rendering
-    QVector<EditorMap *> m_mapCache;
-    QVector<EditorEntity *> m_entityCache;
+    QList<EditorMap *> m_mapCache;
+    QList<EditorEntity *> m_entityCache;
     // highest number of layers of all visible maps
     int m_maxLayer;
 

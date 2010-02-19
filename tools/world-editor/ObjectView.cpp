@@ -20,10 +20,10 @@
 
 #include "moc_ObjectView.cxx"
 
-QVector<QPixmap *> ObjectView::s_surfaceTypePixmaps;
+QList<QPixmap *> ObjectView::s_surfaceTypePixmaps;
 QStringList ObjectView::s_surfaceTypeNames;
 
-QVector<QPixmap *> ObjectView::s_shapePixmaps;
+QList<QPixmap *> ObjectView::s_shapePixmaps;
 QStringList ObjectView::s_shapeNames;
 
 const char * ObjectView::c_shapes[] = {

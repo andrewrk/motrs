@@ -61,7 +61,7 @@ QPixmap * EditorResourceManager::pixmapForArt(QString artName)
 }
 
 
-bool EditorResourceManager::loadTextFile(QString filename, QVector< QPair<QString, QString> > & v)
+bool EditorResourceManager::loadTextFile(QString filename, QList< QPair<QString, QString> > & out_list)
 {
     QFile infile(filename);
 
@@ -70,7 +70,7 @@ bool EditorResourceManager::loadTextFile(QString filename, QVector< QPair<QStrin
         return false;
     }
 
-    v.clear();
+    out_list.clear();
 
     QTextStream in(&infile);
     while(! in.atEnd()) {
@@ -101,7 +101,7 @@ bool EditorResourceManager::loadTextFile(QString filename, QVector< QPair<QStrin
             QString name = pairs.takeFirst().trimmed();
             QString value = pairs.join("").trimmed();
 
-            v.append(QPair<QString, QString>(name, value));
+            out_list.append(QPair<QString, QString>(name, value));
         }
     }
 

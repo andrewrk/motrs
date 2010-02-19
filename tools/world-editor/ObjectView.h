@@ -126,8 +126,8 @@ private: //variables
     double m_offsetY;
 
     // pixmaps used to display surface types and shapes
-    static QVector<QPixmap *> s_surfaceTypePixmaps;
-    static QVector<QPixmap *> s_shapePixmaps;
+    static QList<QPixmap *> s_surfaceTypePixmaps;
+    static QList<QPixmap *> s_shapePixmaps;
     static QStringList s_surfaceTypeNames;
     static QStringList s_shapeNames;
 

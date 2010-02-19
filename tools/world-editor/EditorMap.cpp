@@ -35,7 +35,7 @@ EditorMap::EditorMap()
 
 EditorMap::EditorMap(QString file)
 {
-    QVector< QPair<QString, QString> > props;
+    QList< QPair<QString, QString> > props;
 
     bool good = EditorResourceManager::loadTextFile(file, props);
 

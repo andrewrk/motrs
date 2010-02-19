@@ -1,5 +1,7 @@
 #include "EditorObject.h"
 
+#include "EditorResourceManager.h"
+
 #include <QFile>
 #include <QDebug>
 
