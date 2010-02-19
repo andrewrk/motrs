@@ -53,6 +53,13 @@ WorldView::~WorldView()
         delete m_world;
 }
 
+void WorldView::refreshGui()
+{
+    refreshLayersList();
+    refreshObjectsList();
+    setControlEnableStates();
+}
+
 void WorldView::resizeEvent(QResizeEvent * e)
 {
     // move the scroll bars into position
@@ -516,6 +523,8 @@ void WorldView::setWorld(EditorWorld * world)
     m_vsb->setValue((int)(m_world->top()));
 
     updateViewCache();
+
+    refreshGui();
 }
 
 void WorldView::refreshLayersList()
@@ -566,8 +575,7 @@ void WorldView::refreshObjectsList()
 void WorldView::selectMap(EditorMap * map)
 {
     m_selectedMap = map;
-    refreshLayersList();
-    refreshObjectsList();
+    refreshGui();
     this->update();
 }
 

@@ -23,9 +23,6 @@ WorldEditor::WorldEditor(QWidget *parent) :
 
     m_ui->actionQuit->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_F4));
 
-    m_view->setFocusPolicy(Qt::StrongFocus);
-
-    setCentralWidget(m_view);
 
     // fill tools combo box with appropriate values
     fillToolComboBox(*m_ui->cboLeftClick);
@@ -50,6 +47,10 @@ WorldEditor::WorldEditor(QWidget *parent) :
     m_ui->cboLeftClick->setCurrentIndex(settings.value("state/tool/left", WorldView::Arrow).toInt());
     m_ui->cboMiddleClick->setCurrentIndex(settings.value("state/tool/middle", WorldView::Pan).toInt());
     m_ui->cboRightClick->setCurrentIndex(settings.value("state/tool/right", WorldView::Eraser).toInt());
+
+    m_view->setFocusPolicy(Qt::StrongFocus);
+    setCentralWidget(m_view);
+    m_view->refreshGui();
 }
 
 void WorldEditor::on_cboLeftClick_currentIndexChanged(int index)

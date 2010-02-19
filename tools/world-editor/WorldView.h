@@ -45,6 +45,8 @@ public: //methods
 
     MouseTool toolRightClick() { return m_toolRightClick; }
     void setToolRightClick(MouseTool tool);
+
+    void refreshGui();
 protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
