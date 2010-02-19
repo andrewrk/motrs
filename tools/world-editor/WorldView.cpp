@@ -30,7 +30,7 @@ WorldView::WorldView(WorldEditor * window, QWidget * parent) :
     m_offsetY(0),
     m_mapCache(),
     m_selectedMap(NULL),
-    m_mouseDownTool(WorldEditor::Nothing),
+    m_mouseDownTool(Nothing),
     m_mouseState(Normal)
 {
     m_hsb->show();
@@ -311,12 +311,12 @@ void WorldView::determineCursor()
     switch(m_mouseState) {
         case Normal: {
             switch(m_mouseDownTool) {
-                case WorldEditor::Nothing: {
+                case Nothing: {
                     // change mouse cursor to sizers if over map boundaries
                     // if the user could use the arrow tool
-                    if( m_window->m_toolLeftClick == WorldEditor::Arrow ||
-                        m_window->m_toolMiddleClick == WorldEditor::Arrow ||
-                        m_window->m_toolRightClick == WorldEditor::Arrow )
+                    if( m_toolLeftClick == Arrow ||
+                        m_toolMiddleClick == Arrow ||
+                        m_toolRightClick == Arrow )
                     {
                         if( overMapLeft(m_mouseX, m_mouseY) || overMapRight(m_mouseX, m_mouseY))
                             this->setCursor(Qt::SizeHorCursor);
@@ -328,12 +328,12 @@ void WorldView::determineCursor()
                             this->setCursor(Qt::ArrowCursor);
                     }
                 } break;
-                case WorldEditor::Arrow: break;
-                case WorldEditor::Eraser: break;
-                case WorldEditor::Pan: break;
-                case WorldEditor::Center: break;
-                case WorldEditor::Pencil: break;
-                case WorldEditor::Brush: break;
+                case Arrow: break;
+                case Eraser: break;
+                case Pan: break;
+                case Center: break;
+                case Pencil: break;
+                case Brush: break;
             }
         } break;
         case SetStartPoint: break;
@@ -355,13 +355,13 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
     switch(m_mouseState) {
         case Normal: {
             switch(m_mouseDownTool) {
-                case WorldEditor::Nothing: break;
-                case WorldEditor::Arrow: break;
-                case WorldEditor::Eraser: break;
-                case WorldEditor::Pan: break;
-                case WorldEditor::Center: break;
-                case WorldEditor::Pencil: break;
-                case WorldEditor::Brush: break;
+                case Nothing: break;
+                case Arrow: break;
+                case Eraser: break;
+                case Pan: break;
+                case Center: break;
+                case Pencil: break;
+                case Brush: break;
             }
         } break;
         case SetStartPoint: break;
@@ -379,14 +379,14 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
 
 void WorldView::mouseReleaseEvent(QMouseEvent * e)
 {
-    WorldEditor::MouseTool tool = WorldEditor::Nothing;
+    MouseTool tool = Nothing;
 
     if( e->button() == Qt::LeftButton )
-        tool = m_window->m_toolLeftClick;
+        tool = m_toolLeftClick;
     else if( e->button() == Qt::MidButton )
-        tool = m_window->m_toolMiddleClick;
+        tool = m_toolMiddleClick;
     else if( e->button() == Qt::RightButton )
-        tool = m_window->m_toolRightClick;
+        tool = m_toolRightClick;
     else
         return;
 
@@ -415,7 +415,7 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
 
     // return state to normal
     if( tool == m_mouseDownTool ) {
-        m_mouseDownTool = WorldEditor::Nothing;
+        m_mouseDownTool = Nothing;
         m_mouseState = Normal;
         determineCursor();
     }
@@ -426,17 +426,17 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
 void WorldView::mousePressEvent(QMouseEvent * e)
 {
     // if we are already pressing down the mouse with another tool, return
-    if( m_mouseDownTool != WorldEditor::Nothing )
+    if( m_mouseDownTool != Nothing )
         return;
 
-    WorldEditor::MouseTool tool = WorldEditor::Nothing;
+    MouseTool tool = Nothing;
 
     if( e->button() == Qt::LeftButton )
-        tool = m_window->m_toolLeftClick;
+        tool = m_toolLeftClick;
     else if( e->button() == Qt::MidButton )
-        tool = m_window->m_toolMiddleClick;
+        tool = m_toolMiddleClick;
     else if( e->button() == Qt::RightButton )
-        tool = m_window->m_toolRightClick;
+        tool = m_toolRightClick;
     else
         return;
 
@@ -445,9 +445,9 @@ void WorldView::mousePressEvent(QMouseEvent * e)
     m_mouseDownTool = tool;
 
     switch( tool ){
-        case WorldEditor::Nothing:
+        case Nothing:
             break;
-        case WorldEditor::Arrow: {
+        case Arrow: {
             // are we stretching the boundaries of a map?
             if( overMapLeft(e->x(), e->y()) )
                 m_mouseState = StretchMapLeft;
@@ -462,19 +462,19 @@ void WorldView::mousePressEvent(QMouseEvent * e)
             else
                 selectMap(mapAt(e->x(), e->y())); // if they clicked inside a map, select it
         } break;
-        case WorldEditor::Eraser:
+        case Eraser:
 
             break;
-        case WorldEditor::Pan:
+        case Pan:
 
             break;
-        case WorldEditor::Center:
+        case Center:
 
             break;
-        case WorldEditor::Pencil:
+        case Pencil:
 
             break;
-        case WorldEditor::Brush:
+        case Brush:
 
             break;
         default:
@@ -558,8 +558,8 @@ void WorldView::setSelectedLayer(int index)
 {
     m_window->layersList()->setCurrentRow(index);
     m_selectedLayer = index;
+    setControlEnableStates();
 }
-
 
 void WorldView::addLayer()
 {
@@ -595,4 +595,19 @@ void WorldView::setControlEnableStates()
     m_window->deleteLayerButton()->setEnabled(m_selectedMap != NULL && m_window->layersList()->currentRow() > -1);
     m_window->newLayerButton()->setEnabled(m_selectedMap != NULL);
 
+}
+
+void WorldView::setToolLeftClick(MouseTool tool)
+{
+    m_toolLeftClick = tool;
+}
+
+void WorldView::setToolMiddleClick(MouseTool tool)
+{
+    m_toolMiddleClick = tool;
+}
+
+void WorldView::setToolRightClick(MouseTool tool)
+{
+    m_toolRightClick = tool;
 }

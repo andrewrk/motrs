@@ -18,10 +18,15 @@ namespace Ui
 class WorldEditor : public QMainWindow
 {
     Q_OBJECT
-    friend class WorldView;
 public:
     WorldEditor(QWidget *parent = 0);
     ~WorldEditor();
+
+    QListWidget * layersList();
+    QPushButton * newLayerButton();
+    QPushButton * deleteLayerButton();
+    QPushButton * moveLayerUpButton();
+    QPushButton * moveLayerDownButton();
 
 protected:
     void resizeEvent(QResizeEvent * e);
@@ -29,36 +34,15 @@ protected:
     void closeEvent(QCloseEvent * e);
 
 private:
-    enum MouseTool {
-        Nothing,
-        Arrow,
-        Eraser,
-        Pan,
-        Center,
-        Pencil,
-        Brush,
-    };
-
     Ui::WorldEditor * m_ui;
 
     WorldView * m_view;
-
-    MouseTool m_toolLeftClick;
-    MouseTool m_toolMiddleClick;
-    MouseTool m_toolRightClick;
 
     QStringList m_toolNames;
 
     void refreshWorldList();
     void openWorld(QString file);
     void fillToolComboBox(QComboBox & comboBox);
-
-
-    QListWidget * layersList();
-    QPushButton * newLayerButton();
-    QPushButton * deleteLayerButton();
-    QPushButton * moveLayerUpButton();
-    QPushButton * moveLayerDownButton();
 
 private slots:
     void on_btnNewEntity_clicked();

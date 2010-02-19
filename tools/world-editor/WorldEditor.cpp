@@ -47,22 +47,22 @@ WorldEditor::WorldEditor(QWidget *parent) :
         haveDefaultLayout ? defaultLayout : QVariant()).toByteArray());
     this->restoreGeometry(settings.value("windowGeometry").toByteArray());
 
-    m_ui->cboLeftClick->setCurrentIndex(settings.value("state/tool/left", Arrow).toInt());
-    m_ui->cboMiddleClick->setCurrentIndex(settings.value("state/tool/middle", Pan).toInt());
-    m_ui->cboRightClick->setCurrentIndex(settings.value("state/tool/right", Eraser).toInt());
+    m_ui->cboLeftClick->setCurrentIndex(settings.value("state/tool/left", WorldView::Arrow).toInt());
+    m_ui->cboMiddleClick->setCurrentIndex(settings.value("state/tool/middle", WorldView::Pan).toInt());
+    m_ui->cboRightClick->setCurrentIndex(settings.value("state/tool/right", WorldView::Eraser).toInt());
 }
 
 void WorldEditor::on_cboLeftClick_currentIndexChanged(int index)
 {
-    m_toolLeftClick = (MouseTool) index;
+    m_view->setToolLeftClick( (WorldView::MouseTool) index);
 }
 void WorldEditor::on_cboMiddleClick_currentIndexChanged(int index)
 {
-    m_toolMiddleClick = (MouseTool) index;
+    m_view->setToolMiddleClick( (WorldView::MouseTool) index);
 }
 void WorldEditor::on_cboRightClick_currentIndexChanged(int index)
 {
-    m_toolRightClick = (MouseTool) index;
+    m_view->setToolRightClick( (WorldView::MouseTool) index);
 }
 
 void WorldEditor::closeEvent(QCloseEvent * e)
@@ -71,9 +71,9 @@ void WorldEditor::closeEvent(QCloseEvent * e)
     settings.setValue("windowState", this->saveState());
     settings.setValue("windowGeometry", this->saveGeometry());
 
-    settings.setValue("state/tool/left", m_toolLeftClick);
-    settings.setValue("state/tool/middle", m_toolMiddleClick);
-    settings.setValue("state/tool/right", m_toolRightClick);
+    settings.setValue("state/tool/left", m_view->toolLeftClick());
+    settings.setValue("state/tool/middle", m_view->toolMiddleClick());
+    settings.setValue("state/tool/right", m_view->toolRightClick());
 
     // TODO: make sure we're not going to clobber someone's work
 
@@ -180,7 +180,6 @@ QPushButton * WorldEditor::moveLayerDownButton()
 void WorldEditor::on_list_layers_itemSelectionChanged()
 {
     m_view->setSelectedLayer(m_ui->list_layers->currentRow());
-    m_view->setControlEnableStates();
 }
 
 void WorldEditor::on_list_layers_itemChanged(QListWidgetItem* item)
