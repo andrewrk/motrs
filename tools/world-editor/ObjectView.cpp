@@ -444,8 +444,15 @@ void ObjectView::drawGrid(QPainter &p)
         int sizeX = m_object->tileCountX();
         int sizeY = m_object->tileCountY();
 
-        if( gridType == EditorSettings::Pretty ) {
+        if( gridType == EditorSettings::Pretty )
             p.setPen(QColor(128, 128, 128, 64));
+        else if( gridType == EditorSettings::Solid )
+            p.setPen(Qt::black);
+        else
+            p.setPen(QColor(128, 128, 128));
+
+        if( gridType == EditorSettings::Pretty || gridType == EditorSettings::Solid ) {
+
 
             // vertical
             for(int x=0; x<=sizeX; ++x) {
@@ -460,8 +467,6 @@ void ObjectView::drawGrid(QPainter &p)
             }
 
         } else if( gridType == EditorSettings::Fast ) {
-            p.setPen(QColor(128, 128, 128));
-
             for(int y = 0; y <= sizeY; ++y) {
                 for(int x = 0; x <= sizeX; ++x)
                     p.drawPoint((int)screenX(x*Tile::size), (int)screenY(y*Tile::size));

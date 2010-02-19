@@ -11,6 +11,7 @@ public:
         None,
         Fast,
         Pretty,
+        Solid,
     };
 
     static GridRenderType gridRenderType();

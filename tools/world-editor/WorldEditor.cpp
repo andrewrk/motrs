@@ -155,6 +155,11 @@ QListWidget * WorldEditor::layersList()
     return m_ui->list_layers;
 }
 
+QListWidget * WorldEditor::objectsList()
+{
+    return m_ui->lstObjects;
+}
+
 QPushButton * WorldEditor::newLayerButton()
 {
     return m_ui->btnNewLayer;

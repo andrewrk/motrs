@@ -23,6 +23,7 @@ public:
     ~WorldEditor();
 
     QListWidget * layersList();
+    QListWidget * objectsList();
     QPushButton * newLayerButton();
     QPushButton * deleteLayerButton();
     QPushButton * moveLayerUpButton();

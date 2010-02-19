@@ -142,6 +142,7 @@ private: //methods
     void determineCursor();
 
     void refreshLayersList();
+    void refreshObjectsList();
     void setControlEnableStates();
 
 

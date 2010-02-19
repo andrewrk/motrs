@@ -12,6 +12,7 @@
 #include <QUrl>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QDir>
 
 #include <cmath>
 
@@ -43,6 +44,7 @@ WorldView::WorldView(WorldEditor * window, QWidget * parent) :
 
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
+
 }
 
 WorldView::~WorldView()
@@ -179,6 +181,8 @@ void WorldView::drawGrid(QPainter &p)
     if( gridType != EditorSettings::None ) {
         if( gridType == EditorSettings::Pretty )
             p.setPen(QColor(128, 128, 128, 64));
+        else if( gridType == EditorSettings::Solid )
+            p.setPen(Qt::black);
         else
             p.setPen(QColor(128, 128, 128));
 
@@ -189,7 +193,7 @@ void WorldView::drawGrid(QPainter &p)
         double gridX = gameLeft - std::fmod(gameLeft, Tile::size);
         double gridY = gameTop - std::fmod(gameTop, Tile::size);
 
-        if( gridType == EditorSettings::Pretty ) {
+        if( gridType == EditorSettings::Pretty || gridType == EditorSettings::Solid ) {
             while(gridX < gameRight) {
                 double drawX = screenX(gridX);
                 p.drawLine((int)drawX, 0, (int)drawX, this->height());
@@ -536,10 +540,34 @@ void WorldView::refreshLayersList()
     setControlEnableStates();
 }
 
+void WorldView::refreshObjectsList()
+{
+    QListWidget * list = m_window->objectsList();
+
+    QDir dir(EditorResourceManager::objectsDir());
+
+    QStringList filters;
+    filters << "*.object";
+
+    QStringList entries = dir.entryList(filters, QDir::Files | QDir::Readable,
+        QDir::Name | QDir::IgnoreCase);
+    list->clear();
+    for(int i=0; i<entries.size(); ++i) {
+        // create item
+        QString file = dir.absoluteFilePath(entries[i]);
+        // TODO: create preview icons for objects upon save
+        QListWidgetItem * item = new QListWidgetItem(QIcon(), entries[i], list);
+        item->setData(Qt::UserRole, QVariant(file));
+        list->addItem(item);
+    }
+
+}
+
 void WorldView::selectMap(EditorMap * map)
 {
     m_selectedMap = map;
     refreshLayersList();
+    refreshObjectsList();
     this->update();
 }
 
