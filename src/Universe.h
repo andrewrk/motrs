@@ -20,21 +20,22 @@ public:
         int z; // layer
     } Location;
 
-    Universe(const char * buffer);
+    static Universe * load(const char * buffer);
     ~Universe();
 
-    bool isGood();
     int worldCount();
     World * startWorld();
 
     Entity * player() { return m_player; }
 
-private:
+private: //variables
     std::vector<World *> m_worlds;
     bool m_good;
     int m_startWorld;
 
     Entity * m_player;
+private: //methods
+    Universe();
 };
 
 #endif

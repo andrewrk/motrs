@@ -4,12 +4,14 @@
 #include "EditorResourceManager.h"
 #include "WorldView.h"
 #include "ObjectEditor.h"
+#include "EditorGraphic.h"
 
 #include <QDir>
 #include <QGraphicsPixmapItem>
 #include <QListWidget>
 #include <QDebug>
 #include <QSettings>
+#include <QMessageBox>
 
 #include "moc_WorldEditor.cxx"
 
@@ -23,6 +25,7 @@ WorldEditor::WorldEditor(QWidget *parent) :
 
     m_ui->actionQuit->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_F4));
 
+    EditorGraphic::initialize();
 
     // fill tools combo box with appropriate values
     fillToolComboBox(*m_ui->cboLeftClick);
@@ -129,8 +132,7 @@ void WorldEditor::refreshWorldList()
     m_ui->list_worlds->clear();
 
     // do a directory listing of data/worlds
-    QDir dir(EditorResourceManager::dataDir());
-    dir.cd("worlds");
+    QDir dir(EditorResourceManager::worldsDir());
     QStringList filters;
     filters << "*.world";
     QStringList entries = dir.entryList(filters, QDir::Files | QDir::Readable,
@@ -141,14 +143,19 @@ void WorldEditor::refreshWorldList()
 void WorldEditor::on_list_worlds_doubleClicked(QModelIndex index)
 {
     QListWidgetItem * item = m_ui->list_worlds->item(index.row());
-    QDir dir(EditorResourceManager::dataDir());
-    dir.cd("worlds");
+    QDir dir(EditorResourceManager::worldsDir());
     openWorld(dir.absoluteFilePath(item->text()));
 }
 
 void WorldEditor::openWorld(QString file)
 {
-    m_view->setWorld(new EditorWorld(file));
+    EditorWorld * world = EditorWorld::load(file);
+
+    if (world == NULL) {
+        QMessageBox::warning(this, tr("Error"), tr("Error opening world."));
+        return;
+    }
+    m_view->setWorld(world);
 }
 
 QListWidget * WorldEditor::layersList()
@@ -231,4 +238,11 @@ void WorldEditor::on_btnNewObject_clicked()
 void WorldEditor::on_btnNewEntity_clicked()
 {
     // TODO: create a new entity and open it up in the editor
+}
+
+void WorldEditor::on_lstObjects_itemDoubleClicked(QListWidgetItem* item)
+{
+    ObjectEditor * editor = new ObjectEditor(this);
+    editor->open(item->data(Qt::UserRole).toString());
+    editor->show();
 }

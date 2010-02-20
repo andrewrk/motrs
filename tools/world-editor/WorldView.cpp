@@ -45,6 +45,9 @@ WorldView::WorldView(WorldEditor * window, QWidget * parent) :
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
 
+    // refresh the display to animate
+    connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(update()));
+    m_animationTimer.start(100);
 }
 
 WorldView::~WorldView()
@@ -76,7 +79,7 @@ void WorldView::updateViewCache()
     // need to be drawn.
     m_mapCache.clear();
     m_entityCache.clear();
-    if( m_world && m_world->isGood() ) {
+    if( m_world ) {
         // select the maps that are in range
         std::vector<Map*> * maps = m_world->maps();
         double viewLeft = absoluteX(0);
@@ -114,66 +117,61 @@ void WorldView::paintEvent(QPaintEvent * e)
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_world ) {
-        if( m_world->isGood() ) {
-            double absX = absoluteX(0);
-            double absY = absoluteY(0);
+        double absX = absoluteX(0);
+        double absY = absoluteY(0);
 
-            for(int layer=0; layer<m_maxLayer; ++layer) {
-                // draw map at this layer
-                for(int i=0; i<m_mapCache.size(); ++i) {
-                    EditorMap * map = m_mapCache[i];
-
-                    // if the map is selected and this layer is unchecked, don't draw
-                    if( map == m_selectedMap && m_window->layersList()->item(layer)->checkState() == Qt::Unchecked)
-                        continue;
-
-                    if( layer < map->layerCount() )
-                        map->draw(absX, absY,
-                            (double)this->width(), (double)this->height(), layer);
-                }
-
-                // draw entities at this layer
-                for(int i=0; i<m_entityCache.size(); ++i) {
-                    if( m_entityCache[i]->layer() == layer )
-                        m_entityCache[i]->draw(absX, absY);
-                }
-            }
-            // draw a bold line around map borders
-            QPen normalMapBorder(Qt::black, 2);
-            QPen selectedMapBorder(Qt::blue, 2);
-            p.setBrush(Qt::NoBrush);
-            for (int i = 0; i < m_mapCache.size(); i++) {
+        for(int layer=0; layer<m_maxLayer; ++layer) {
+            // draw map at this layer
+            for(int i=0; i<m_mapCache.size(); ++i) {
                 EditorMap * map = m_mapCache[i];
 
-                p.setPen(m_selectedMap == map ? selectedMapBorder : normalMapBorder);
-                QRect outline((int)screenX(map->left()), (int)screenY(map->top()),
-                    (int)(map->width() * m_zoom), (int)(map->height() * m_zoom));
+                // if the map is selected and this layer is unchecked, don't draw
+                if( map == m_selectedMap && m_window->layersList()->item(layer)->checkState() == Qt::Unchecked)
+                    continue;
 
-                // if we're dragging boundaries, move the blue line
-                if( m_selectedMap == map ) {
-                    int deltaX = m_mouseX - m_mouseDownX;
-                    int deltaY = m_mouseY - m_mouseDownY;
-                    if (m_mouseState == StretchMapLeft)
-                        outline.setLeft(outline.left() + deltaX);
-                    else if (m_mouseState == StretchMapBottom)
-                        outline.setBottom(outline.bottom() + deltaY);
-                    else if (m_mouseState == StretchMapRight)
-                        outline.setRight(outline.right() + deltaX);
-                    else if (m_mouseState == StretchMapTop)
-                        outline.setTop(outline.top() + deltaY);
-                    else if (m_mouseState == MoveMap)
-                        outline.moveTo(outline.left() + deltaX, outline.top() + deltaY);
-
-                }
-
-                p.drawRect(outline);
+                if( layer < map->layerCount() )
+                    map->draw(absX, absY,
+                        (double)this->width(), (double)this->height(), layer);
             }
 
-            drawGrid(p);
-        } else {
-            p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
-                tr("Error loading World."));
+            // draw entities at this layer
+            for(int i=0; i<m_entityCache.size(); ++i) {
+                if( m_entityCache[i]->layer() == layer )
+                    m_entityCache[i]->draw(absX, absY);
+            }
         }
+        // draw a bold line around map borders
+        QPen normalMapBorder(Qt::black, 2);
+        QPen selectedMapBorder(Qt::blue, 2);
+        p.setBrush(Qt::NoBrush);
+        for (int i = 0; i < m_mapCache.size(); i++) {
+            EditorMap * map = m_mapCache[i];
+
+            p.setPen(m_selectedMap == map ? selectedMapBorder : normalMapBorder);
+            QRect outline((int)screenX(map->left()), (int)screenY(map->top()),
+                (int)(map->width() * m_zoom), (int)(map->height() * m_zoom));
+
+            // if we're dragging boundaries, move the blue line
+            if( m_selectedMap == map ) {
+                int deltaX = m_mouseX - m_mouseDownX;
+                int deltaY = m_mouseY - m_mouseDownY;
+                if (m_mouseState == StretchMapLeft)
+                    outline.setLeft(outline.left() + deltaX);
+                else if (m_mouseState == StretchMapBottom)
+                    outline.setBottom(outline.bottom() + deltaY);
+                else if (m_mouseState == StretchMapRight)
+                    outline.setRight(outline.right() + deltaX);
+                else if (m_mouseState == StretchMapTop)
+                    outline.setTop(outline.top() + deltaY);
+                else if (m_mouseState == MoveMap)
+                    outline.moveTo(outline.left() + deltaX, outline.top() + deltaY);
+
+            }
+
+            p.drawRect(outline);
+        }
+
+        drawGrid(p);
     } else {
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
             tr("Double click a world to edit"));

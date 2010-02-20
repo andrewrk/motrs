@@ -3,12 +3,12 @@
 
 #include "Tile.h"
 #include "Array3.h"
+#include "EditorGraphic.h"
 
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QHash>
 #include <QtCore/QList>
-#include <QtGui/QPixmap>
 
 class EditorObject
 {
@@ -18,8 +18,8 @@ public: //variables
         double y;
         double width;
         double height;
-        QString pixmapFile;
-        QPixmap * pixmap;
+        QString graphicName; // file name in resources/graphics
+        EditorGraphic * graphic;
         int layer;
     } ObjectGraphic;
 

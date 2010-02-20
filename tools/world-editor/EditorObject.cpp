@@ -32,6 +32,8 @@ EditorObject * EditorObject::load(QString file)
 
     EditorObject * out = new EditorObject();
 
+    out->m_layerNames.clear();
+
     for(int i=0; i<props.size(); ++i) {
         const QPair<QString, QString> & pair = props.at(i);
 
@@ -85,8 +87,8 @@ EditorObject * EditorObject::load(QString file)
             graphic->width = graphicProps.at(2).toDouble();
             graphic->height = graphicProps.at(3).toDouble();
             graphic->layer = graphicProps.at(4).toInt();
-            graphic->pixmapFile = graphicProps.at(5);
-            graphic->pixmap = EditorResourceManager::pixmapForGraphic(graphic->pixmapFile);
+            graphic->graphicName = graphicProps.at(5);
+            graphic->graphic = EditorResourceManager::graphic(graphic->graphicName);
             out->graphics()->at(graphic->layer)->append(graphic);
         } else if( pair.first.compare("layerName", Qt::CaseInsensitive) == 0 ) {
             out->m_layerNames << pair.second;
@@ -148,7 +150,7 @@ void EditorObject::save(QString filename)
             ObjectGraphic * graphic = list->at(i);
             out << "graphic=" << graphic->x << "," << graphic->y << ","
                 << graphic->width << "," << graphic->height << "," << z
-                << "," << graphic->pixmapFile << "\n";
+                << "," << graphic->graphicName << "\n";
         }
     }
 

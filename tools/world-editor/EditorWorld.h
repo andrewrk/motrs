@@ -8,10 +8,12 @@
 class EditorWorld : public World
 {
 public:
-    EditorWorld(QString file);
     ~EditorWorld();
 
+    static EditorWorld * load(QString file);
+
 private:
+    EditorWorld();
 };
 
 #endif // EDITORWORLD_H

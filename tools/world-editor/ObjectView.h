@@ -11,6 +11,7 @@
 #include <QDragLeaveEvent>
 #include <QPushButton>
 #include <QScrollBar>
+#include <QTimer>
 
 class ObjectEditor;
 
@@ -96,10 +97,10 @@ private: //variables
     // the object we are editing
     EditorObject * m_object;
 
-    // contains a pixmap to draw when dragging art and such
-    QPixmap * m_dragPixmap;
-    int m_dragPixmapX;
-    int m_dragPixmapY;
+    // contains a graphic to draw when dragging art and such
+    EditorGraphic * m_dragGraphic;
+    int m_dragGraphicX;
+    int m_dragGraphicY;
 
     // gui elements on the edges of the view
     QPushButton * m_btnTopPlus;
@@ -141,6 +142,8 @@ private: //variables
     double m_startWidth, m_startHeight;
 
     EditorObject::ObjectGraphic m_copyBuffer;
+
+    QTimer m_animationTimer;
 
 private: //methods
 

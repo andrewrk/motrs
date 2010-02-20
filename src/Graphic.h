@@ -8,21 +8,21 @@
 // or a still image.
 class Graphic {
 public:
+    // allocates and returns a new Graphic based on the buffer. will return
+    // NULL if there was a problem.
     static Graphic * load(const char * buffer);
-    Graphic(const char * buffer);
 
-    // create an animation from memory and offset the animation
-    Graphic(const char * buffer, int offset);
     ~Graphic();
 
     // draw to an SDL surface
     void draw(SDL_Surface * dest, SDL_Rect * destRect);
     void draw(SDL_Surface * dest, int x, int y);
 
-    // check if the animation loaded ok
-    bool isGood();
+    // get the size
+    int width();
+    int height();
 
-private:
+protected: //variables
     /*  storage format:
         Uint32 GraphicType
         Uint32 StorageType
@@ -61,6 +61,9 @@ private:
     int m_offset;
 
     std::vector<SDL_Rect> m_spriteBounds; // boundaries of each sprite
+
+protected: //methods
+    Graphic();
 
     int currentFrame();
 };

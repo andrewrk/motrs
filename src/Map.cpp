@@ -22,9 +22,9 @@ Map * Map::load(const char *buffer) {
     int tileCount = Utils::readInt(&cursor);
     map->m_palette.push_back(Tile::nullTile());
     for (int i = 0; i < tileCount; i++) {
-        Tile * tile = new Tile(&cursor);
+        Tile * tile = Tile::loadFromMemory(&cursor);
         map->m_palette.push_back(tile);
-        if (!tile->isGood()) {
+        if (tile == NULL) {
             delete map;
             return NULL;
         }

@@ -74,11 +74,11 @@ EditorMap::EditorMap(QString file)
             // tile=shape,surface,graphicId
             QStringList tileProps = props[i].second.split(",");
             QString graphicFile = tileProps.at(2);
-            QPixmap * pixmap = EditorResourceManager::pixmapForGraphic(graphicFile);
+            EditorGraphic * graphic = EditorResourceManager::graphic(graphicFile);
             EditorTile * tile = new EditorTile(
                 (EditorTile::Shape)tileProps.at(0).toInt(),
                 (EditorTile::SurfaceType)tileProps.at(1).toInt(),
-                pixmap);
+                graphic);
             m_palette.push_back(tile);
         } else if( props[i].first.compare("layer", Qt::CaseInsensitive) == 0 ) {
             // layer=name,0,0,...
@@ -100,9 +100,7 @@ EditorMap::EditorMap(QString file)
             int layerIndex = entityProps.at(2).toInt();
             QString entityFileTitle = entityProps.at(3);
 
-            QDir dir(EditorResourceManager::dataDir());
-            dir.cd("entities");
-            QString entityFile = dir.absoluteFilePath(entityFileTitle);
+            QString entityFile = QDir(EditorResourceManager::entitiesDir()).absoluteFilePath(entityFileTitle);
             EditorEntity * entity = new EditorEntity(entityFile);
             entity->setCenter(x, y);
             entity->setLayer(layerIndex);

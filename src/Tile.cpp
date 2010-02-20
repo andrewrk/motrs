@@ -11,24 +11,24 @@
 const double Tile::size = 16.0;
 const int Tile::sizeInt = (int)Tile::size;
 
-Tile::Tile(const char** cursor) :
-    m_good(true),
-    m_shape(tsSolidWall),
-    m_surfaceType(stNormal),
-    m_graphic(NULL)
+Tile * Tile::loadFromMemory(const char** cursor)
 {
-    m_shape = (Shape)Utils::readInt(cursor);
-    m_surfaceType = (SurfaceType)Utils::readInt(cursor);
+    Tile * out = new Tile();
+
+    out->m_shape = (Shape)Utils::readInt(cursor);
+    out->m_surfaceType = (SurfaceType)Utils::readInt(cursor);
     std::string graphicId = Utils::readString(cursor);
-    m_graphic = ResourceManager::getGraphic(graphicId);
-    if (m_graphic == NULL) {
-        m_good = false;
-        return;
+    out->m_graphic = ResourceManager::getGraphic(graphicId);
+    if (out->m_graphic == NULL) {
+        std::cerr << "Unable to load graphic for tile" << std::endl;
+        delete out;
+        return NULL;
     }
+
+    return out;
 }
 
 Tile::Tile() :
-    m_good(true),
     m_shape(tsSolidWall),
     m_surfaceType(stNormal),
     m_graphic(NULL)
@@ -36,7 +36,6 @@ Tile::Tile() :
 }
 
 Tile::Tile(const Tile & tile) :
-    m_good(tile.m_good),
     m_shape(tile.m_shape),
     m_surfaceType(tile.m_surfaceType),
     m_graphic(tile.m_graphic)
@@ -44,10 +43,6 @@ Tile::Tile(const Tile & tile) :
 }
 
 Tile::~Tile() {
-}
-
-bool Tile::isGood() {
-    return m_good;
 }
 
 void Tile::draw(int screenX, int screenY) {

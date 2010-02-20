@@ -8,18 +8,28 @@
 #include "Entity.h"
 #include "ResourceManager.h"
 
-Universe::Universe(const char * buffer) :
+Universe::Universe() :
     m_worlds(),
-    m_good(true),
     m_startWorld(-1),
     m_player(NULL)
 {
+}
+
+Universe::~Universe()
+{
+}
+
+Universe * Universe::load(const char * buffer)
+{
+    Universe * out = new Universe();
+
     const char * cursor = buffer;
     int version = Utils::readInt(&cursor);
-    if (version != 2) {
+    int codeVersion = 2;
+    if (version != codeVersion) {
         std::cerr << "Unsupported Universe version: " << version << std::endl;
-        m_good = false;
-        return;
+        delete out;
+        return NULL;
     }
 
     int worldCount = Utils::readInt(&cursor);
@@ -27,33 +37,29 @@ Universe::Universe(const char * buffer) :
         std::string worldId = Utils::readString(&cursor);
         World * world = ResourceManager::getWorld(worldId);
         if (world == NULL) {
-            m_good = false;
-            return;
+            std::cerr << "Cannot continue loading Universe because a world failed to load." << std::endl;
+            delete out;
+            return NULL;
         }
-        m_worlds.push_back(world);
+        out->m_worlds.push_back(world);
     }
 
-    m_player = ResourceManager::getEntity(Utils::readString(&cursor));
-    if (m_player == NULL) {
-        m_good = false;
-        return;
+    out->m_player = ResourceManager::getEntity(Utils::readString(&cursor));
+    if (out->m_player == NULL) {
+        std::cerr << "Error loading Universe: error loading player entity" << std::endl;
+        delete out;
+        return NULL;
     }
 
-    m_startWorld = Utils::readInt(&cursor);
+    out->m_startWorld = Utils::readInt(&cursor);
     double startX = (double)Utils::readInt(&cursor);
     double startY = (double)Utils::readInt(&cursor);
     int startZ = Utils::readInt(&cursor);
-    m_player->setCenter(startX, startY);
-    m_player->setLayer(startZ);
-    m_player->setOrientation(Entity::Center);
-}
+    out->m_player->setCenter(startX, startY);
+    out->m_player->setLayer(startZ);
+    out->m_player->setOrientation(Entity::Center);
 
-Universe::~Universe()
-{
-}
-
-bool Universe::isGood() {
-    return m_good;
+    return out;
 }
 
 int Universe::worldCount() {

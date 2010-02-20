@@ -9,14 +9,11 @@
 class World
 {
 public:
+    // load a world from memory. returns NULL on error
     static World * load(const char * buffer);
-    World(const char * buffer);
     // create an empty world
     World();
     ~World();
-
-    // did the world load ok?
-    bool isGood();
 
     // return the Location at specified coordinates
     Universe::Location locationOf(double absoluteX, double absoluteY);
@@ -29,8 +26,6 @@ public:
     double width() {return m_width;}
     double height() {return m_height;}
 protected:
-
-    bool m_good;
     std::vector<Map*> m_maps;
 
     double m_width;

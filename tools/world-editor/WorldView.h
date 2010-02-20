@@ -5,6 +5,7 @@
 #include <QScrollBar>
 #include <QPaintEvent>
 #include <QResizeEvent>
+#include <QTimer>
 
 #include "EditorWorld.h"
 #include "EditorMap.h"
@@ -118,6 +119,8 @@ private: //variables
     MouseTool m_toolLeftClick;
     MouseTool m_toolMiddleClick;
     MouseTool m_toolRightClick;
+
+    QTimer m_animationTimer;
 
 private: //methods
     // transfer between absolute coordinates and editor coordinates

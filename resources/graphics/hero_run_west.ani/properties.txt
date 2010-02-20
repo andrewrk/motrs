@@ -1,0 +1,2 @@
+transparent=255,0,255
+fps=16

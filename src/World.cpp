@@ -5,25 +5,16 @@
 #include "Utils.h"
 #include "ResourceManager.h"
 
-World * World::load(const char * buffer) {
-    World * world = new World(buffer);
-    if (!world->isGood()) {
-        delete world;
-        return NULL;
-    }
-    return world;
-}
-
-World::World(const char * buffer) :
-    m_good(true),
-    m_maps()
+World * World::load(const char * buffer)
 {
+    World * out = new World();
+
     const char * cursor = buffer;
     int version = Utils::readInt(&cursor);
     if (version != 1) {
         std::cerr << "Unsupported World version: " << version << std::endl;
-        m_good = false;
-        return;
+        delete out;
+        return NULL;
     }
     int mapCount = Utils::readInt(&cursor);
     for (int i = 0; i < mapCount; i++) {
@@ -33,18 +24,20 @@ World::World(const char * buffer) :
         std::string mapId = Utils::readString(&cursor);
         Map * map = ResourceManager::getMap(mapId);
         if (map == NULL) {
-            m_good = false;
-            break;
+            std::cerr << "Cannot load world because loading its maps failed" << std::endl;
+            delete out;
+            return NULL;
         }
         map->setPosition(x, y, z);
-        m_maps.push_back(map);
+        out->m_maps.push_back(map);
     }
 
-    calculateBoundaries();
+    out->calculateBoundaries();
+
+    return out;
 }
 
 World::World() :
-    m_good(true),
     m_maps()
 {
     m_maps.clear();
@@ -53,10 +46,6 @@ World::World() :
 World::~World()
 {
 
-}
-
-bool World::isGood() {
-    return m_good;
 }
 
 Universe::Location World::locationOf(double absoluteX, double absoluteY) {

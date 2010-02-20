@@ -29,11 +29,11 @@ Universe * ResourceManager::loadUniverse(std::string resourceFilePath, std::stri
         delete buffer;
         return NULL;
     }
-    Universe * universe = new Universe(buffer + sizeof(char));
+    Universe * universe = Universe::load(buffer + sizeof(char));
     delete resourceFile;
     resourceFile = NULL;
-    if (!universe->isGood()) {
-        delete universe;
+    if (universe == NULL) {
+        std::cerr << "Unable to return universe - it did not load correctly." << std::endl;
         return NULL;
     }
     // TODO: clean caches of buffers

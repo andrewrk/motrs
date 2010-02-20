@@ -51,7 +51,7 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     QWidget(parent),
     m_window(window),
     m_object(NULL),
-    m_dragPixmap(NULL),
+    m_dragGraphic(NULL),
     m_btnTopPlus(new QPushButton("+", this)),
     m_btnTopMinus(new QPushButton("-", this)),
     m_btnBottomPlus(new QPushButton("+", this)),
@@ -70,7 +70,7 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     m_selectedGraphic(NULL),
     m_mouseState(msNormal)
 {
-    m_copyBuffer.pixmap = NULL;
+    m_copyBuffer.graphic = NULL;
 
     m_btnTopPlus->show();
     m_btnTopMinus->show();
@@ -99,6 +99,10 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
 
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
+
+    // refresh the display to animate
+    connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(update()));
+    m_animationTimer.start(100);
 }
 
 ObjectView::~ObjectView()
@@ -153,20 +157,17 @@ void ObjectView::refreshArt()
 {
     QListWidget * artList = m_window->artList();
 
-    // do a directory listing of data/art
-    QDir dir(EditorResourceManager::dataDir());
-    dir.cd("art");
-    QStringList filters;
-    filters << "*.bmp" << "*.png" << "*.jpg";
-    QStringList entries = dir.entryList(filters, QDir::Files | QDir::Readable,
-        QDir::Name | QDir::IgnoreCase);
+    // directory listing of graphics
+    QDir dir(EditorResourceManager::graphicsDir());
+    QStringList entries = dir.entryList(QDir::Files | QDir::Readable | QDir::Dirs | QDir::NoDotAndDotDot,
+                                        QDir::Name | QDir::IgnoreCase);
     artList->clear();
-    for(int i=0; i<entries.size(); ++i) {
+    for (int i=0; i<entries.size(); ++i) {
         // create item
-        QString file = dir.absoluteFilePath(entries[i]);
-        QPixmap * pixmap = new QPixmap(file);
+        EditorGraphic * graphic = EditorResourceManager::graphic(entries[i]);
+        QPixmap * pixmap = graphic->toPixmap();
         QListWidgetItem * item = new QListWidgetItem(QIcon(*pixmap), entries[i], artList);
-        item->setData(Qt::UserRole, QVariant(file));
+        item->setData(Qt::UserRole, QVariant(entries[i]));
         artList->addItem(item);
     }
 }
@@ -199,16 +200,15 @@ void ObjectView::paintEvent(QPaintEvent * e)
                     QList<EditorObject::ObjectGraphic *> * thisLayerGraphics = graphics->at(layer);
                     for(int i=0; i<thisLayerGraphics->size(); ++i) {
                         EditorObject::ObjectGraphic * graphic = thisLayerGraphics->at(i);
-                        p.drawPixmap(screenX(graphic->x), screenY(graphic->y),
-                            graphic->width * m_zoom, graphic->height * m_zoom,
-                            *graphic->pixmap);
+                        graphic->graphic->draw(p, screenX(graphic->x), screenY(graphic->y),
+                            graphic->width * m_zoom, graphic->height * m_zoom);
                     }
 
                     // draw dragged stuff
-                    if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
-                        p.drawPixmap(m_dragPixmapX, m_dragPixmapY,
-                            m_dragPixmap->width() * m_zoom,
-                            m_dragPixmap->height() * m_zoom, *m_dragPixmap);
+                    if( layer == m_selectedLayer && m_dragGraphic != NULL ) {
+                        m_dragGraphic->draw(p, m_dragGraphicX, m_dragGraphicY,
+                            m_dragGraphic->width() * m_zoom,
+                            m_dragGraphic->height() * m_zoom);
                     }
                 }
             }
@@ -247,13 +247,10 @@ void ObjectView::paintEvent(QPaintEvent * e)
 
 void ObjectView::dropEvent(QDropEvent * e)
 {
-    QStringList pictureExtensions;
-    pictureExtensions << "bmp" << "jpg" << "png";
-
     QString itemModelMime = "application/x-qabstractitemmodeldatalist";
 
     // don't show the art in paintevent
-    m_dragPixmap = NULL;
+    m_dragGraphic = NULL;
     const QMimeData * data = e->mimeData();
     if(data->hasFormat(itemModelMime)) {
         QStandardItemModel model;
@@ -261,24 +258,19 @@ void ObjectView::dropEvent(QDropEvent * e)
         QString file = model.item(0,0)->data(Qt::UserRole).toString();
 
         QFileInfo info(file);
-        QString ext = info.suffix();
-        if( pictureExtensions.contains(ext, Qt::CaseInsensitive) ) {
-            // it's art. create a new ObjectGraphic and add it to the object
-            EditorObject::ObjectGraphic * graphic = new EditorObject::ObjectGraphic;
-            graphic->pixmapFile = info.fileName();
-            graphic->pixmap = EditorResourceManager::pixmapForArt(graphic->pixmapFile);
-            graphic->x = absoluteX(e->pos().x());
-            graphic->y = absoluteY(e->pos().y());
-            graphic->width = graphic->pixmap->width();
-            graphic->height = graphic->pixmap->height();
-            graphic->layer = m_selectedLayer;
 
-            m_object->graphics()->value(m_selectedLayer)->append(graphic);
-        } else {
-            qDebug() << "Unable to drag drop extension " << ext;
-            QMessageBox::warning(this, tr("error"), tr("Uh oh, we don't support %1 yet.").arg(ext));
-            return;
-        }
+        // it's art. create a new ObjectGraphic and add it to the object
+        EditorObject::ObjectGraphic * graphic = new EditorObject::ObjectGraphic;
+        graphic->graphicName = info.fileName();
+        graphic->graphic = EditorResourceManager::graphic(graphic->graphicName);
+        graphic->x = absoluteX(e->pos().x());
+        graphic->y = absoluteY(e->pos().y());
+        graphic->width = graphic->graphic->width();
+        graphic->height = graphic->graphic->height();
+        graphic->layer = m_selectedLayer;
+
+        m_object->graphics()->value(m_selectedLayer)->append(graphic);
+
         e->acceptProposedAction();
     }
 }
@@ -287,9 +279,6 @@ void ObjectView::dropEvent(QDropEvent * e)
 void ObjectView::dragEnterEvent(QDragEnterEvent * e)
 {
     if( e->source() == m_window->artList() ) {
-        QStringList pictureExtensions;
-        pictureExtensions << "bmp" << "jpg" << "png";
-
         QString itemModelMime = "application/x-qabstractitemmodeldatalist";
 
         const QMimeData * data = e->mimeData();
@@ -299,18 +288,10 @@ void ObjectView::dragEnterEvent(QDragEnterEvent * e)
             QString file = model.item(0,0)->data(Qt::UserRole).toString();
 
             QFileInfo info(file);
-            QString ext = info.suffix();
-            if( pictureExtensions.contains(ext, Qt::CaseInsensitive) ) {
-                // it's art
-                QString title = info.fileName();
-                qDebug() << title;
-                QPixmap * pixmap = EditorResourceManager::pixmapForArt(title);
-                m_dragPixmap = pixmap;
-            } else {
-                qDebug() << "Unable to drag drop extension " << ext;
-                QMessageBox::warning(this, tr("error"), tr("Uh oh, we don't support %1 yet.").arg(ext));
-                return;
-            }
+            QString title = info.fileName();
+            EditorGraphic * graphic = EditorResourceManager::graphic(title);
+            m_dragGraphic = graphic;
+
             e->acceptProposedAction();
         }
     }
@@ -318,8 +299,8 @@ void ObjectView::dragEnterEvent(QDragEnterEvent * e)
 
 void ObjectView::dragMoveEvent(QDragMoveEvent * e)
 {
-    m_dragPixmapX = e->pos().x();
-    m_dragPixmapY = e->pos().y();
+    m_dragGraphicX = e->pos().x();
+    m_dragGraphicY = e->pos().y();
     this->update();
 
     e->acceptProposedAction();
@@ -327,7 +308,7 @@ void ObjectView::dragMoveEvent(QDragMoveEvent * e)
 
 void ObjectView::dragLeaveEvent(QDragLeaveEvent * e)
 {
-    m_dragPixmap = NULL;
+    m_dragGraphic = NULL;
     this->update();
 }
 
@@ -407,7 +388,7 @@ void ObjectView::setControlEnableStates()
     // menus
     m_window->cutAction()->setEnabled(m_object != NULL && m_selectedGraphic != NULL);
     m_window->copyAction()->setEnabled(m_object != NULL && m_selectedGraphic != NULL);
-    m_window->pasteAction()->setEnabled(m_object != NULL && m_copyBuffer.pixmap != NULL);
+    m_window->pasteAction()->setEnabled(m_object != NULL && m_copyBuffer.graphic != NULL);
     m_window->deleteAction()->setEnabled(m_object != NULL && m_selectedGraphic != NULL);
 }
 
@@ -958,7 +939,7 @@ void ObjectView::copySelection()
 
 void ObjectView::pasteSelection()
 {
-    if( m_copyBuffer.pixmap == NULL )
+    if( m_copyBuffer.graphic == NULL )
         return;
 
     // copy the copyBuffer

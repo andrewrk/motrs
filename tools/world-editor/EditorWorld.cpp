@@ -7,15 +7,25 @@
 #include <QStringList>
 #include <QDir>
 
-EditorWorld::EditorWorld(QString file) :
+EditorWorld::EditorWorld() :
     World()
+{
+}
+
+EditorWorld::~EditorWorld()
+{
+}
+
+EditorWorld * EditorWorld::load(QString file)
 {
     QList< QPair<QString, QString> > props;
 
-    m_good = EditorResourceManager::loadTextFile(file, props);
+    if(! EditorResourceManager::loadTextFile(file, props) ) {
+        qDebug() << "Error loading property file: " << file;
+        return NULL;
+    }
 
-    if( ! m_good )
-        return;
+    EditorWorld * out = new EditorWorld();
 
     for(int i=0; i<props.size(); ++i) {
         if( props[i].first.compare("version", Qt::CaseInsensitive) == 0 ) {
@@ -24,29 +34,25 @@ EditorWorld::EditorWorld(QString file) :
             if( fileVersion != codeVersion ) {
                 qDebug() << "Tried to open version  " << fileVersion <<
                     " with version " << codeVersion << " code.";
-                this->m_good = false;
-                return;
+                delete out;
+                return NULL;
             }
         } else if( props[i].first.compare("map", Qt::CaseInsensitive) == 0 ) {
             // map=x,y,z,id
             QStringList coords = props[i].second.split(",");
-            QDir dir(EditorResourceManager::dataDir());
-            dir.cd("maps");
+            QDir dir(EditorResourceManager::mapsDir());
             QString mapFile = dir.absoluteFilePath(coords[3]);
             EditorMap * map = new EditorMap(mapFile);
             map->setPosition(coords[0].toDouble(), coords[1].toDouble(), coords[2].toInt());
-            m_maps.push_back(map);
+            out->m_maps.push_back(map);
         } else {
             qDebug() << "Unrecognized World property: " << props[i].first;
-            this->m_good = false;
-            return;
+            delete out;
+            return NULL;
         }
     }
 
-    calculateBoundaries();
-}
+    out->calculateBoundaries();
 
-EditorWorld::~EditorWorld()
-{
-
+    return out;
 }
