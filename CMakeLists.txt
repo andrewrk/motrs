@@ -74,7 +74,7 @@ IF(WIN32)
     SET(ALL_DLL_FILES ${DLL_FILES} ${EDITOR_DLL_FILES})
 ENDIF()
 ################################################################
-SET(CMAKE_CXX_FLAGS "-ggdb -Wall -Wconversion")
+SET(CMAKE_CXX_FLAGS "-ggdb -Wall")
 
 # compile resource compiling tools
 SET(TOOLS_OUT_DIR "${CMAKE_BINARY_DIR}/tools")
