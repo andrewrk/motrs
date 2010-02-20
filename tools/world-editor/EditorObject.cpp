@@ -1,5 +1,10 @@
 #include "EditorObject.h"
 
+#include "EditorResourceManager.h"
+
+#include <QFile>
+#include <QDebug>
+
 EditorObject::EditorObject() :
     m_layerNames(),
     m_surfaceTypes(new Array3<Tile::SurfaceType>(1,1,1)),
@@ -20,13 +25,141 @@ EditorObject::~EditorObject()
 
 EditorObject * EditorObject::load(QString file)
 {
-    // TODO
+    QList< QPair<QString, QString> > props;
+
+    if( ! EditorResourceManager::loadTextFile(file, props) )
+        return NULL;
+
+    EditorObject * out = new EditorObject();
+
+    out->m_layerNames.clear();
+
+    for(int i=0; i<props.size(); ++i) {
+        const QPair<QString, QString> & pair = props.at(i);
+
+        if( pair.first.compare("version", Qt::CaseInsensitive) == 0 ) {
+            int codeVersion = 1;
+            int fileVersion = pair.second.toInt();
+            if( codeVersion != fileVersion ) {
+                qDebug() << "EditorObject::load - file version does not match code version";
+                return NULL; // TODO fix this memory leak
+            }
+        } else if( pair.first.compare("name", Qt::CaseInsensitive) == 0 ) {
+            out->m_name = pair.second;
+        } else if( pair.first.compare("size", Qt::CaseInsensitive) == 0 ) {
+            QStringList sizes = pair.second.split(",");
+            int sizeX = sizes.at(0).toInt();
+            int sizeY = sizes.at(1).toInt();
+            int sizeZ = sizes.at(2).toInt();
+            out->m_surfaceTypes = new Array3<Tile::SurfaceType>(sizeX, sizeY, sizeZ);
+            out->m_shapes = new Array3<Tile::Shape>(sizeX, sizeY, sizeZ);
+        } else if( pair.first.compare("description", Qt::CaseInsensitive) == 0 ) {
+            out->m_description = pair.second;
+        } else if( pair.first.compare("surfaceTypes", Qt::CaseInsensitive) == 0 ) {
+            QStringList surfaceTypes = pair.second.split(",");
+            int i=0;
+            for(int z=0; z<out->layerCount(); ++z) {
+                for(int y=0; y<out->tileCountY(); ++y) {
+                    for(int x=0; x<out->tileCountX(); ++x) {
+                        out->m_surfaceTypes->set(x,y,z, (Tile::SurfaceType) surfaceTypes.at(i).toInt() );
+                        ++i;
+                    }
+                }
+            }
+        } else if( pair.first.compare("shapes", Qt::CaseInsensitive) == 0 ) {
+            QStringList shapes = pair.second.split(",");
+            int i=0;
+            for(int z=0; z<out->layerCount(); ++z) {
+                for(int y=0; y<out->tileCountY(); ++y) {
+                    for(int x=0; x<out->tileCountX(); ++x) {
+                        out->m_shapes->set(x,y,z, (Tile::Shape) shapes.at(i).toInt() );
+                        ++i;
+                    }
+                }
+            }
+        } else if( pair.first.compare("graphic", Qt::CaseInsensitive) == 0 ) {
+            // create a graphic and add it to the list
+            ObjectGraphic * graphic = new ObjectGraphic;
+            // x,y,width,height,layer,graphicFile
+            QStringList graphicProps = pair.second.split(",");
+            graphic->x = graphicProps.at(0).toDouble();
+            graphic->y = graphicProps.at(1).toDouble();
+            graphic->width = graphicProps.at(2).toDouble();
+            graphic->height = graphicProps.at(3).toDouble();
+            graphic->layer = graphicProps.at(4).toInt();
+            graphic->graphicName = graphicProps.at(5);
+            graphic->graphic = EditorResourceManager::graphic(graphic->graphicName);
+            out->graphics()->at(graphic->layer)->append(graphic);
+        } else if( pair.first.compare("layerName", Qt::CaseInsensitive) == 0 ) {
+            out->m_layerNames << pair.second;
+        } else {
+            qDebug() << "EditorObject::load - unrecognized property name: " << pair.first;
+            return NULL; // TODO: fix this memory leak
+        }
+    }
+
+    if( out->m_layerNames.size() != out->m_surfaceTypes->sizeZ() ) {
+        // layers do not match
+        qDebug() << "Layer names do not match actual layer size";
+        return NULL; // TODO: fix this memory leak
+    }
+
+    return out;
 }
 
-void EditorObject::save(QString file)
+void EditorObject::save(QString filename)
 {
-    // TODO
+    QFile file(filename);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    if( ! file.isOpen() ){
+        qDebug() << "Unable to open " << filename << " for writing";
+        return;
+    }
+
+    QTextStream out(&file);
+
+    out << "version=1\n";
+    out << "name=" << m_name << "\n";
+    out << "size=" << tileCountX() << "," << tileCountY() << "," << layerCount() << "\n";
+    out << "description=" << m_description << "\n";
+
+    out << "\n# flatten a 3d grid in z,y,x order\n";
+    QString surfaceTypes = "";
+    QString shapes = "";
+    for(int z=0; z<layerCount(); ++z) {
+        for(int y=0; y<tileCountY(); ++y) {
+            for(int x=0; x<tileCountX(); ++x) {
+                surfaceTypes += QString::number(m_surfaceTypes->get(x,y,z)) + QString(",");
+                shapes += QString::number(m_shapes->get(x,y,z)) + QString(",");
+            }
+            surfaceTypes += " \\\n";
+            shapes += " \\\n";
+        }
+        surfaceTypes += "\\\n";
+        shapes += "\\\n";
+    }
+    out << "surfaceTypes=" << surfaceTypes << "\n";
+    out << "shapes=" << shapes << "\n";
+
+    out << "\n# list of graphics and their locations\n";
+    out << "# graphic=x,y,width,height,layer,graphicFile\n";
+    for(int z=0; z<layerCount(); ++z) {
+        QList<ObjectGraphic *> * list = m_graphics.at(z);
+        for(int i=0; i<list->size(); ++i) {
+            ObjectGraphic * graphic = list->at(i);
+            out << "graphic=" << graphic->x << "," << graphic->y << ","
+                << graphic->width << "," << graphic->height << "," << z
+                << "," << graphic->graphicName << "\n";
+        }
+    }
+
+    out << "\n# layer names\n";
+    for(int z=0; z<layerCount(); ++z) {
+        out << "layerName=" << m_layerNames.at(z) << "\n";
+    }
 }
+
 
 Tile::Shape EditorObject::shape(int x, int y, int z)
 {
@@ -63,7 +196,7 @@ void EditorObject::deleteLayer(int index)
     m_shapes->deleteRowZ(index);
     m_surfaceTypes->deleteRowZ(index);
     m_layerNames.removeAt(index);
-    m_graphics.remove(index); // TODO: fix this memory leak
+    m_graphics.removeAt(index); // TODO: fix this memory leak
 }
 
 void EditorObject::swapLayer(int i, int j)

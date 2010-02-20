@@ -110,7 +110,14 @@
       <widget class="QLineEdit" name="txtFilterObjects"/>
      </item>
      <item>
-      <widget class="QListWidget" name="lstObjects"/>
+      <widget class="QListWidget" name="lstObjects">
+       <property name="dragEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::DragOnly</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btnNewObject">

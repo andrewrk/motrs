@@ -22,23 +22,18 @@ def update_file(f, datfile):
         if os.system(command):
             sys.exit(1)
 
-def compile_folder(in_folder, out_folder, compile_func):
+def compile_folder(in_folder, out_folder, compile_func, modified_func):
     """
     make sure every file in in_folder is compiled and up to date in 
     out_folder
     """
     for root, dirs, files in os.walk(in_folder):
-        for f in files:
+        for f in files + dirs:
             if f.startswith("."): continue
             in_file = os.path.join(root, f)
             out_file = os.path.join(out_folder, f)
 
-            in_file_modified = os.path.getmtime(in_file)
-            out_file_modified = -1
-            if os.path.exists(out_file):
-                out_file_modified = os.path.getmtime(out_file)
-
-            if in_file_modified > out_file_modified:
+            if modified_func(in_file, out_file):
                 print("Compiling %s..." % in_file)
                 compile_func(in_file, out_file)
         break
@@ -222,6 +217,9 @@ def compile_entity(in_path, out_path):
 
 
 def read_declarations(in_path):
+    """
+    reads a properties format text file and returns a list of name/value pairs
+    """
     lines = open(in_path, "rU").read().split("\n")
     def strip_comments(line):
         comment_start = line.find("#")
@@ -249,6 +247,11 @@ def open_output(out_file):
     build_path(out_file)
     return open(out_file, "wb")
 
+def compile_graphic(in_file, out_file):
+    if os.path.isdir(in_file):
+        compile_animation(in_file, out_file)
+    else:
+        compile_bitmap(in_file, out_file)
 
 def compile_bitmap(in_file, out_file):
     """
@@ -283,33 +286,10 @@ def compile_bitmap(in_file, out_file):
     # actual bmp data
     out.write(open(in_file, "rb").read())
 
-def compile_animation_folder(in_folder, out_folder):
-    for root, dirs, files in os.walk(in_folder):
-        for d in dirs:
-            in_dir = os.path.join(root, d)
-            out_file = os.path.join(out_folder, d)
-
-            out_file_modified = -1
-            if os.path.exists(out_file):
-                out_file_modified = os.path.getmtime(out_file)
-
-            # if any file in in_dir is later than out_file_modified
-            for ani_root, ani_dirs, ani_files in os.walk(in_dir):
-                for f in ani_files:
-                    if os.path.getmtime(os.path.join(ani_root, f)) > out_file_modified:
-                        print("Compiling %s..." % in_dir)
-                        compile_animation(in_dir, out_file)
-                        break
-                    
-                break
-
-        break
-
 def compile_animation(in_dir, out_file):
     """
     Compile an animation into a Graphic. See Graphic.h
     """
-
     # get a list of all the bitmaps
     bitmaps = []
     prop_file = None
@@ -346,9 +326,7 @@ def compile_animation(in_dir, out_file):
         x += frame_width
 
     # read the properties
-    props = {}
-    for name, propType, value in [[y.strip() for y in x.split("=")] for x in open(os.path.join(in_dir, "properties.txt")).read().split("\n") if x.find('=') >= 0]:
-        props[name] = value
+    props = dict(read_declarations(os.path.join(in_dir, "properties.txt")))
 
     # write the sheet to a temp file
     sheetfile = tempfile.mktemp()
@@ -366,7 +344,7 @@ def compile_animation(in_dir, out_file):
     #Uint32 StorageType
     out.write(pack("i", 0))
 
-    r,g,b = [int(x.strip()) for x in props['alphacolor'].split(',')]
+    r,g,b = [int(x.strip()) for x in props['transparent'].split(',')]
 
     #RGB colorKey;
     out.write(pack("BBB", r, g, b))
@@ -395,6 +373,35 @@ def build_path(file_path):
     if not os.path.exists(d):
         os.makedirs(d)
 
+def compare_file_date(in_file, out_file):
+    """
+    standard file compare: if out_file is newer, return true
+    """
+    in_file_modified = os.path.getmtime(in_file)
+    out_file_modified = -1
+    if os.path.exists(out_file):
+        out_file_modified = os.path.getmtime(out_file)
+    return in_file_modified > out_file_modified
+
+def graphic_modified(source, dest):
+    if os.path.isdir(source):
+        return animation_modified(source, dest)
+    else:
+        return compare_file_date(source, dest)
+
+def animation_modified(in_dir, out_file):
+    out_file_modified = -1
+    if os.path.exists(out_file):
+        out_file_modified = os.path.getmtime(out_file)
+
+    # if any file in in_dir is later than out_file_modified
+    for ani_root, ani_dirs, ani_files in os.walk(in_dir):
+        for f in ani_files:
+            if os.path.getmtime(os.path.join(ani_root, f)) > out_file_modified:
+                return True
+        break
+
+    return False
 
 def main():
     command, datfile, in_dir, out_dir = sys.argv
@@ -412,23 +419,17 @@ def main():
 
     # compile single-source resources
     compiled_resources = (
-        ("universes", compile_universe),
-        ("worlds", compile_world),
-        ("maps", compile_map),
-        ("entities", compile_entity),
-        ("bitmaps", compile_bitmap),
+        ("universes", compile_universe, compare_file_date),
+        ("worlds", compile_world, compare_file_date),
+        ("maps", compile_map, compare_file_date),
+        ("entities", compile_entity, compare_file_date),
+        ("graphics", compile_graphic, graphic_modified),
     )
-    for (item, func) in compiled_resources:
+    for (item, func, modified_func) in compiled_resources:
         print("Checking %s..." % item)
         in_files, out_files = (os.path.join(in_resources, item), os.path.join(out_resources, item))
-        compile_folder(in_files, out_files, func)
+        compile_folder(in_files, out_files, func, modified_func)
         update_folder(out_files, datfile)
-
-    # compile animations
-    print("Checking animations...")
-    in_ani, out_ani = (os.path.join(in_resources, "animations"), os.path.join(out_resources, "animations"))
-    compile_animation_folder(in_ani, out_ani)
-    update_folder(out_ani, datfile)
 
 
 if __name__ == "__main__":

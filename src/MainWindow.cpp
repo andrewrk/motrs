@@ -61,7 +61,6 @@ void MainWindow::toggleFullscreen()
 {
     setFullscreenFlags(! m_fullscreen);
     m_screen = SDL_SetVideoMode(c_width, c_height, c_colorDepth, m_videoModeFlags);
-    //SDL_WM_ToggleFullScreen(m_screen);
 }
 
 void MainWindow::setFullscreenFlags(bool fullscreen)

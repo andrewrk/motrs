@@ -8,7 +8,7 @@
 
 EditorEntity::EditorEntity(QString file)
 {
-    QVector< QPair<QString, QString> > props;
+    QList< QPair<QString, QString> > props;
 
     m_good = EditorResourceManager::loadTextFile(file, props);
 
@@ -39,7 +39,7 @@ EditorEntity::EditorEntity(QString file)
         } else if( props[i].first.compare("stand", Qt::CaseInsensitive) == 0 ) {
             // nw,w,sw,n,c,s,ne,e,se
             QStringList standGraphics = props[i].second.split(",");
-            m_pixmap = EditorResourceManager::pixmapForGraphic(standGraphics.at(5));
+            m_graphic = EditorResourceManager::graphic(standGraphics.at(5));
         } else if( props[i].first.compare("walk", Qt::CaseInsensitive) == 0 ) {
             // world editor doesn't care about this
         } else if( props[i].first.compare("run", Qt::CaseInsensitive) == 0 ) {
@@ -58,8 +58,7 @@ EditorEntity::EditorEntity(QString file)
 
 void EditorEntity::draw(double screenX, double screenY)
 {
-    QPainter * p = WorldView::painter();
-    p->drawPixmap((int)(m_centerX - m_centerOffsetX - screenX),
-                  (int)(m_centerY - m_centerOffsetY - m_altitude - screenY),
-                        * m_pixmap);
+    m_graphic->draw(*WorldView::painter(),
+        (int)(m_centerX - m_centerOffsetX - screenX),
+        (int)(m_centerY - m_centerOffsetY - m_altitude - screenY));
 }

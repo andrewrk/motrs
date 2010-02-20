@@ -4,12 +4,14 @@
 #include "EditorResourceManager.h"
 #include "WorldView.h"
 #include "ObjectEditor.h"
+#include "EditorGraphic.h"
 
 #include <QDir>
 #include <QGraphicsPixmapItem>
 #include <QListWidget>
 #include <QDebug>
 #include <QSettings>
+#include <QMessageBox>
 
 #include "moc_WorldEditor.cxx"
 
@@ -23,9 +25,7 @@ WorldEditor::WorldEditor(QWidget *parent) :
 
     m_ui->actionQuit->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_F4));
 
-    m_view->setFocusPolicy(Qt::StrongFocus);
-
-    setCentralWidget(m_view);
+    EditorGraphic::initialize();
 
     // fill tools combo box with appropriate values
     fillToolComboBox(*m_ui->cboLeftClick);
@@ -47,22 +47,26 @@ WorldEditor::WorldEditor(QWidget *parent) :
         haveDefaultLayout ? defaultLayout : QVariant()).toByteArray());
     this->restoreGeometry(settings.value("windowGeometry").toByteArray());
 
-    m_ui->cboLeftClick->setCurrentIndex(settings.value("state/tool/left", Arrow).toInt());
-    m_ui->cboMiddleClick->setCurrentIndex(settings.value("state/tool/middle", Pan).toInt());
-    m_ui->cboRightClick->setCurrentIndex(settings.value("state/tool/right", Eraser).toInt());
+    m_ui->cboLeftClick->setCurrentIndex(settings.value("state/tool/left", WorldView::Arrow).toInt());
+    m_ui->cboMiddleClick->setCurrentIndex(settings.value("state/tool/middle", WorldView::Pan).toInt());
+    m_ui->cboRightClick->setCurrentIndex(settings.value("state/tool/right", WorldView::Eraser).toInt());
+
+    m_view->setFocusPolicy(Qt::StrongFocus);
+    setCentralWidget(m_view);
+    m_view->refreshGui();
 }
 
 void WorldEditor::on_cboLeftClick_currentIndexChanged(int index)
 {
-    m_toolLeftClick = (MouseTool) index;
+    m_view->setToolLeftClick( (WorldView::MouseTool) index);
 }
 void WorldEditor::on_cboMiddleClick_currentIndexChanged(int index)
 {
-    m_toolMiddleClick = (MouseTool) index;
+    m_view->setToolMiddleClick( (WorldView::MouseTool) index);
 }
 void WorldEditor::on_cboRightClick_currentIndexChanged(int index)
 {
-    m_toolRightClick = (MouseTool) index;
+    m_view->setToolRightClick( (WorldView::MouseTool) index);
 }
 
 void WorldEditor::closeEvent(QCloseEvent * e)
@@ -71,9 +75,9 @@ void WorldEditor::closeEvent(QCloseEvent * e)
     settings.setValue("windowState", this->saveState());
     settings.setValue("windowGeometry", this->saveGeometry());
 
-    settings.setValue("state/tool/left", m_toolLeftClick);
-    settings.setValue("state/tool/middle", m_toolMiddleClick);
-    settings.setValue("state/tool/right", m_toolRightClick);
+    settings.setValue("state/tool/left", m_view->toolLeftClick());
+    settings.setValue("state/tool/middle", m_view->toolMiddleClick());
+    settings.setValue("state/tool/right", m_view->toolRightClick());
 
     // TODO: make sure we're not going to clobber someone's work
 
@@ -128,8 +132,7 @@ void WorldEditor::refreshWorldList()
     m_ui->list_worlds->clear();
 
     // do a directory listing of data/worlds
-    QDir dir(EditorResourceManager::dataDir());
-    dir.cd("worlds");
+    QDir dir(EditorResourceManager::worldsDir());
     QStringList filters;
     filters << "*.world";
     QStringList entries = dir.entryList(filters, QDir::Files | QDir::Readable,
@@ -140,19 +143,29 @@ void WorldEditor::refreshWorldList()
 void WorldEditor::on_list_worlds_doubleClicked(QModelIndex index)
 {
     QListWidgetItem * item = m_ui->list_worlds->item(index.row());
-    QDir dir(EditorResourceManager::dataDir());
-    dir.cd("worlds");
+    QDir dir(EditorResourceManager::worldsDir());
     openWorld(dir.absoluteFilePath(item->text()));
 }
 
 void WorldEditor::openWorld(QString file)
 {
-    m_view->setWorld(new EditorWorld(file));
+    EditorWorld * world = EditorWorld::load(file);
+
+    if (world == NULL) {
+        QMessageBox::warning(this, tr("Error"), tr("Error opening world."));
+        return;
+    }
+    m_view->setWorld(world);
 }
 
 QListWidget * WorldEditor::layersList()
 {
     return m_ui->list_layers;
+}
+
+QListWidget * WorldEditor::objectsList()
+{
+    return m_ui->lstObjects;
 }
 
 QPushButton * WorldEditor::newLayerButton()
@@ -180,7 +193,6 @@ QPushButton * WorldEditor::moveLayerDownButton()
 void WorldEditor::on_list_layers_itemSelectionChanged()
 {
     m_view->setSelectedLayer(m_ui->list_layers->currentRow());
-    m_view->setControlEnableStates();
 }
 
 void WorldEditor::on_list_layers_itemChanged(QListWidgetItem* item)
@@ -226,4 +238,11 @@ void WorldEditor::on_btnNewObject_clicked()
 void WorldEditor::on_btnNewEntity_clicked()
 {
     // TODO: create a new entity and open it up in the editor
+}
+
+void WorldEditor::on_lstObjects_itemDoubleClicked(QListWidgetItem* item)
+{
+    ObjectEditor * editor = new ObjectEditor(this);
+    editor->open(item->data(Qt::UserRole).toString());
+    editor->show();
 }

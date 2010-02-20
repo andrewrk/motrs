@@ -16,10 +16,7 @@ class MainWindow;
 class Gameplay
 {
 public:
-    static Gameplay * instance() {
-        Debug::assert(s_inst != NULL, "Gameplay::instance() s_inst null");
-        return s_inst;
-    }
+    static inline Gameplay * instance();
 
     Gameplay(SDL_Surface * screen, int fps, MainWindow * owner);
     ~Gameplay();
@@ -27,12 +24,12 @@ public:
     void mainLoop();
     bool isGood();
 
-    unsigned int frameCount() { return m_frameCount; }
-    int fps() { return m_fps; }
-    SDL_Surface * screen() { return m_screen; }
+    inline long long int frameCount();
+    inline int fps();
+    inline SDL_Surface * screen();
 
-    double screenWidth() { return 800.0; }
-    double screenHeight() { return 600.0; }
+    inline double screenWidth();
+    inline double screenHeight();
 private: //variables
 
     static const char * ResourceFilePath;
@@ -46,7 +43,7 @@ private: //variables
     SDL_Surface * m_screen;
     int m_fps;
     int m_interval;
-    unsigned int m_frameCount;
+    long long int m_frameCount;
 
     double m_screenX, m_screenY;
 
@@ -74,6 +71,37 @@ private: //methods
     double minMarginWest() { return 350.0; }
 
 };
+
+inline Gameplay * Gameplay::instance()
+{
+    Debug::assert(s_inst != NULL, "Gameplay::instance() s_inst null");
+    return s_inst;
+}
+
+inline long long int Gameplay::frameCount()
+{
+    return m_frameCount;
+}
+
+inline SDL_Surface * Gameplay::screen()
+{
+    return m_screen;
+}
+
+inline int Gameplay::fps()
+{
+    return m_fps;
+}
+
+inline double Gameplay::screenWidth()
+{
+    return 800.0;
+}
+
+inline double Gameplay::screenHeight()
+{
+    return 600.0;
+}
 
 #endif
 

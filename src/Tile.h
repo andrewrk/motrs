@@ -5,7 +5,7 @@
 
 class Tile
 {
-public:
+public: //variables
     static const double size;
     static const int sizeInt;
 
@@ -46,16 +46,15 @@ public:
         stCount
     };
 
+public: //methods
+    static Tile * loadFromMemory(const char** cursor);
     static Tile * nullTile();
 
-
-    Tile(const char** cursor);
     Tile(const Tile &); // copy constructor
     Tile(); // null constructor - constructs a null tile
     virtual ~Tile();
 
     // screenX and screenY is the absolute coordinates of 0,0 on the screen
-    bool isGood();
     virtual void draw(int screenX, int screenY);
     bool hasMinPresence(PhysicalPresence minPresence);
     void resolveCircleCollision(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
@@ -72,8 +71,6 @@ protected:
     static void resolveCircleOnTriangleSE(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
     static void resolveCircleOnTriangleSW(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
     static void resolveCircleOnPoint(double pointX, double pointY, double & objectCenterX, double & objectCenterY, double objectRadius);
-
-    bool m_good;
 
     Shape m_shape;
     SurfaceType m_surfaceType;

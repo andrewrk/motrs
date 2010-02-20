@@ -2,8 +2,7 @@
 #define EDITORENTITY_H
 
 #include "Entity.h"
-
-#include <QPixmap>
+#include "EditorGraphic.h"
 
 class EditorEntity : public Entity
 {
@@ -15,7 +14,7 @@ public:
     void draw(double screenX, double screenY);
 private:
     bool m_good;
-    QPixmap * m_pixmap;
+    EditorGraphic * m_graphic;
 };
 
 #endif // EDITORENTITY_H

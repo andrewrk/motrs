@@ -40,7 +40,7 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps, MainWindow * owner) :
 
     // initialize gameplay
     m_universe = ResourceManager::loadUniverse(ResourceFilePath, "main.universe");
-    if (!(m_universe != NULL && m_universe->isGood())) {
+    if (m_universe == NULL) {
         m_good = false;
         return;
     }

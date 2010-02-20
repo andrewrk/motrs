@@ -51,6 +51,8 @@ void SettingsDialog::showEvent(QShowEvent * e)
         case EditorSettings::Pretty:
             m_ui->optGridPretty->setChecked(true);
             break;
+        case EditorSettings::Solid:
+            m_ui->optGridSolid->setChecked(true);
     }
 }
 
@@ -72,6 +74,8 @@ void SettingsDialog::on_btnOK_clicked()
         grid = EditorSettings::Fast;
     else if(m_ui->optGridPretty->isChecked() )
         grid = EditorSettings::Pretty;
+    else if(m_ui->optGridSolid->isChecked() )
+        grid = EditorSettings::Solid;
 
     EditorSettings::setGridRenderType(grid);
 

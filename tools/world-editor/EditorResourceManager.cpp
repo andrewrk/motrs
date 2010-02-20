@@ -8,60 +8,24 @@
 #include <QFileInfo>
 #include <QDir>
 
-QMap<QString, QPixmap *> EditorResourceManager::s_artPixmaps;
-QMap<QString, QPixmap *> EditorResourceManager::s_graphicPixmaps;
+QMap<QString, EditorGraphic *> EditorResourceManager::s_graphics;
 
-QPixmap * EditorResourceManager::pixmapForGraphic(QString graphicName)
+EditorGraphic * EditorResourceManager::graphic(QString name)
 {
-    if( s_graphicPixmaps.contains(graphicName) ) {
-        return s_graphicPixmaps.value(graphicName);
+    if( s_graphics.contains(name) ) {
+        return s_graphics.value(name);
     } else {
-        // check if it exists as a static image
-        QDir dir(dataDir());
-        dir.cd("bitmaps");
-        QString bitmapFile = dir.absoluteFilePath(graphicName);
-        if( QFileInfo(bitmapFile).exists() ) {
-            QPixmap * pixmap = new QPixmap(bitmapFile);
-            s_graphicPixmaps.insert(graphicName, pixmap);
-            return pixmap;
-        }
+        QDir dir(graphicsDir());
+        QString filename = dir.absoluteFilePath(name);
 
-        // check if it exists as an animation
-        dir.cdUp();
-        dir.cd("animations");
-        QString animationDir = dir.absoluteFilePath(graphicName);
-        if( QFileInfo(animationDir).exists() ) {
-            // grab the first frame from the animation
-            dir.cd(animationDir);
-            QStringList frames = dir.entryList(QDir::NoDotAndDotDot|QDir::Files, QDir::Name);
-            QString firstFrame = frames.first();
-            QPixmap * pixmap = new QPixmap(dir.absoluteFilePath(firstFrame));
-            s_graphicPixmaps.insert(graphicName, pixmap);
-            return pixmap;
-        }
-        return NULL;
+        EditorGraphic * graphic = EditorGraphic::load(filename);
+        if( graphic != NULL )
+            s_graphics.insert(name, graphic);
+        return graphic;
     }
 }
 
-QPixmap * EditorResourceManager::pixmapForArt(QString artName)
-{
-    if( s_artPixmaps.contains(artName) ){
-        return s_artPixmaps.value(artName);
-    } else {
-        QDir dir(dataDir());
-        dir.cd("art");
-        QString artFile = dir.absoluteFilePath(artName);
-        if( QFileInfo(artFile).exists() ) {
-            QPixmap * pixmap = new QPixmap(artFile);
-            s_artPixmaps.insert(artName, pixmap);
-            return pixmap;
-        }
-        return NULL;
-    }
-}
-
-
-bool EditorResourceManager::loadTextFile(QString filename, QVector< QPair<QString, QString> > & v)
+bool EditorResourceManager::loadTextFile(QString filename, QList< QPair<QString, QString> > & out_list)
 {
     QFile infile(filename);
 
@@ -70,7 +34,7 @@ bool EditorResourceManager::loadTextFile(QString filename, QVector< QPair<QStrin
         return false;
     }
 
-    v.clear();
+    out_list.clear();
 
     QTextStream in(&infile);
     while(! in.atEnd()) {
@@ -101,7 +65,7 @@ bool EditorResourceManager::loadTextFile(QString filename, QVector< QPair<QStrin
             QString name = pairs.takeFirst().trimmed();
             QString value = pairs.join("").trimmed();
 
-            v.append(QPair<QString, QString>(name, value));
+            out_list.append(QPair<QString, QString>(name, value));
         }
     }
 
@@ -109,17 +73,53 @@ bool EditorResourceManager::loadTextFile(QString filename, QVector< QPair<QStrin
     return true;
 }
 
-
-
 QString EditorResourceManager::dataDir()
 {
     QSettings settings;
     return settings.value("paths/data", ".").toString();
 }
 
+QString EditorResourceManager::objectsDir()
+{
+    QDir dir(dataDir());
+    return dir.absoluteFilePath("objects");
+}
 
 QString EditorResourceManager::localDataDir()
 {
+    // TODO: take into account data path so it works on linux
     QDir dir("data");
     return dir.absolutePath();
 }
+
+QString EditorResourceManager::entitiesDir()
+{
+    QDir dir(dataDir());
+    return dir.absoluteFilePath("entities");
+}
+
+QString EditorResourceManager::graphicsDir()
+{
+    QDir dir(dataDir());
+    return dir.absoluteFilePath("graphics");
+}
+
+QString EditorResourceManager::mapsDir()
+{
+    QDir dir(dataDir());
+    return dir.absoluteFilePath("maps");
+}
+
+QString EditorResourceManager::worldsDir()
+{
+    QDir dir(dataDir());
+    return dir.absoluteFilePath("worlds");
+}
+
+QString EditorResourceManager::universeFile()
+{
+    QDir dir(dataDir());
+    dir.cd("universes");
+    return dir.absoluteFilePath("main.universe");
+}
+

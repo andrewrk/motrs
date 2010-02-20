@@ -5,6 +5,7 @@
 #include <QScrollBar>
 #include <QPaintEvent>
 #include <QResizeEvent>
+#include <QTimer>
 
 #include "EditorWorld.h"
 #include "EditorMap.h"
@@ -14,8 +15,17 @@
 class WorldView : public QWidget
 {
     Q_OBJECT
-    friend class WorldEditor;
-public:
+public: //variables
+    enum MouseTool {
+        Nothing,
+        Arrow,
+        Eraser,
+        Pan,
+        Center,
+        Pencil,
+        Brush,
+    };
+public: //methods
     WorldView(WorldEditor * window, QWidget * parent = NULL);
     ~WorldView();
 
@@ -27,6 +37,17 @@ public:
     void deleteLayer(int index);
 
     inline static QPainter * painter() { return s_painter; }
+
+    MouseTool toolLeftClick() { return m_toolLeftClick; }
+    void setToolLeftClick(MouseTool tool);
+
+    MouseTool toolMiddleClick() { return m_toolMiddleClick; }
+    void setToolMiddleClick(MouseTool tool);
+
+    MouseTool toolRightClick() { return m_toolRightClick; }
+    void setToolRightClick(MouseTool tool);
+
+    void refreshGui();
 protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
@@ -35,7 +56,7 @@ protected:
     void mouseMoveEvent(QMouseEvent * e);
     void keyPressEvent(QKeyEvent * e);
     void keyReleaseEvent(QKeyEvent * e);
-private:
+private: //variables
     enum MouseState {
         Normal,
         SetStartPoint,
@@ -70,8 +91,8 @@ private:
     double m_offsetY;
 
     // saved list of maps that are visible for fast rendering
-    QVector<EditorMap *> m_mapCache;
-    QVector<EditorEntity *> m_entityCache;
+    QList<EditorMap *> m_mapCache;
+    QList<EditorEntity *> m_entityCache;
     // highest number of layers of all visible maps
     int m_maxLayer;
 
@@ -80,7 +101,7 @@ private:
 
     int m_mouseDownX;
     int m_mouseDownY;
-    WorldEditor::MouseTool m_mouseDownTool;
+    MouseTool m_mouseDownTool;
     int m_mouseState;
 
     // location of the mouse
@@ -94,7 +115,14 @@ private:
     // art that has not been converted into objects or entities yet.
     ArtItem m_tempArt;
 
+    // what tools to use when we click with the mouse
+    MouseTool m_toolLeftClick;
+    MouseTool m_toolMiddleClick;
+    MouseTool m_toolRightClick;
 
+    QTimer m_animationTimer;
+
+private: //methods
     // transfer between absolute coordinates and editor coordinates
     double screenX(double absoluteX);
     double screenY(double absoluteY);
@@ -119,6 +147,7 @@ private:
     void determineCursor();
 
     void refreshLayersList();
+    void refreshObjectsList();
     void setControlEnableStates();
 
 

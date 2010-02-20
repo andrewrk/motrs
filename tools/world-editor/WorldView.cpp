@@ -12,6 +12,7 @@
 #include <QUrl>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QDir>
 
 #include <cmath>
 
@@ -30,7 +31,7 @@ WorldView::WorldView(WorldEditor * window, QWidget * parent) :
     m_offsetY(0),
     m_mapCache(),
     m_selectedMap(NULL),
-    m_mouseDownTool(WorldEditor::Nothing),
+    m_mouseDownTool(Nothing),
     m_mouseState(Normal)
 {
     m_hsb->show();
@@ -43,12 +44,23 @@ WorldView::WorldView(WorldEditor * window, QWidget * parent) :
 
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
+
+    // refresh the display to animate
+    connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(update()));
+    m_animationTimer.start(100);
 }
 
 WorldView::~WorldView()
 {
     if( m_world )
         delete m_world;
+}
+
+void WorldView::refreshGui()
+{
+    refreshLayersList();
+    refreshObjectsList();
+    setControlEnableStates();
 }
 
 void WorldView::resizeEvent(QResizeEvent * e)
@@ -67,7 +79,7 @@ void WorldView::updateViewCache()
     // need to be drawn.
     m_mapCache.clear();
     m_entityCache.clear();
-    if( m_world && m_world->isGood() ) {
+    if( m_world ) {
         // select the maps that are in range
         std::vector<Map*> * maps = m_world->maps();
         double viewLeft = absoluteX(0);
@@ -105,66 +117,61 @@ void WorldView::paintEvent(QPaintEvent * e)
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_world ) {
-        if( m_world->isGood() ) {
-            double absX = absoluteX(0);
-            double absY = absoluteY(0);
+        double absX = absoluteX(0);
+        double absY = absoluteY(0);
 
-            for(int layer=0; layer<m_maxLayer; ++layer) {
-                // draw map at this layer
-                for(int i=0; i<m_mapCache.size(); ++i) {
-                    EditorMap * map = m_mapCache[i];
-
-                    // if the map is selected and this layer is unchecked, don't draw
-                    if( map == m_selectedMap && m_window->layersList()->item(layer)->checkState() == Qt::Unchecked)
-                        continue;
-
-                    if( layer < map->layerCount() )
-                        map->draw(absX, absY,
-                            (double)this->width(), (double)this->height(), layer);
-                }
-
-                // draw entities at this layer
-                for(int i=0; i<m_entityCache.size(); ++i) {
-                    if( m_entityCache[i]->layer() == layer )
-                        m_entityCache[i]->draw(absX, absY);
-                }
-            }
-            // draw a bold line around map borders
-            QPen normalMapBorder(Qt::black, 2);
-            QPen selectedMapBorder(Qt::blue, 2);
-            p.setBrush(Qt::NoBrush);
-            for (int i = 0; i < m_mapCache.size(); i++) {
+        for(int layer=0; layer<m_maxLayer; ++layer) {
+            // draw map at this layer
+            for(int i=0; i<m_mapCache.size(); ++i) {
                 EditorMap * map = m_mapCache[i];
 
-                p.setPen(m_selectedMap == map ? selectedMapBorder : normalMapBorder);
-                QRect outline((int)screenX(map->left()), (int)screenY(map->top()),
-                    (int)(map->width() * m_zoom), (int)(map->height() * m_zoom));
+                // if the map is selected and this layer is unchecked, don't draw
+                if( map == m_selectedMap && m_window->layersList()->item(layer)->checkState() == Qt::Unchecked)
+                    continue;
 
-                // if we're dragging boundaries, move the blue line
-                if( m_selectedMap == map ) {
-                    int deltaX = m_mouseX - m_mouseDownX;
-                    int deltaY = m_mouseY - m_mouseDownY;
-                    if (m_mouseState == StretchMapLeft)
-                        outline.setLeft(outline.left() + deltaX);
-                    else if (m_mouseState == StretchMapBottom)
-                        outline.setBottom(outline.bottom() + deltaY);
-                    else if (m_mouseState == StretchMapRight)
-                        outline.setRight(outline.right() + deltaX);
-                    else if (m_mouseState == StretchMapTop)
-                        outline.setTop(outline.top() + deltaY);
-                    else if (m_mouseState == MoveMap)
-                        outline.moveTo(outline.left() + deltaX, outline.top() + deltaY);
-
-                }
-
-                p.drawRect(outline);
+                if( layer < map->layerCount() )
+                    map->draw(absX, absY,
+                        (double)this->width(), (double)this->height(), layer);
             }
 
-            drawGrid(p);
-        } else {
-            p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
-                tr("Error loading World."));
+            // draw entities at this layer
+            for(int i=0; i<m_entityCache.size(); ++i) {
+                if( m_entityCache[i]->layer() == layer )
+                    m_entityCache[i]->draw(absX, absY);
+            }
         }
+        // draw a bold line around map borders
+        QPen normalMapBorder(Qt::black, 2);
+        QPen selectedMapBorder(Qt::blue, 2);
+        p.setBrush(Qt::NoBrush);
+        for (int i = 0; i < m_mapCache.size(); i++) {
+            EditorMap * map = m_mapCache[i];
+
+            p.setPen(m_selectedMap == map ? selectedMapBorder : normalMapBorder);
+            QRect outline((int)screenX(map->left()), (int)screenY(map->top()),
+                (int)(map->width() * m_zoom), (int)(map->height() * m_zoom));
+
+            // if we're dragging boundaries, move the blue line
+            if( m_selectedMap == map ) {
+                int deltaX = m_mouseX - m_mouseDownX;
+                int deltaY = m_mouseY - m_mouseDownY;
+                if (m_mouseState == StretchMapLeft)
+                    outline.setLeft(outline.left() + deltaX);
+                else if (m_mouseState == StretchMapBottom)
+                    outline.setBottom(outline.bottom() + deltaY);
+                else if (m_mouseState == StretchMapRight)
+                    outline.setRight(outline.right() + deltaX);
+                else if (m_mouseState == StretchMapTop)
+                    outline.setTop(outline.top() + deltaY);
+                else if (m_mouseState == MoveMap)
+                    outline.moveTo(outline.left() + deltaX, outline.top() + deltaY);
+
+            }
+
+            p.drawRect(outline);
+        }
+
+        drawGrid(p);
     } else {
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
             tr("Double click a world to edit"));
@@ -179,6 +186,8 @@ void WorldView::drawGrid(QPainter &p)
     if( gridType != EditorSettings::None ) {
         if( gridType == EditorSettings::Pretty )
             p.setPen(QColor(128, 128, 128, 64));
+        else if( gridType == EditorSettings::Solid )
+            p.setPen(Qt::black);
         else
             p.setPen(QColor(128, 128, 128));
 
@@ -189,7 +198,7 @@ void WorldView::drawGrid(QPainter &p)
         double gridX = gameLeft - std::fmod(gameLeft, Tile::size);
         double gridY = gameTop - std::fmod(gameTop, Tile::size);
 
-        if( gridType == EditorSettings::Pretty ) {
+        if( gridType == EditorSettings::Pretty || gridType == EditorSettings::Solid ) {
             while(gridX < gameRight) {
                 double drawX = screenX(gridX);
                 p.drawLine((int)drawX, 0, (int)drawX, this->height());
@@ -311,12 +320,12 @@ void WorldView::determineCursor()
     switch(m_mouseState) {
         case Normal: {
             switch(m_mouseDownTool) {
-                case WorldEditor::Nothing: {
+                case Nothing: {
                     // change mouse cursor to sizers if over map boundaries
                     // if the user could use the arrow tool
-                    if( m_window->m_toolLeftClick == WorldEditor::Arrow ||
-                        m_window->m_toolMiddleClick == WorldEditor::Arrow ||
-                        m_window->m_toolRightClick == WorldEditor::Arrow )
+                    if( m_toolLeftClick == Arrow ||
+                        m_toolMiddleClick == Arrow ||
+                        m_toolRightClick == Arrow )
                     {
                         if( overMapLeft(m_mouseX, m_mouseY) || overMapRight(m_mouseX, m_mouseY))
                             this->setCursor(Qt::SizeHorCursor);
@@ -328,12 +337,12 @@ void WorldView::determineCursor()
                             this->setCursor(Qt::ArrowCursor);
                     }
                 } break;
-                case WorldEditor::Arrow: break;
-                case WorldEditor::Eraser: break;
-                case WorldEditor::Pan: break;
-                case WorldEditor::Center: break;
-                case WorldEditor::Pencil: break;
-                case WorldEditor::Brush: break;
+                case Arrow: break;
+                case Eraser: break;
+                case Pan: break;
+                case Center: break;
+                case Pencil: break;
+                case Brush: break;
             }
         } break;
         case SetStartPoint: break;
@@ -355,13 +364,13 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
     switch(m_mouseState) {
         case Normal: {
             switch(m_mouseDownTool) {
-                case WorldEditor::Nothing: break;
-                case WorldEditor::Arrow: break;
-                case WorldEditor::Eraser: break;
-                case WorldEditor::Pan: break;
-                case WorldEditor::Center: break;
-                case WorldEditor::Pencil: break;
-                case WorldEditor::Brush: break;
+                case Nothing: break;
+                case Arrow: break;
+                case Eraser: break;
+                case Pan: break;
+                case Center: break;
+                case Pencil: break;
+                case Brush: break;
             }
         } break;
         case SetStartPoint: break;
@@ -379,14 +388,14 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
 
 void WorldView::mouseReleaseEvent(QMouseEvent * e)
 {
-    WorldEditor::MouseTool tool = WorldEditor::Nothing;
+    MouseTool tool = Nothing;
 
     if( e->button() == Qt::LeftButton )
-        tool = m_window->m_toolLeftClick;
+        tool = m_toolLeftClick;
     else if( e->button() == Qt::MidButton )
-        tool = m_window->m_toolMiddleClick;
+        tool = m_toolMiddleClick;
     else if( e->button() == Qt::RightButton )
-        tool = m_window->m_toolRightClick;
+        tool = m_toolRightClick;
     else
         return;
 
@@ -415,7 +424,7 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
 
     // return state to normal
     if( tool == m_mouseDownTool ) {
-        m_mouseDownTool = WorldEditor::Nothing;
+        m_mouseDownTool = Nothing;
         m_mouseState = Normal;
         determineCursor();
     }
@@ -426,17 +435,17 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
 void WorldView::mousePressEvent(QMouseEvent * e)
 {
     // if we are already pressing down the mouse with another tool, return
-    if( m_mouseDownTool != WorldEditor::Nothing )
+    if( m_mouseDownTool != Nothing )
         return;
 
-    WorldEditor::MouseTool tool = WorldEditor::Nothing;
+    MouseTool tool = Nothing;
 
     if( e->button() == Qt::LeftButton )
-        tool = m_window->m_toolLeftClick;
+        tool = m_toolLeftClick;
     else if( e->button() == Qt::MidButton )
-        tool = m_window->m_toolMiddleClick;
+        tool = m_toolMiddleClick;
     else if( e->button() == Qt::RightButton )
-        tool = m_window->m_toolRightClick;
+        tool = m_toolRightClick;
     else
         return;
 
@@ -445,9 +454,9 @@ void WorldView::mousePressEvent(QMouseEvent * e)
     m_mouseDownTool = tool;
 
     switch( tool ){
-        case WorldEditor::Nothing:
+        case Nothing:
             break;
-        case WorldEditor::Arrow: {
+        case Arrow: {
             // are we stretching the boundaries of a map?
             if( overMapLeft(e->x(), e->y()) )
                 m_mouseState = StretchMapLeft;
@@ -462,19 +471,19 @@ void WorldView::mousePressEvent(QMouseEvent * e)
             else
                 selectMap(mapAt(e->x(), e->y())); // if they clicked inside a map, select it
         } break;
-        case WorldEditor::Eraser:
+        case Eraser:
 
             break;
-        case WorldEditor::Pan:
+        case Pan:
 
             break;
-        case WorldEditor::Center:
+        case Center:
 
             break;
-        case WorldEditor::Pencil:
+        case Pencil:
 
             break;
-        case WorldEditor::Brush:
+        case Brush:
 
             break;
         default:
@@ -512,6 +521,8 @@ void WorldView::setWorld(EditorWorld * world)
     m_vsb->setValue((int)(m_world->top()));
 
     updateViewCache();
+
+    refreshGui();
 }
 
 void WorldView::refreshLayersList()
@@ -536,10 +547,33 @@ void WorldView::refreshLayersList()
     setControlEnableStates();
 }
 
+void WorldView::refreshObjectsList()
+{
+    QListWidget * list = m_window->objectsList();
+
+    QDir dir(EditorResourceManager::objectsDir());
+
+    QStringList filters;
+    filters << "*.object";
+
+    QStringList entries = dir.entryList(filters, QDir::Files | QDir::Readable,
+        QDir::Name | QDir::IgnoreCase);
+    list->clear();
+    for(int i=0; i<entries.size(); ++i) {
+        // create item
+        QString file = dir.absoluteFilePath(entries[i]);
+        // TODO: create preview icons for objects upon save
+        QListWidgetItem * item = new QListWidgetItem(QIcon(), entries[i], list);
+        item->setData(Qt::UserRole, QVariant(file));
+        list->addItem(item);
+    }
+
+}
+
 void WorldView::selectMap(EditorMap * map)
 {
     m_selectedMap = map;
-    refreshLayersList();
+    refreshGui();
     this->update();
 }
 
@@ -558,8 +592,8 @@ void WorldView::setSelectedLayer(int index)
 {
     m_window->layersList()->setCurrentRow(index);
     m_selectedLayer = index;
+    setControlEnableStates();
 }
-
 
 void WorldView::addLayer()
 {
@@ -595,4 +629,19 @@ void WorldView::setControlEnableStates()
     m_window->deleteLayerButton()->setEnabled(m_selectedMap != NULL && m_window->layersList()->currentRow() > -1);
     m_window->newLayerButton()->setEnabled(m_selectedMap != NULL);
 
+}
+
+void WorldView::setToolLeftClick(MouseTool tool)
+{
+    m_toolLeftClick = tool;
+}
+
+void WorldView::setToolMiddleClick(MouseTool tool)
+{
+    m_toolMiddleClick = tool;
+}
+
+void WorldView::setToolRightClick(MouseTool tool)
+{
+    m_toolRightClick = tool;
 }
