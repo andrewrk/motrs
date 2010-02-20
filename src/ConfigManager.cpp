@@ -104,5 +104,5 @@ std::string ConfigManager::command()
 
 std::string ConfigManager::value(std::string key, std::string defaultValue)
 {
-    return (m_map.count(key) > 0) ? m_map.at(key) : defaultValue;
+    return (m_map.count(key) > 0) ? m_map[key] : defaultValue;
 }

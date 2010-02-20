@@ -199,16 +199,16 @@ void ObjectView::paintEvent(QPaintEvent * e)
                     QList<EditorObject::ObjectGraphic *> * thisLayerGraphics = graphics->value(layer);
                     for(int i=0; i<thisLayerGraphics->size(); ++i) {
                         EditorObject::ObjectGraphic * graphic = thisLayerGraphics->at(i);
-                        p.drawPixmap(screenX(graphic->x), screenY(graphic->y),
-                            graphic->width * m_zoom, graphic->height * m_zoom,
+                        p.drawPixmap((int)screenX(graphic->x), (int)screenY(graphic->y),
+                            (int)(graphic->width * m_zoom), (int)(graphic->height * m_zoom),
                             *graphic->pixmap);
                     }
 
                     // draw dragged stuff
                     if( layer == m_selectedLayer && m_dragPixmap != NULL ) {
                         p.drawPixmap(m_dragPixmapX, m_dragPixmapY,
-                            m_dragPixmap->width() * m_zoom,
-                            m_dragPixmap->height() * m_zoom, *m_dragPixmap);
+                            (int)(m_dragPixmap->width() * m_zoom),
+                            (int)(m_dragPixmap->height() * m_zoom), *m_dragPixmap);
                     }
                 }
             }
@@ -217,9 +217,9 @@ void ObjectView::paintEvent(QPaintEvent * e)
             if( m_selectedGraphic != NULL ) {
                 p.setPen(QPen(Qt::blue,2));
 
-                QRect outline(screenX(m_selectedGraphic->x), screenY(m_selectedGraphic->y),
-                    m_selectedGraphic->width * m_zoom,
-                    m_selectedGraphic->height * m_zoom);
+                QRect outline((int)screenX(m_selectedGraphic->x), (int)screenY(m_selectedGraphic->y),
+                    (int)(m_selectedGraphic->width * m_zoom),
+                    (int)(m_selectedGraphic->height * m_zoom));
 
                 p.drawRect(outline);
             }
@@ -231,7 +231,7 @@ void ObjectView::paintEvent(QPaintEvent * e)
                     QPixmap * pixmap = (m_viewMode == vmSurfaceType) ?
                         s_surfaceTypePixmaps[m_object->surfaceType(x,y,m_selectedLayer)] :
                         s_shapePixmaps[m_object->shape(x,y,m_selectedLayer)];
-                    p.drawPixmap(screenX(x * Tile::size), screenY(y * Tile::size), Tile::size * m_zoom, Tile::size * m_zoom, *pixmap);
+                    p.drawPixmap((int)screenX(x * Tile::size), (int)screenY(y * Tile::size), (int)(Tile::size * m_zoom), (int)(Tile::size * m_zoom), *pixmap);
                 }
             }
         } else {
@@ -449,14 +449,14 @@ void ObjectView::drawGrid(QPainter &p)
 
             // vertical
             for(int x=0; x<=sizeX; ++x) {
-                double sx = screenX(x*Tile::size);
-                p.drawLine(sx, screenY(0), sx, screenY(sizeY * Tile::size));
+                int sx = (int)screenX(x*Tile::size);
+                p.drawLine(sx, (int)screenY(0), sx, (int)screenY(sizeY * Tile::size));
             }
 
             // horizontal
             for(int y=0; y<=sizeY; ++y) {
-                double sy = screenY(y*Tile::size);
-                p.drawLine(screenX(0), sy, screenX(sizeX * Tile::size), sy);
+                int sy = (int)screenY(y*Tile::size);
+                p.drawLine((int)screenX(0), sy, (int)screenX(sizeX * Tile::size), sy);
             }
 
         } else if( gridType == EditorSettings::Fast ) {
@@ -771,9 +771,9 @@ void ObjectView::wheelEvent(QWheelEvent * e)
         // zoom
         m_zoom = Utils::max(Utils::min(m_zoom * std::pow(1.2, steps), 100.0), 0.2);
     } else if( e->orientation() == Qt::Vertical ) {
-        m_vsb->setValue(m_vsb->value() - steps * 100 / m_zoom);
+        m_vsb->setValue((int)(m_vsb->value() - steps * 100 / m_zoom));
     } else if( e->orientation() == Qt::Horizontal ) {
-        m_hsb->setValue(m_hsb->value() - steps * 100 / m_zoom);
+        m_hsb->setValue((int)(m_hsb->value() - steps * 100 / m_zoom));
     }
 
     this->update();
@@ -892,8 +892,8 @@ void ObjectView::mouseMoveEvent(QMouseEvent * e)
             this->update();
         }
     } else if( m_viewMode == vmSurfaceType || m_viewMode == vmShape ) {
-        int tileX = absoluteX(e->x()) / Tile::size;
-        int tileY = absoluteY(e->y()) / Tile::size;
+        int tileX = (int)(absoluteX(e->x()) / Tile::size);
+        int tileY = (int)(absoluteY(e->y()) / Tile::size);
         int tileZ = m_selectedLayer;
         bool inRange =  tileX >= 0 && tileX < m_object->tileCountX() &&
                         tileY >= 0 && tileY < m_object->tileCountY() &&
