@@ -243,7 +243,7 @@ void Gameplay::applyInput(Entity * entity, bool takesInput) {
 
     if (isFalling) {
         double altitudeVelocity = entity->altitudeVelocity();
-        double gravity = 1.0;
+        double gravity = 0.3;
         altitudeVelocity -= gravity;
         // TODO: terminal velocity
         entity->setAltitudeVelocity(altitudeVelocity);
@@ -359,7 +359,7 @@ void Gameplay::updateDisplay() {
     for (int layer = 0; layer < layerCount; layer++) {
         for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++) {
             Map * map = m_loadedMapsCache[i];
-            if (i < (unsigned int)map->layerCount())
+            if (layer < map->layerCount())
                 map->draw(m_screenX, m_screenY, screenWidth(), screenHeight(), layer);
         }
         // TODO: cache entities on each layer

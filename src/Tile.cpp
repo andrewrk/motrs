@@ -102,13 +102,32 @@ void Tile::resolveCircleCollision(double tileX, double tileY, double & objectCen
         Debug::assert(false, "TODO: tile shapes");
         break;
     case tsFloorRailE:
-        Debug::assert(false, "TODO: tile shapes");
+        {
+            if (!(tileY < objectCenterY && objectCenterY < tileY + Tile::size))
+                break;
+            double tileRight = tileX + Tile::size;
+            double leftThreshold = tileRight - objectRadius;
+            if (!(leftThreshold < objectCenterX && objectCenterX < tileX + Tile::size))
+                break;
+            objectCenterX -= 3.0;
+            if (objectCenterX < leftThreshold)
+                objectCenterX = leftThreshold;
+        }
         break;
     case tsFloorRailS:
         Debug::assert(false, "TODO: tile shapes");
         break;
     case tsFloorRailW:
-        Debug::assert(false, "TODO: tile shapes");
+        {
+            if (!(tileY < objectCenterY && objectCenterY < tileY + Tile::size))
+                break;
+            double rightThreshold = tileX + objectRadius;
+            if (!(tileX < objectCenterX && objectCenterX < rightThreshold))
+                break;
+                objectCenterX += 3.0;
+            if (objectCenterX > rightThreshold)
+                objectCenterX = rightThreshold;
+        }
         break;
     default:
         Debug::assert(false, "unknown tile shape");
