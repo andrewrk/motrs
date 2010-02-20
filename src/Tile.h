@@ -9,12 +9,12 @@ public:
     static const double size;
     static const int sizeInt;
 
-    /** It's not important to leave these values alone */
+    // It's not important to leave these values alone
     enum PhysicalPresence {
         ppHole, ppFloor, ppRail, ppEmbrasure, ppWall
     };
 
-    /** It's important to leave these values alone since they're stored in .map files */
+    // It's important to leave these values alone since they're stored in .map files
     enum Shape {
         // solid
         tsSolidWall  = 0,
@@ -35,7 +35,7 @@ public:
         tsCount
     };
 
-    /** It's important to leave these values alones since they're stored in .map files */
+    // It's important to leave these values alone since they're stored in .map files
     enum SurfaceType {
         stNormal    = 0,
         stWater     = 1,

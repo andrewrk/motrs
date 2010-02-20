@@ -17,6 +17,8 @@ tile=3,0,Sand Block NW.bmp
 tile=4,0,Sand Block NE.bmp
 tile=5,0,Sand Block SE.bmp
 tile=6,0,Sand Block SW.bmp
+tile=0,0,block.bmp
+tile=8,0,floorRailE.bmp
 
 # Layer declarations are always full arrays (no sparse allowed).
 # Flatten a 2d grid in row-major order. 
@@ -34,7 +36,7 @@ layer=layer name,\
 2,1,1,1, 1,1,1,1, 1,1,1,1, 1,6,1,5, 1,1,1,1, 1,1,1,1, \
 \
 2,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,2, \
-2,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,2, \
+2,1,1,1, 1,1,1,1, 1,8,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,2, \
 2,1,1,1, 1,1,1,1, 1,1,1,1, 1,3,1,1, 4,1,1,1, 1,1,1,1, \
 2,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, \
 \
