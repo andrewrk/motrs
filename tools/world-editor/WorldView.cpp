@@ -156,15 +156,15 @@ void WorldView::paintEvent(QPaintEvent * e)
                 int deltaX = m_mouseX - m_mouseDownX;
                 int deltaY = m_mouseY - m_mouseDownY;
                 if (m_mouseState == StretchMapLeft)
-                    outline.setLeft(outline.left() + deltaX);
+                    outline.setLeft(snapScreenX(outline.left() + deltaX));
                 else if (m_mouseState == StretchMapBottom)
-                    outline.setBottom(outline.bottom() + deltaY);
+                    outline.setBottom(snapScreenY(outline.bottom() + deltaY));
                 else if (m_mouseState == StretchMapRight)
-                    outline.setRight(outline.right() + deltaX);
+                    outline.setRight(snapScreenX(outline.right() + deltaX));
                 else if (m_mouseState == StretchMapTop)
-                    outline.setTop(outline.top() + deltaY);
+                    outline.setTop(snapScreenY(outline.top() + deltaY));
                 else if (m_mouseState == MoveMap)
-                    outline.moveTo(outline.left() + deltaX, outline.top() + deltaY);
+                    outline.moveTo(snapScreenX(outline.left() + deltaX), snapScreenY(outline.top() + deltaY));
 
             }
 
@@ -219,24 +219,46 @@ void WorldView::drawGrid(QPainter &p)
     }
 }
 
-double WorldView::screenX(double absoluteX)
+int WorldView::screenX(double absoluteX)
 {
-    return (absoluteX - m_offsetX) * m_zoom;
+    return (int)(absoluteX - m_offsetX) * m_zoom;
 }
 
-double WorldView::screenY(double absoluteY)
+int WorldView::screenY(double absoluteY)
 {
-    return (absoluteY - m_offsetY) * m_zoom;
+    return (int)(absoluteY - m_offsetY) * m_zoom;
 }
 
-double WorldView::absoluteX(double screenX)
+double WorldView::absoluteX(int screenX)
 {
     return (screenX / m_zoom) + m_offsetX;
 }
 
-double WorldView::absoluteY(double screenY)
+double WorldView::absoluteY(int screenY)
 {
     return (screenY / m_zoom) + m_offsetY;
+}
+
+
+int WorldView::snapScreenX(int x)
+{
+    // snap to tile boundary
+    return screenX(snapAbsoluteX(absoluteX(x)));
+}
+
+int WorldView::snapScreenY(int y)
+{
+    return screenY(snapAbsoluteY(absoluteY(y)));
+}
+
+double WorldView::snapAbsoluteX(double x)
+{
+    return std::floor(x / Tile::size) * Tile::size;
+}
+
+double WorldView::snapAbsoluteY(double y)
+{
+    return std::floor(y / Tile::size) * Tile::size;
 }
 
 bool WorldView::overMapLeft(int x, int y)
@@ -403,22 +425,30 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
     double deltaY = (e->y() - m_mouseDownY) * m_zoom;
     switch(m_mouseState) {
         case StretchMapLeft:
-            m_selectedMap->setLeft(m_selectedMap->left() + deltaX);
-            m_selectedMap->addTilesLeft((int)(-deltaX / Tile::size));
+        {
+            double newLeft = snapAbsoluteX(m_selectedMap->left() + deltaX);
+            int deltaWidth = (int) (m_selectedMap->left() - newLeft) / Tile::size;
+            m_selectedMap->setLeft(newLeft);
+            m_selectedMap->addTilesLeft(deltaWidth);
+        }
         break;
         case StretchMapTop:this->setCursor(Qt::ArrowCursor);
-            m_selectedMap->setTop(m_selectedMap->top() + deltaY);
-            m_selectedMap->addTilesTop((int)(-deltaY / Tile::size));
+        {
+            double newTop = snapAbsoluteY(m_selectedMap->top() + deltaY);
+            int deltaHeight = (int) (m_selectedMap->top() - newTop) / Tile::size;
+            m_selectedMap->setTop(newTop);
+            m_selectedMap->addTilesTop(deltaHeight);
+        }
         break;
         case StretchMapRight:
-            m_selectedMap->setWidth(m_selectedMap->width() + deltaX);
+            m_selectedMap->setWidth(snapAbsoluteX(m_selectedMap->width() + deltaX));
         break;
         case StretchMapBottom:
-            m_selectedMap->setHeight(m_selectedMap->height() + deltaY);
+            m_selectedMap->setHeight(snapAbsoluteY(m_selectedMap->height() + deltaY));
         break;
         case MoveMap:
-            m_selectedMap->setLeft(m_selectedMap->left() + deltaX);
-            m_selectedMap->setTop(m_selectedMap->top() + deltaY);
+            m_selectedMap->setLeft(snapAbsoluteX(m_selectedMap->left() + deltaX));
+            m_selectedMap->setTop(snapAbsoluteY(m_selectedMap->top() + deltaY));
         break;
     }
 

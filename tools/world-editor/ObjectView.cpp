@@ -456,24 +456,45 @@ void ObjectView::drawGrid(QPainter &p)
     }
 }
 
-double ObjectView::screenX(double absoluteX)
+int ObjectView::screenX(double absoluteX)
 {
-    return (absoluteX - m_offsetX) * m_zoom;
+    return (int)(absoluteX - m_offsetX) * m_zoom;
 }
 
-double ObjectView::screenY(double absoluteY)
+int ObjectView::screenY(double absoluteY)
 {
-    return (absoluteY - m_offsetY) * m_zoom;
+    return (int)(absoluteY - m_offsetY) * m_zoom;
 }
 
-double ObjectView::absoluteX(double screenX)
+double ObjectView::absoluteX(int screenX)
 {
     return (screenX / m_zoom) + m_offsetX;
 }
 
-double ObjectView::absoluteY(double screenY)
+double ObjectView::absoluteY(int screenY)
 {
     return (screenY / m_zoom) + m_offsetY;
+}
+
+int ObjectView::snapScreenX(int x)
+{
+    // snap to tile boundary
+    return screenX(snapAbsoluteX(absoluteX(x)));
+}
+
+int ObjectView::snapScreenY(int y)
+{
+    return screenY(snapAbsoluteY(absoluteY(y)));
+}
+
+double ObjectView::snapAbsoluteX(double x)
+{
+    return std::floor(x / Tile::size) * Tile::size;
+}
+
+double ObjectView::snapAbsoluteY(double y)
+{
+    return std::floor(y / Tile::size) * Tile::size;
 }
 
 void ObjectView::on_btnLeftPlus_clicked()

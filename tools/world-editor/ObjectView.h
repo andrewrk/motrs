@@ -147,10 +147,15 @@ private: //variables
 
 private: //methods
 
-    double screenX(double absoluteX);
-    double screenY(double absoluteY);
-    double absoluteX(double screenX);
-    double absoluteY(double screenY);
+    int screenX(double absoluteX);
+    int screenY(double absoluteY);
+    double absoluteX(int screenX);
+    double absoluteY(int screenY);
+
+    int snapScreenX(int x);
+    int snapScreenY(int y);
+    double snapAbsoluteX(double x);
+    double snapAbsoluteY(double y);
 
     void drawGrid(QPainter &p);
 
