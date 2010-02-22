@@ -60,7 +60,7 @@ void Physics::squareAndCircle(double cx1, double cy1, double a1, double cx2, dou
         pointAndCircle(cx1 + a1, cy1 + a1, cx2, cy2, r2, out_dx, out_dy);
         break;
     default:
-        Debug::assert(false, "unknown zone");
+        assert(false);
     }
 }
 
@@ -103,7 +103,7 @@ void Physics::squareAndSquare(double cx1, double cy1, double a1, double cx2, dou
         }
         break;
     default:
-        Debug::assert(false, "ifuvwbiwufdbivw");
+        assert(false);
     }
 }
 

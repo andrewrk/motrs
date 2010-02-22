@@ -4,6 +4,7 @@
 #include "Gameplay.h"
 
 #include <iostream>
+#include <cstdlib>
 
 const int MainWindow::c_fps = 48;
 const int MainWindow::c_width = 800;

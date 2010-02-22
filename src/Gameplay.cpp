@@ -35,7 +35,7 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps, MainWindow * owner) :
     m_player(NULL),
     m_window(owner)
 {
-    Debug::assert(s_inst == NULL, "only one Gameplay allowed");
+    assert(s_inst == NULL);
     s_inst = this;
 
     // initialize gameplay
@@ -190,7 +190,7 @@ void Gameplay::applyInput(Entity * entity, bool takesInput) {
         isFalling = true;
         canSwingSword = takesInput;
         break;
-    default: Debug::assert(false, "bad movement mode");
+    default: assert(false);
     }
 
     if (canChangeDirections) {
@@ -277,7 +277,7 @@ void Gameplay::applyInput(Entity * entity, bool takesInput) {
                 entity->setCurrentSequence(Entity::None);
             break;
         }
-    default: Debug::assert(false, "unrecognized Sequence.");
+    default: assert(false);
     }
     entity->setVelocity(dx, dy);
 }

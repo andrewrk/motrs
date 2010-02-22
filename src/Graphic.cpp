@@ -37,7 +37,8 @@ Graphic * Graphic::load(const char * buffer)
         // load the .bmp
         SDL_RWops * rw = SDL_RWFromConstMem(buffer, header->imageSize);
         SDL_Surface * temp = SDL_LoadBMP_RW(rw, 1);
-        Debug::assert(temp != NULL, "lalala");
+
+        assert(temp != NULL);
         if (temp == NULL) {
             std::cerr << "Error turning Graphic buffer into SDL_Surface" << std::endl;
             delete out;
@@ -51,7 +52,7 @@ Graphic * Graphic::load(const char * buffer)
                 colorKey->g, colorKey->b));
     } else if (storageType == stPNG) {
         // TODO: implement PNG support
-        Debug::assert(false, "TODO: add PNG support in Graphic");
+        assert(false);
     } else {
         std::cerr << "unknown storageType: " << storageType << std::endl;
         return NULL;

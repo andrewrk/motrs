@@ -627,7 +627,7 @@ void WorldView::setSelectedLayer(int index)
 
 void WorldView::addLayer()
 {
-    Debug::assert(m_selectedMap, "Error: Layer manipulations on no selected map");
+    assert(m_selectedMap);
     m_selectedMap->addLayer();
 
     updateViewCache();
@@ -636,7 +636,7 @@ void WorldView::addLayer()
 
 void WorldView::swapLayers(int i, int j)
 {
-    Debug::assert(m_selectedMap, "Error: Layer manipulations on no selected map");
+    assert(m_selectedMap);
     m_selectedMap->swapLayer(i, j);
 
     updateViewCache();
@@ -645,7 +645,7 @@ void WorldView::swapLayers(int i, int j)
 
 void WorldView::deleteLayer(int index)
 {
-    Debug::assert(m_selectedMap, "Error: Layer manipulations on no selected map");
+    assert(m_selectedMap);
     m_selectedMap->deleteLayer(index);
     updateViewCache();
     refreshLayersList();

@@ -13,7 +13,7 @@ Config::Config(int argc, char * argv[], std::string configFile) :
 
 Config * Config::instance()
 {
-    Debug::assert(s_inst != NULL, "Config not initialized properly");
+    assert(s_inst != NULL);
     return s_inst;
 }
 

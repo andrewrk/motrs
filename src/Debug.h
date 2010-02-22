@@ -1,29 +1,17 @@
-#ifndef _DEBUG_H_
-#define _DEBUG_H_
+#ifndef DEBUG_H
+#define DEBUG_H
 
-#include <iostream>
-#include <string>
-#include <cstdlib>
-
-#ifdef assert
-// on windows, there is some macro named assert already.
-// don't know what it is, but i don't want it.
-#undef assert
+#ifdef RELEASE
+#define NDEBUG
+#else
+#undef NDEBUG
 #endif
 
-namespace Debug
-{
-    inline void assert(bool value, std::string message)
-    {
-#ifndef RELEASE
-        if( ! value ) {
-            std::cerr << message << std::endl;
-            // abort ensures we get a stack trace
-            abort();
-        }
-#endif
-    }
+#include <cassert>
 
-}
+// the following function is defined by this header:
+// void assert(expression)
+// if expression is false, crashes the program and reports why.
+// if in RELEASE mode, the assertion is not compiled into the program
 
 #endif

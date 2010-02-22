@@ -235,7 +235,7 @@ void ObjectView::paintEvent(QPaintEvent * e)
                 }
             }
         } else {
-            Debug::assert(false, "Unknown view mode");
+            assert(false);
         }
 
         drawGrid(p);
@@ -597,7 +597,7 @@ void ObjectView::zoomOut()
 
 void ObjectView::addLayer()
 {
-    Debug::assert(m_object, "Error: Layer manipulations on a null object");
+    assert(m_object != NULL);
     m_object->addLayer();
 
     refreshLayersList();
@@ -606,7 +606,7 @@ void ObjectView::addLayer()
 
 void ObjectView::deleteLayer(int index)
 {
-    Debug::assert(m_object, "Error: Layer manipulations on a null object");
+    assert(m_object != NULL);
     m_object->deleteLayer(index);
 
     refreshLayersList();
@@ -615,7 +615,7 @@ void ObjectView::deleteLayer(int index)
 
 void ObjectView::swapLayers(int i, int j)
 {
-    Debug::assert(m_object, "Error: Layer manipulations on a null object");
+    assert(m_object != NULL);
     m_object->swapLayer(i, j);
 
     refreshLayersList();
@@ -651,7 +651,7 @@ void ObjectView::propertyChanged(int row)
             m_object->setDescription(value);
             break;
         default:
-            Debug::assert(false, "unhandled property");
+            assert(false);
             break;
     }
 
@@ -822,7 +822,7 @@ void ObjectView::mousePressEvent(QMouseEvent * e)
             setControlEnableStates();
         }
     } else {
-        Debug::assert(false, "Invalid viewMode in mousePressEvent");
+        assert(false);
     }
 }
 
@@ -882,7 +882,7 @@ void ObjectView::determineCursor()
             this->setCursor(Qt::ArrowCursor);
             break;
         default:
-            Debug::assert(false, "invalid viewMode in determineCursor");
+            assert(false);
     }
 }
 
@@ -919,7 +919,7 @@ void ObjectView::mouseMoveEvent(QMouseEvent * e)
             this->update();
         }
     } else {
-        Debug::assert(false, "Invalid viewMode");
+        assert(false);
     }
 }
 
@@ -940,7 +940,8 @@ void ObjectView::deleteSelection()
         }
     }
 
-    Debug::assert(false, "Couldn't find graphic to delete");
+    // couldn't find graphic to delete
+    assert(false);
 }
 
 void ObjectView::cutSelection()

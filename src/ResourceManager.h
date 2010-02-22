@@ -39,7 +39,7 @@ private:
 
     template <class T>
     static T * loadFromCachedBuffer(std::string resourceTypeName, std::map<std::string, const char *> & cache, char typeCode, std::string id) {
-        Debug::assert(resourceFile != NULL, "ResourceManager::get" + resourceTypeName + ": resourceFile == NULL");
+        assert(resourceFile != NULL);
         const char * buffer = find(cache, id);
         if (buffer == NULL) {
             buffer = resourceFile->getResource(id);
@@ -62,7 +62,7 @@ private:
 
     template <class T>
     static T * loadCachedResource(std::string resourceTypeName, std::map<std::string, T*> & cache, char typeCode, std::string id) {
-        Debug::assert(resourceFile != NULL, "ResourceManager::get" + resourceTypeName + ": resourceFile == NULL");
+        assert(resourceFile != NULL);
         T * resource = find(cache, id);
         if (resource == NULL) {
             const char * buffer = resourceFile->getResource(id);
