@@ -50,17 +50,17 @@ Map * Map::load(const char *buffer) {
                 }
                 break;
             }
-            default: Debug::assert(false, "unkown layer type");
+            default: assert(false);
         }
     }
 
     // submaps
     int submapCount = Utils::readInt(&cursor);
-    Debug::assert(submapCount == 0, "TODO support submaps");
+    assert(submapCount == 0);
 
     // triggers
     int triggerCount = Utils::readInt(&cursor);
-    Debug::assert(triggerCount == 0, "TODO support triggers");
+    assert(triggerCount == 0);
 
     // entities
     int entityCount = Utils::readInt(&cursor);

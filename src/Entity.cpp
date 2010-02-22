@@ -108,7 +108,7 @@ void Entity::resolveCollision(Entity * other) {
             Physics::squareAndCircle(entity1->intendedCenterX(), entity1->intendedCenterY(), entity1->radius(), entity2->intendedCenterX(), entity2->intendedCenterY(), entity2->radius(), dx, dy);
             break;
         default:
-            Debug::assert(false, "aosidnvaosidnao");
+            assert(false);
             break;
         }
         break;
@@ -127,12 +127,12 @@ void Entity::resolveCollision(Entity * other) {
             Physics::squareAndSquare(entity1->intendedCenterX(), entity1->intendedCenterY(), entity1->radius(), entity2->intendedCenterX(), entity2->intendedCenterY(), entity2->radius(), dx, dy);
             break;
         default:
-            Debug::assert(false, "aosidnvaosidnao");
+            assert(false);
             break;
         }
         break;
     default:
-        Debug::assert(false, "asfoaiovisnvoasd");
+        assert(false);
         break;
     }
 
@@ -157,13 +157,13 @@ void Entity::draw(double screenX, double screenY) {
     case Run: graphicList = m_running; break;
     case JumpUp: graphicList = m_running; break;
     case Falling: graphicList = m_standing; break;
-    default: Debug::assert(false, "unrecognized movementMode.");
+    default: assert(false);
     }
     // override with sequence graphics
     switch (m_currentSequence) {
     case None: break; // leave it alone
     case Sword: graphicList = m_sword; break;
-    default: Debug::assert(false, "unrecognized Sequence.");
+    default: assert(false);
     }
 
     graphicList[m_direction]->draw(Gameplay::instance()->screen(),

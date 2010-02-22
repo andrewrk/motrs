@@ -74,7 +74,7 @@ private: //methods
 
 inline Gameplay * Gameplay::instance()
 {
-    Debug::assert(s_inst != NULL, "Gameplay::instance() s_inst null");
+    assert(s_inst != NULL);
     return s_inst;
 }
 

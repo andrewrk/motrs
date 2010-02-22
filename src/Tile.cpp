@@ -64,7 +64,7 @@ bool Tile::hasMinPresence(PhysicalPresence minPresence) {
     case tsFloorRailE: return minPresence <= ppRail;
     case tsFloorRailS: return minPresence <= ppRail;
     case tsFloorRailW: return minPresence <= ppRail;
-    default: Debug::assert(false, "Bad physical presence value"); return false;
+    default: assert(false); return false;
     }
 }
 
@@ -77,7 +77,8 @@ void Tile::resolveCircleCollision(double tileX, double tileY, double & objectCen
         // nothing
         break;
     case tsSolidHole:
-        Debug::assert(false, "TODO: tile shapes");
+        // TODO: tile shapes
+        assert(false);
         break;
     // floor + wall diagonals. tsDiag(pp1)(pp2)(where-pp2-is)
     case tsDiagFloorWallNW:
@@ -94,7 +95,7 @@ void Tile::resolveCircleCollision(double tileX, double tileY, double & objectCen
         break;
     // floor + rail orientations
     case tsFloorRailN:
-        Debug::assert(false, "TODO: tile shapes");
+        assert(false);
         break;
     case tsFloorRailE:
         {
@@ -110,7 +111,8 @@ void Tile::resolveCircleCollision(double tileX, double tileY, double & objectCen
         }
         break;
     case tsFloorRailS:
-        Debug::assert(false, "TODO: tile shapes");
+        // TODO: tile shapes
+        assert(false);
         break;
     case tsFloorRailW:
         {
@@ -125,7 +127,7 @@ void Tile::resolveCircleCollision(double tileX, double tileY, double & objectCen
         }
         break;
     default:
-        Debug::assert(false, "unknown tile shape");
+        assert(false);
         break;
     }
 }

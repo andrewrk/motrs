@@ -92,15 +92,12 @@ int Array3<T>::getLinearIndex(int x, int y, int z) const {
 
 #if RANGE_CHECK
     template <class T>
-    void Array3<T>::rangeCheck(int x, int y, int z) const {
-        if(! (0 <= x && x < m_sizeX &&
+    void Array3<T>::rangeCheck(int x, int y, int z) const
+    {
+        assert(
+            0 <= x && x < m_sizeX &&
             0 <= y && y < m_sizeY &&
-            0 <= z && z < m_sizeZ) )
-        {
-            std::cerr << "range fail: " << x << "," << y << "," << z
-                << " : " << m_sizeX << "," << m_sizeY << "," << m_sizeZ << std::endl;
-            Debug::assert(false, "(the above range fail)");
-        }
+            0 <= z && z < m_sizeZ );
     }
 #endif
 
