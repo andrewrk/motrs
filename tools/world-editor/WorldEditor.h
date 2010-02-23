@@ -64,6 +64,7 @@ private slots:
     void on_cboMiddleClick_currentIndexChanged(int index);
     void on_cboRightClick_currentIndexChanged(int index);
 
+    void refreshObjectList();
 
 };
 

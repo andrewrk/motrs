@@ -140,6 +140,11 @@ void WorldEditor::refreshWorldList()
     m_ui->list_worlds->addItems(entries);
 }
 
+void WorldEditor::refreshObjectList()
+{
+    m_view->refreshObjectsList();
+}
+
 void WorldEditor::on_list_worlds_doubleClicked(QModelIndex index)
 {
     QListWidgetItem * item = m_ui->list_worlds->item(index.row());
@@ -231,6 +236,7 @@ void WorldEditor::on_actionQuit_triggered()
 void WorldEditor::on_btnNewObject_clicked()
 {
     ObjectEditor * editor = new ObjectEditor(this);
+    connect(editor, SIGNAL(objectSaved()), this, SLOT(refreshObjectList()));
     editor->createEmpty();
     editor->show();
 }

@@ -3,6 +3,7 @@
 
 #include "EditorResourceManager.h"
 #include "ObjectView.h"
+#include "WorldEditor.h"
 
 #include <QDir>
 #include <QSettings>
@@ -225,7 +226,6 @@ void ObjectEditor::closeEvent(QCloseEvent * e)
     QSettings settings;
     settings.setValue("ObjectEditor/windowState", this->saveState());
     settings.setValue("ObjectEditor/windowGeometry", this->saveGeometry());
-
 }
 
 void ObjectEditor::on_actionClose_triggered()
@@ -261,4 +261,5 @@ void ObjectEditor::on_actionPaste_triggered()
 void ObjectEditor::on_actionSave_triggered()
 {
     m_view->saveObject();
+    emit objectSaved();
 }

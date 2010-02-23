@@ -46,6 +46,7 @@ public: //methods
     void setToolRightClick(MouseTool tool);
 
     void refreshGui();
+    void refreshObjectsList();
 protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
@@ -146,7 +147,6 @@ private: //methods
     void determineCursor();
 
     void refreshLayersList();
-    void refreshObjectsList();
     void setControlEnableStates();
 
 

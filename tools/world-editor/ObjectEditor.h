@@ -45,6 +45,8 @@ public:
     QAction * deleteAction();
 
     void createEmpty();
+signals:
+    void objectSaved();
 
 protected:
     void changeEvent(QEvent *e);
