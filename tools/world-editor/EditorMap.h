@@ -27,6 +27,8 @@ public: //variables
         QString name;
         // list of objects per layer. Layer 0 of the object == the layer it is on.
         // this means the object's layerCount + index < this editormap's layerCount
+        // if an object has multiple layers, there is a pointer to the same object
+        // in each layer list in which the object's layer overlaps
         QList<MapObject *> objects;
         // list of entities per layer
         QList<EditorEntity *> entities;
@@ -44,6 +46,8 @@ public: //methods
     void setTop(double value);
     void setWidth(double value);
     void setHeight(double value);
+    double width();
+    double height();
 
     void addLayer(QString name = "");
     void deleteLayer(int index);
@@ -62,11 +66,16 @@ public: //methods
     inline int tileCountX();
     inline int tileCountY();
 
-    // expose the layers structure
-    inline MapLayer * layer(int index);
+    // expose the layers structure, read only.
+    inline const MapLayer * layer(int index) const;
 
-    double width();
-    double height();
+    // add/remove an object/entity to this map. makes sure the data structure is intact.
+    void addObject(MapObject * object);
+    void removeObject(MapObject * object);
+
+    void addEntity(EditorEntity * entity);
+    void removeEntity(EditorEntity * entity);
+
 private: //variables
     // we simply remember the dimensions because we don't actually have a tile
     // grid until we compile into a Map
@@ -91,7 +100,7 @@ inline int EditorMap::layerCount()
     return m_layers.size();
 }
 
-inline EditorMap::MapLayer * EditorMap::layer(int index)
+inline const EditorMap::MapLayer * EditorMap::layer(int index) const
 {
     return m_layers.at(index);
 }

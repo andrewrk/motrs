@@ -66,7 +66,7 @@ EditorMap * EditorMap::load(QString file)
 
             entity->setCenter(x, y);
             entity->setLayer(layerIndex);
-            out->m_layers.at(layerIndex)->entities.append(entity);
+            out->addEntity(entity);
         } else if( props[i].first.compare("object", Qt::CaseInsensitive) == 0 ) {
             // object=tileX,tileY,layerIndex,objectId
             QStringList objectProps = props[i].second.split(",");
@@ -84,20 +84,50 @@ EditorMap * EditorMap::load(QString file)
                 return NULL; // TODO: fix memory leak
             }
 
-            out->m_layers.at(object->layer)->objects.append(object);
+            out->addObject(object);
         } else {
             // unrecognized map property
             assert(false);
         }
     }
 
-    assert(layerCount == out->m_layers.size());
+    assert(layerCount == out->layerCount());
 
     return out;
 }
 
 EditorMap::~EditorMap()
 {
+}
+
+void EditorMap::addObject(MapObject * object)
+{
+    for (int i=0; i<object->object->layerCount(); ++i) {
+        int layerIndex = object->layer + i;
+        while (layerIndex >= layerCount())
+            addLayer();
+        m_layers.at(layerIndex)->objects.append(object);
+    }
+}
+
+void EditorMap::removeObject(MapObject * object)
+{
+    for (int i=0; i<object->object->layerCount(); ++i) {
+        int layerIndex = object->layer + i;
+        m_layers.at(layerIndex)->objects.removeOne(object);
+    }
+}
+
+void EditorMap::addEntity(EditorEntity * entity)
+{
+    while (entity->layer() >= layerCount())
+        addLayer();
+    m_layers.at(entity->layer())->entities.append(entity);
+}
+
+void EditorMap::removeEntity(EditorEntity * entity)
+{
+    m_layers.at(entity->layer())->entities.removeOne(entity);
 }
 
 void EditorMap::setLeft(double value)
@@ -128,18 +158,54 @@ void EditorMap::addLayer(QString name)
 {
     MapLayer * layer = new MapLayer;
     layer->name = name.isEmpty() ?
-        QObject::tr("Layer %1").arg(QString::number(layerCount())) : name;
+        QObject::tr("Layer %1").arg(QString::number(layerCount()+1)) : name;
     m_layers.append(layer);
 }
 
 void EditorMap::deleteLayer(int index)
 {
-    delete m_layers.takeAt(index);
+    MapLayer * layer = m_layers.at(index);
+    for (int i=0; i<layer->entities.size(); ++i)
+        removeEntity(layer->entities.at(i));
+
+    // remove all objects associated with this layer, saving the ones that
+    // we want to put back later
+    QList<MapObject *> savedObjects;
+    while (layer->objects.size() > 0) {
+        MapObject * object = layer->objects.first();
+        if (object->layer != index)
+            savedObjects.append(object);
+        removeObject(object);
+    }
+
+    // delete the layer
+    delete layer;
+    m_layers.removeAt(index);
+
+    // put the ones back in that we saved
+    for (int i=0; i<savedObjects.size(); ++i)
+        addObject(savedObjects.at(i));
 }
 
 void EditorMap::swapLayer(int i, int j)
 {
+    // take out the objects
+    QList<MapObject *> savedObjects;
+    for (int layer=i; layer<=j; ++layer) {
+        QList<MapObject *> objects = m_layers.at(layer)->objects;
+        while (objects.size() > 0) {
+            MapObject * object = objects.first();
+            savedObjects.append(object);
+            removeObject(object);
+        }
+    }
+
+    // swap the layer
     m_layers.swap(i, j);
+
+    // put the objects back in
+    for (int i=0; i<savedObjects.size(); ++i)
+        addObject(savedObjects.at(i));
 }
 
 void EditorMap::renameLayer(int index, QString newName)

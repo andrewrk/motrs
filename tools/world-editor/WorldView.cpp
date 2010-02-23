@@ -120,16 +120,12 @@ void WorldView::paintEvent(QPaintEvent * e)
 
                 if (layerIndex < map->layerCount()) {
                     // draw only this layer from the map
-                    EditorMap::MapLayer * layer = map->layer(layerIndex);
+                    const EditorMap::MapLayer * layer = map->layer(layerIndex);
 
                     // Objects. need to check every layer before this one and
                     // this one because objects can have multiple layers.
-                    // TODO in the map data structure store a pointer to every
-                    // object whose layers overlap with the layer to make this
-                    // faster
                     for (int objectIndex=0; objectIndex<layer->objects.size(); ++objectIndex) {
-                        // To be: object is any EditorObject whose layers overlap
-                        // layerIndex
+                        // object is any EditorObject whose layers overlap layerIndex. How convenient!
                         EditorMap::MapObject * object = layer->objects.at(objectIndex);
 
                         // paint all the graphics which are at the layer we want
