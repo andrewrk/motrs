@@ -42,6 +42,8 @@ public: //methods
     // load a Map from a text format file
     static EditorMap * load(QString file);
 
+    void save();
+
     void setLeft(double value);
     void setTop(double value);
     void setWidth(double value);
@@ -76,6 +78,8 @@ public: //methods
     void addEntity(EditorEntity * entity);
     void removeEntity(EditorEntity * entity);
 
+    inline QString name() const;
+
 private: //variables
     // we simply remember the dimensions because we don't actually have a tile
     // grid until we compile into a Map
@@ -83,6 +87,8 @@ private: //variables
     int m_tileCountY;
 
     QList<MapLayer *> m_layers;
+
+    QString m_name;
 };
 
 inline int EditorMap::tileCountX()
@@ -103,6 +109,11 @@ inline int EditorMap::layerCount()
 inline const EditorMap::MapLayer * EditorMap::layer(int index) const
 {
     return m_layers.at(index);
+}
+
+inline QString EditorMap::name() const
+{
+    return m_name;
 }
 
 #endif

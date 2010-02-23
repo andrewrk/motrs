@@ -5,6 +5,7 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QFileInfo>
 
 EditorEntity * EditorEntity::load(QString file)
 {
@@ -19,6 +20,8 @@ EditorEntity * EditorEntity::load(QString file)
     }
 
     EditorEntity * out = new EditorEntity();
+
+    out->m_name = QFileInfo(file).fileName();
 
     for(int i=0; i<props.size(); ++i) {
         if( props[i].first.compare("version", Qt::CaseInsensitive) == 0 ) {

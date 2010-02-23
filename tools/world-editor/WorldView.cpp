@@ -757,3 +757,8 @@ void WorldView::dragLeaveEvent(QDragLeaveEvent * e)
     m_dragObject = NULL;
     this->update();
 }
+
+void WorldView::saveTheWorld()
+{
+    m_world->save();
+}

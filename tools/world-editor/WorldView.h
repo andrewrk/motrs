@@ -47,6 +47,9 @@ public: //methods
 
     void refreshGui();
     void refreshObjectsList();
+
+    // save the opened world to the data folder
+    void saveTheWorld();
 protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);

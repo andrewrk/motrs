@@ -69,6 +69,8 @@ public: //methods
     QString description() { return m_description; }
     void setDescription(QString description) { m_description = description; }
 
+    QString resourceName() { return m_resourceName; }
+
 private: //variables
     QStringList m_layerNames;
 
@@ -78,6 +80,9 @@ private: //variables
 
     QString m_name;
     QString m_description;
+
+    // the resource identifier string (thing that ends in .object)
+    QString m_resourceName;
 
     QList<QList<ObjectGraphic *> *> m_graphics;
 

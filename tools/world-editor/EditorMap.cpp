@@ -28,6 +28,8 @@ EditorMap * EditorMap::load(QString file)
 
     EditorMap * out = new EditorMap();
 
+    out->m_name = QFileInfo(file).fileName();
+
     int layerCount;
 
     for(int i=0; i<props.size(); ++i) {
@@ -98,6 +100,53 @@ EditorMap * EditorMap::load(QString file)
 
 EditorMap::~EditorMap()
 {
+}
+
+void EditorMap::save()
+{
+    QString filename = QDir(EditorResourceManager::mapsDir()).absoluteFilePath(m_name);
+    QFile file(filename);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    if( ! file.isOpen() ){
+        qDebug() << "Unable to open " << filename << " for writing";
+        return;
+    }
+
+    QTextStream out(&file);
+
+    out << "version=4\n";
+    out << "# size=sizeX,sizeY,layerCount\n";
+    out << "# sizes in number of tiles, not in actual coordinates.\n";
+    out << "size=" << tileCountX() << "," << tileCountY() << "," << layerCount() << "\n\n";
+
+    out << "# layer declarations. one declaration per layer\n";
+    out << "# layer=layerName\n";
+    for (int i=0; i<layerCount(); ++i)
+        out << "layer=" << layerName(i) << "\n";
+    out << "\n";
+
+    out << "# object declarations. uses tile coordinates\n";
+    out << "# object=tileX,tileY,layerIndex,objectId\n";
+    for (int layerIndex=0; layerIndex<m_layers.size(); ++layerIndex) {
+        QList<MapObject *> objects = m_layers.at(layerIndex)->objects;
+        for (int i=0; i<objects.size(); ++i) {
+            MapObject * object = objects.at(i);
+            if (object->layer == layerIndex)
+                out << "object=" << object->tileX << "," << object->tileY << "," << layerIndex << "," << object->object->resourceName() << "\n";
+        }
+    }
+    out << "\n";
+
+    out << "# entity declarations. use absolute coordinates\n";
+    out << "# entity=x,y,layerIndex,entityId\n";
+    for (int layerIndex=0; layerIndex<m_layers.size(); ++layerIndex) {
+        QList<EditorEntity *> entities = m_layers.at(layerIndex)->entities;
+        for (int i=0; i<entities.size(); ++i) {
+            EditorEntity * entity = entities.at(i);
+            out << "entity=" << entity->centerX() << "," << entity->centerY() << "," << entity->layer() << "," << entity->name() << "\n";
+        }
+    }
 }
 
 void EditorMap::addObject(MapObject * object)

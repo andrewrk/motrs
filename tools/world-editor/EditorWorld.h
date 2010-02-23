@@ -12,7 +12,13 @@ public:
 
     static EditorWorld * load(QString file);
 
-private:
+    void save();
+
+private: //variables
+    // name of the world, e.g. "tower1.world"
+    QString m_name;
+
+private: //methods
     EditorWorld();
 };
 

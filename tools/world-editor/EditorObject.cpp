@@ -4,6 +4,7 @@
 
 #include <QFile>
 #include <QDebug>
+#include <QFileInfo>
 
 EditorObject::EditorObject() :
     m_layerNames(),
@@ -31,6 +32,8 @@ EditorObject * EditorObject::load(QString file)
         return NULL;
 
     EditorObject * out = new EditorObject();
+
+    out->m_resourceName = QFileInfo(file).fileName();
 
     out->m_layerNames.clear();
 

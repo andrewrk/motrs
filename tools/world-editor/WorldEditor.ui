@@ -27,6 +27,7 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="actionSave"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
@@ -294,7 +295,7 @@
   </widget>
   <action name="actionQuit">
    <property name="text">
-    <string>&amp;Quit</string>
+    <string>&amp;Quit :(</string>
    </property>
   </action>
   <action name="actionSettings">
@@ -379,6 +380,14 @@
    </property>
    <property name="text">
     <string>&amp;Entities</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>&amp;Save the World</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>

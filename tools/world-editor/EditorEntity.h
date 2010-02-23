@@ -16,9 +16,13 @@ public:
 
     inline int width();
     inline int height();
+
+    inline QString name() const;
 private:
     EditorEntity();
     EditorGraphic * m_graphic;
+
+    QString m_name;
 };
 
 inline EditorGraphic * EditorEntity::graphic()
@@ -44,6 +48,11 @@ inline double EditorEntity::centerOffsetX()
 inline double EditorEntity::centerOffsetY()
 {
     return m_centerOffsetY;
+}
+
+inline QString EditorEntity::name() const
+{
+    return m_name;
 }
 
 #endif // EDITORENTITY_H

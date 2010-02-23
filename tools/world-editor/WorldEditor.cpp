@@ -252,3 +252,8 @@ void WorldEditor::on_lstObjects_itemDoubleClicked(QListWidgetItem* item)
     editor->open(item->data(Qt::UserRole).toString());
     editor->show();
 }
+
+void WorldEditor::on_actionSave_triggered()
+{
+    m_view->saveTheWorld();
+}

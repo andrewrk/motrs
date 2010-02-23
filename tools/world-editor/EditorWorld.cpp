@@ -27,6 +27,8 @@ EditorWorld * EditorWorld::load(QString file)
 
     EditorWorld * out = new EditorWorld();
 
+    out->m_name = QFileInfo(file).fileName();
+
     for(int i=0; i<props.size(); ++i) {
         if( props[i].first.compare("version", Qt::CaseInsensitive) == 0 ) {
             int fileVersion = props[i].second.toInt();
@@ -61,4 +63,36 @@ EditorWorld * EditorWorld::load(QString file)
     out->calculateBoundaries();
 
     return out;
+}
+
+void EditorWorld::save()
+{
+    // save each map
+    for (unsigned int i=0; i<m_maps.size(); ++i) {
+        EditorMap * map = (EditorMap *) m_maps.at(i);
+        map->save();
+    }
+
+    // save the world
+    QString filename = QDir(EditorResourceManager::worldsDir()).absoluteFilePath(m_name);
+    QFile file(filename);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    assert(file.isOpen());
+    if( ! file.isOpen() ){
+        qDebug() << "Unable to open " << filename << " for writing";
+        return;
+    }
+
+    QTextStream out(&file);
+
+    out << "version=1\n\n";
+    out << "# A world is a list of map declarations and where they are.\n";
+    out << "# map=x,y,z,id\n";
+    for (unsigned int i=0; i<m_maps.size(); ++i) {
+        EditorMap * map = (EditorMap *) m_maps.at(i);
+        // TODO: support stories
+        out << "map=" << map->left() << "," << map->top() << "," << 0 << "," << map->name() << "\n";
+    }
+
 }
