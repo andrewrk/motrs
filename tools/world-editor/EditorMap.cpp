@@ -1,7 +1,6 @@
 #include "EditorMap.h"
 
 #include "EditorResourceManager.h"
-#include "EditorTile.h"
 #include "EditorEntity.h"
 
 #include <QPixmap>
@@ -9,89 +8,44 @@
 #include <QDebug>
 #include <QPainter>
 
-EditorMap::EditorMap()
+EditorMap::EditorMap() :
+    m_tileCountX(0),
+    m_tileCountY(0)
 {
-    m_palette.clear();
-    m_palette.push_back(Tile::nullTile());
-    m_layerNames.clear();
-    m_entities.clear();
-
-    int defaultSizeX = 2;
-    int defaultSizeY = 2;
-    int defaultLayerCount = 1;
-    m_tiles = new Array3<int>(defaultSizeX, defaultSizeY, defaultLayerCount);
-
-    for(int z=0; z<defaultLayerCount; ++z) {
-        m_layerNames.append(QObject::tr("Layer %1").arg(QString::number(z)));
-        for(int y=0; y<defaultSizeY; ++y) {
-            for(int x=0; x<defaultSizeX; ++x) {
-                m_tiles->set(x,y,z,0); // null tile
-            }
-        }
-    }
-
-    calculateBoundaries();
 }
 
-EditorMap::EditorMap(QString file)
+EditorMap * EditorMap::load(QString file)
 {
     QList< QPair<QString, QString> > props;
 
     bool good = EditorResourceManager::loadTextFile(file, props);
 
-    if( ! good )
-        return;
+    assert(good);
+    if (! good ) {
+        qDebug() << "Error reading EditorMap file";
+        return NULL;
+    }
 
-    int sizeX, sizeY, layerCount;
-    int layerIndex = 0;
+    EditorMap * out = new EditorMap();
 
-    // implicit null tile
-    m_palette.clear();
-    m_palette.push_back(Tile::nullTile());
-    m_layerNames.clear();
-    m_entities.clear();
+    int layerCount;
 
     for(int i=0; i<props.size(); ++i) {
         if( props[i].first.compare("version", Qt::CaseInsensitive) == 0 ) {
             int fileVersion = props[i].second.toInt();
-            int codeVersion = 3;
-            if( fileVersion != codeVersion ) {
-                qDebug() << "Tried to open version  " << fileVersion <<
-                    " with version " << codeVersion << " code.";
-                good = false;
-                return;
-            }
+            int codeVersion = 4;
+            assert(fileVersion == codeVersion);
         } else if( props[i].first.compare("size", Qt::CaseInsensitive) == 0 ) {
             // size in number of tiles
-            // size=sizeX,sizeY
+            // size=sizeX,sizeY,layer
             QStringList size = props[i].second.split(",");
-            sizeX = size.at(0).toInt();
-            sizeY = size.at(1).toInt();
+            out->m_tileCountX = size.at(0).toInt();
+            out->m_tileCountY = size.at(1).toInt();
             layerCount = size.at(2).toInt();
-
-            m_tiles = new Array3<int>(sizeX, sizeY, layerCount);
-        } else if( props[i].first.compare("tile", Qt::CaseInsensitive) == 0 ) {
-            // tile=shape,surface,graphicId
-            QStringList tileProps = props[i].second.split(",");
-            QString graphicFile = tileProps.at(2);
-            EditorGraphic * graphic = EditorResourceManager::graphic(graphicFile);
-            EditorTile * tile = new EditorTile(
-                (EditorTile::Shape)tileProps.at(0).toInt(),
-                (EditorTile::SurfaceType)tileProps.at(1).toInt(),
-                graphic);
-            m_palette.push_back(tile);
         } else if( props[i].first.compare("layer", Qt::CaseInsensitive) == 0 ) {
-            // layer=name,0,0,...
-            QStringList layer = props[i].second.split(",");
-            m_layerNames << layer.takeFirst();
-            int index = 0;
-            for(int y = 0; y < sizeY; ++y) {
-                for(int x = 0; x < sizeX; ++x) {
-                    m_tiles->set(x,y,layerIndex,layer[index].toInt());
-                    ++index;
-                }
-            }
-            ++layerIndex;
+            // layer=name
+            QStringList layerProps = props[i].second.split(",");
+            out->addLayer(layerProps.at(0));
         } else if( props[i].first.compare("entity", Qt::CaseInsensitive) == 0 ) {
             // entity=x,y,layer,id
             QStringList entityProps = props[i].second.split(",");
@@ -101,25 +55,45 @@ EditorMap::EditorMap(QString file)
             QString entityFileTitle = entityProps.at(3);
 
             QString entityFile = QDir(EditorResourceManager::entitiesDir()).absoluteFilePath(entityFileTitle);
-            EditorEntity * entity = new EditorEntity(entityFile);
+            EditorEntity * entity = EditorEntity::load(entityFile);
+
+            assert(entity);
+            if (entity == NULL) {
+                qDebug() << "Unable to load entity for EditorMap";
+                delete out;
+                return NULL; // TODO: fix this memory leak
+            }
+
             entity->setCenter(x, y);
             entity->setLayer(layerIndex);
-            m_entities.push_back(entity);
+            out->m_layers.at(layerIndex)->entities.append(entity);
+        } else if( props[i].first.compare("object", Qt::CaseInsensitive) == 0 ) {
+            // object=tileX,tileY,layerIndex,objectId
+            QStringList objectProps = props[i].second.split(",");
+            MapObject * object = new MapObject;
+
+            object->tileX = objectProps.at(0).toInt();
+            object->tileY = objectProps.at(1).toInt();
+            object->layer = objectProps.at(2).toInt();
+            object->object = EditorObject::load(QDir(EditorResourceManager::objectsDir()).absoluteFilePath(objectProps.at(3)));
+
+            assert(object->object);
+            if (! object->object) {
+                qDebug() << "Unable to load object for EditorMap";
+                delete out;
+                return NULL; // TODO: fix memory leak
+            }
+
+            out->m_layers.at(object->layer)->objects.append(object);
         } else {
-            qDebug() << "Unrecognized Map property: " << props[i].first
-                << " = " << props[i].second;
-            good = false;
-            return;
+            // unrecognized map property
+            assert(false);
         }
     }
 
-    calculateBoundaries();
-}
+    assert(layerCount == out->m_layers.size());
 
-void EditorMap::draw(double screenX, double screenY,
-                     double screenWidth, double screenHeight, int layer)
-{
-    Map::draw(screenX, screenY, screenWidth, screenHeight, layer);
+    return out;
 }
 
 EditorMap::~EditorMap()
@@ -140,85 +114,72 @@ void EditorMap::setWidth(double value)
 {
     int tileCount = (int)(value / Tile::size);
     if (tileCount > 0)
-        m_tiles->redim(tileCount, m_tiles->sizeY(), m_tiles->sizeZ(), 0);
-
-    calculateBoundaries();
+        m_tileCountX = tileCount;
 }
 
 void EditorMap::setHeight(double value)
 {
     int tileCount = (int)(value / Tile::size);
     if (tileCount > 0)
-        m_tiles->redim(m_tiles->sizeX(), tileCount, m_tiles->sizeZ(), 0);
-
-    calculateBoundaries();
+        m_tileCountY = value;
 }
 
 void EditorMap::addLayer(QString name)
 {
-    QString newLayerName = name.isEmpty() ? QObject::tr("Layer %1").arg(QString::number(layerCount()))
-        : name;
-    m_tiles->redim(m_tiles->sizeX(), m_tiles->sizeY(), m_tiles->sizeZ()+1, 0);
-    m_layerNames << newLayerName;
+    MapLayer * layer = new MapLayer;
+    layer->name = name.isEmpty() ?
+        QObject::tr("Layer %1").arg(QString::number(layerCount())) : name;
+    m_layers.append(layer);
 }
 
 void EditorMap::deleteLayer(int index)
 {
-    m_tiles->deleteRowZ(index);
-    m_layerNames.removeAt(index);
+    delete m_layers.takeAt(index);
 }
 
 void EditorMap::swapLayer(int i, int j)
 {
-    m_tiles->swapRowZ(i, j);
-    m_layerNames.swap(i, j);
+    m_layers.swap(i, j);
 }
 
 void EditorMap::renameLayer(int index, QString newName)
 {
-    m_layerNames.replace(index, newName);
+    m_layers.at(index)->name = newName;
 }
 
 QString EditorMap::layerName(int index)
 {
-    return m_layerNames.at(index);
+    return m_layers.at(index)->name;
 }
 
 void EditorMap::addTilesLeft(int amount)
 {
-    m_tiles->expandLeft(amount, 0);
-    calculateBoundaries();
+    m_x -= amount * Tile::size;
+    m_tileCountX += amount;
 }
 
 void EditorMap::addTilesRight(int amount)
 {
-    m_tiles->expandRight(amount, 0);
-    calculateBoundaries();
+    m_tileCountX += amount;
 }
 
 void EditorMap::addTilesTop(int amount)
 {
-    m_tiles->expandTop(amount, 0);
-    calculateBoundaries();
+    m_y -= amount * Tile::size;
+    m_tileCountY += amount;
 }
 
 void EditorMap::addTilesBottom(int amount)
 {
-    m_tiles->expandBottom(amount, 0);
-    calculateBoundaries();
+    m_tileCountY += amount;
 }
 
-Tile * EditorMap::tile(int x, int y, int z)
+double EditorMap::width()
 {
-    return m_palette.at(m_tiles->get(x,y,z));
+    return m_tileCountX * Tile::size;
 }
 
-int EditorMap::tileCountX()
+double EditorMap::height()
 {
-    return m_tiles->sizeX();
-}
-
-int EditorMap::tileCountY()
-{
-    return m_tiles->sizeY();
+    return m_tileCountY * Tile::size;
 }

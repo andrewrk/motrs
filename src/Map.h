@@ -4,7 +4,6 @@
 #include "Array3.h"
 #include "ResourceFile.h"
 #include "Tile.h"
-#include "Trigger.h"
 #include "Entity.h"
 
 #include <vector>
@@ -22,14 +21,14 @@ public:
 
     static Map * load(const char * buffer);
     Map();
-    virtual ~Map();
+    ~Map();
 
     void tilesAtPoint(std::vector<TileAndLocation>& tiles, double x, double y, int layer);
     void intersectingTiles(std::vector<TileAndLocation>& tiles, double centerX, double centerY, double apothem,
                            int layer, Tile::PhysicalPresence minPresence);
 
     // draw on screen
-    virtual void draw(double screenX, double screenY, double screenWidth,
+    void draw(double screenX, double screenY, double screenWidth,
               double screenHeight, int layer);
 
     // world location
@@ -44,11 +43,11 @@ public:
     std::vector<Entity*> * entities() { return &m_entities; }
 
 protected:
-
     enum LayerType {
         ltFull = 1,
         ltSparse = 2,
     };
+
     typedef struct {
         int x, y, tile;
     } SparseTile;
@@ -56,7 +55,6 @@ protected:
     std::vector<Tile*> m_palette;
     Array3<int> * m_tiles;
     std::vector<Map*> m_submaps;
-    std::vector<Trigger*> m_triggers;
     std::vector<Entity*> m_entities;
 
     // absolute coordinates
@@ -68,7 +66,7 @@ protected:
                    int & indexLeft, int & indexTop, int & indexRight, int & indexBottom);
 
     // cache the width and height of the map
-    virtual void calculateBoundaries();
+    void calculateBoundaries();
 };
 
 #endif

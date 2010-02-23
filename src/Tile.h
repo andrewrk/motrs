@@ -52,10 +52,10 @@ public: //methods
 
     Tile(const Tile &); // copy constructor
     Tile(); // null constructor - constructs a null tile
-    virtual ~Tile();
+    ~Tile();
 
     // screenX and screenY is the absolute coordinates of 0,0 on the screen
-    virtual void draw(int screenX, int screenY);
+    void draw(int screenX, int screenY);
     bool hasMinPresence(PhysicalPresence minPresence);
     void resolveCircleCollision(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
 

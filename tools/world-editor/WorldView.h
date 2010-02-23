@@ -36,8 +36,6 @@ public: //methods
     void swapLayers(int i, int j);
     void deleteLayer(int index);
 
-    inline static QPainter * painter() { return s_painter; }
-
     MouseTool toolLeftClick() { return m_toolLeftClick; }
     void setToolLeftClick(MouseTool tool);
 
@@ -92,7 +90,6 @@ private: //variables
 
     // saved list of maps that are visible for fast rendering
     QList<EditorMap *> m_mapCache;
-    QList<EditorEntity *> m_entityCache;
     // highest number of layers of all visible maps
     int m_maxLayer;
 
@@ -108,9 +105,6 @@ private: //variables
     int m_mouseX;
     int m_mouseY;
     Qt::KeyboardModifiers m_keyboardModifiers;
-
-    // holds QPainter object for drawing
-    static QPainter * s_painter;
 
     // art that has not been converted into objects or entities yet.
     ArtItem m_tempArt;

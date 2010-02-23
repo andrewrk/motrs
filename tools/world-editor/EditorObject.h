@@ -70,7 +70,6 @@ public: //methods
     void setDescription(QString description) { m_description = description; }
 
 private: //variables
-
     QStringList m_layerNames;
 
     // use a full array of tiles and then later we can compile it into a map

@@ -7,14 +7,43 @@
 class EditorEntity : public Entity
 {
 public:
-    EditorEntity(QString file);
+    static EditorEntity * load(QString file);
 
-    inline bool isGood() { return m_good; }
+    inline EditorGraphic * graphic();
 
-    void draw(double screenX, double screenY);
+    inline double centerOffsetX();
+    inline double centerOffsetY();
+
+    inline int width();
+    inline int height();
 private:
-    bool m_good;
+    EditorEntity();
     EditorGraphic * m_graphic;
 };
+
+inline EditorGraphic * EditorEntity::graphic()
+{
+    return m_graphic;
+}
+
+inline int EditorEntity::width()
+{
+    return m_graphic->width();
+}
+
+inline int EditorEntity::height()
+{
+    return m_graphic->height();
+}
+
+inline double EditorEntity::centerOffsetX()
+{
+    return m_centerOffsetX;
+}
+
+inline double EditorEntity::centerOffsetY()
+{
+    return m_centerOffsetY;
+}
 
 #endif // EDITORENTITY_H

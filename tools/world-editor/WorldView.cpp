@@ -18,8 +18,6 @@
 
 #include "moc_WorldView.cxx"
 
-QPainter * WorldView::s_painter = NULL;
-
 WorldView::WorldView(WorldEditor * window, QWidget * parent) :
     QWidget(parent),
     m_hsb(new QScrollBar(Qt::Horizontal, this)),
@@ -78,7 +76,6 @@ void WorldView::updateViewCache()
     // when the scroll or zoom changes, we need to recalculate which maps
     // need to be drawn.
     m_mapCache.clear();
-    m_entityCache.clear();
     if( m_world ) {
         // select the maps that are in range
         std::vector<Map*> * maps = m_world->maps();
@@ -98,10 +95,6 @@ void WorldView::updateViewCache()
                     m_maxLayer = map->layerCount();
 
                 m_mapCache.append(map);
-
-                // add the map's entities to our cache
-                for(unsigned int j = 0; j<map->entities()->size(); ++j)
-                    m_entityCache.append( (EditorEntity *) map->entities()->at(j));
             }
         }
     }
@@ -112,32 +105,55 @@ void WorldView::updateViewCache()
 void WorldView::paintEvent(QPaintEvent * e)
 {
     QPainter p(this);
-    s_painter = &p;
     p.setBackground(Qt::white);
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_world ) {
-        double absX = absoluteX(0);
-        double absY = absoluteY(0);
-
-        for(int layer=0; layer<m_maxLayer; ++layer) {
+        for(int layerIndex=0; layerIndex<m_maxLayer; ++layerIndex) {
             // draw map at this layer
-            for(int i=0; i<m_mapCache.size(); ++i) {
-                EditorMap * map = m_mapCache[i];
+            for(int mapIndex=0; mapIndex<m_mapCache.size(); ++mapIndex) {
+                EditorMap * map = m_mapCache.at(mapIndex);
 
                 // if the map is selected and this layer is unchecked, don't draw
-                if( map == m_selectedMap && m_window->layersList()->item(layer)->checkState() == Qt::Unchecked)
+                if (map == m_selectedMap && m_window->layersList()->item(layerIndex)->checkState() == Qt::Unchecked)
                     continue;
 
-                if( layer < map->layerCount() )
-                    map->draw(absX, absY,
-                        (double)this->width(), (double)this->height(), layer);
-            }
+                if (layerIndex < map->layerCount()) {
+                    // draw only this layer from the map
+                    EditorMap::MapLayer * layer = map->layer(layerIndex);
 
-            // draw entities at this layer
-            for(int i=0; i<m_entityCache.size(); ++i) {
-                if( m_entityCache[i]->layer() == layer )
-                    m_entityCache[i]->draw(absX, absY);
+                    // Objects. need to check every layer before this one and
+                    // this one because objects can have multiple layers.
+                    // TODO in the map data structure store a pointer to every
+                    // object whose layers overlap with the layer to make this
+                    // faster
+                    for (int objectIndex=0; objectIndex<layer->objects.size(); ++objectIndex) {
+                        // To be: object is any EditorObject whose layers overlap
+                        // layerIndex
+                        EditorMap::MapObject * object = layer->objects.at(objectIndex);
+
+                        // paint all the graphics which are at the layer we want
+                        QList<EditorObject::ObjectGraphic *> * graphics = object->object->graphics()->at(layerIndex);
+                        for (int i=0; i<graphics->size(); ++i) {
+                            EditorObject::ObjectGraphic * graphic = graphics->at(i);
+                            p.drawPixmap(
+                                screenX(map->left() + object->tileX * Tile::size + graphic->x),
+                                screenY(map->top() + object->tileY * Tile::size + graphic->y),
+                                graphic->width * m_zoom, graphic->height * m_zoom,
+                                *graphic->graphic->toPixmap());
+                        }
+                    }
+
+                    // Entities. Only have one graphic and one layer. nice and simple.
+                    for (int entityIndex=0; entityIndex<layer->entities.size(); ++entityIndex) {
+                        EditorEntity * entity = layer->entities.at(entityIndex);
+                        p.drawPixmap(
+                            screenX(map->left() + entity->centerX() - entity->centerOffsetX()),
+                            screenY(map->top() + entity->centerY() - entity->centerOffsetY()),
+                            entity->width() * m_zoom, entity->height() * m_zoom,
+                            *entity->graphic()->toPixmap());
+                    }
+                }
             }
         }
         // draw a bold line around map borders
@@ -176,8 +192,6 @@ void WorldView::paintEvent(QPaintEvent * e)
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
             tr("Double click a world to edit"));
     }
-
-    s_painter = NULL;
 }
 
 void WorldView::drawGrid(QPainter &p)

@@ -42,7 +42,13 @@ EditorWorld * EditorWorld::load(QString file)
             QStringList coords = props[i].second.split(",");
             QDir dir(EditorResourceManager::mapsDir());
             QString mapFile = dir.absoluteFilePath(coords[3]);
-            EditorMap * map = new EditorMap(mapFile);
+            EditorMap * map = EditorMap::load(mapFile);
+            assert(map);
+            if (map == NULL) {
+                qDebug() << "Error loading EditorMap for " << mapFile;
+                delete out;
+                return NULL;
+            }
             map->setPosition(coords[0].toDouble(), coords[1].toDouble(), coords[2].toInt());
             out->m_maps.push_back(map);
         } else {

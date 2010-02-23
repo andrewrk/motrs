@@ -78,7 +78,7 @@ public:
     int incrementSequencePosition() { return ++m_sequencePosition; }
 
     void resolveCollision(Entity * other);
-    virtual void draw(double screenX, double screenY);
+    void draw(double screenX, double screenY);
 
 protected:
     enum Shape {
