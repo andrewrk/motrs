@@ -13,6 +13,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QDir>
+#include <QStandardItemModel>
 
 #include <cmath>
 
@@ -30,7 +31,8 @@ WorldView::WorldView(WorldEditor * window, QWidget * parent) :
     m_mapCache(),
     m_selectedMap(NULL),
     m_mouseDownTool(Nothing),
-    m_mouseState(Normal)
+    m_mouseState(Normal),
+    m_dragObject(NULL)
 {
     m_hsb->show();
     m_vsb->show();
@@ -127,16 +129,15 @@ void WorldView::paintEvent(QPaintEvent * e)
                     for (int objectIndex=0; objectIndex<layer->objects.size(); ++objectIndex) {
                         // object is any EditorObject whose layers overlap layerIndex. How convenient!
                         EditorMap::MapObject * object = layer->objects.at(objectIndex);
+                        drawObject(p, object, layerIndex, map);
+                    }
 
-                        // paint all the graphics which are at the layer we want
-                        QList<EditorObject::ObjectGraphic *> * graphics = object->object->graphics()->at(layerIndex);
-                        for (int i=0; i<graphics->size(); ++i) {
-                            EditorObject::ObjectGraphic * graphic = graphics->at(i);
-                            p.drawPixmap(
-                                screenX(map->left() + object->tileX * Tile::size + graphic->x),
-                                screenY(map->top() + object->tileY * Tile::size + graphic->y),
-                                graphic->width * m_zoom, graphic->height * m_zoom,
-                                *graphic->graphic->toPixmap());
+                    // Object being dragged from the objects list
+                    if (m_dragObject != NULL) {
+                        if (layerIndex >= m_dragObject->layer &&
+                            layerIndex < m_dragObject->layer + m_dragObject->object->layerCount())
+                        {
+                            drawObject(p, m_dragObject, layerIndex, m_selectedMap);
                         }
                     }
 
@@ -187,6 +188,20 @@ void WorldView::paintEvent(QPaintEvent * e)
     } else {
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
             tr("Double click a world to edit"));
+    }
+}
+
+void WorldView::drawObject(QPainter &p, EditorMap::MapObject * object, int layerIndex, EditorMap * map)
+{
+    // paint all the graphics which are at the layer we want
+    QList<EditorObject::ObjectGraphic *> * graphics = object->object->graphics()->at(layerIndex);
+    for (int i=0; i<graphics->size(); ++i) {
+        EditorObject::ObjectGraphic * graphic = graphics->at(i);
+        p.drawPixmap(
+            screenX(map->left() + object->tileX * Tile::size + graphic->x),
+            screenY(map->top() + object->tileY * Tile::size + graphic->y),
+            graphic->width * m_zoom, graphic->height * m_zoom,
+            *graphic->graphic->toPixmap());
     }
 }
 
@@ -567,6 +582,8 @@ void WorldView::setWorld(EditorWorld * world)
 
 void WorldView::refreshLayersList()
 {
+    int oldSelectedLayer = m_selectedLayer;
+
     QListWidget * list = m_window->layersList();
     list->clear();
     if( m_selectedMap ) {
@@ -579,8 +596,12 @@ void WorldView::refreshLayersList()
             list->addItem(newItem);
         }
 
-        if( m_selectedMap->layerCount() > 0 )
-            list->item(0)->setSelected(true);
+        if (oldSelectedLayer >= 0 && oldSelectedLayer < m_selectedMap->layerCount())
+            m_selectedLayer = oldSelectedLayer;
+        else if (m_selectedMap->layerCount() > 0)
+            m_selectedLayer = 0;
+
+        list->setCurrentRow(m_selectedLayer);
     } else {
         list->addItem(tr("Click a map to select it and view layers"));
     }
@@ -684,4 +705,55 @@ void WorldView::setToolMiddleClick(MouseTool tool)
 void WorldView::setToolRightClick(MouseTool tool)
 {
     m_toolRightClick = tool;
+}
+
+void WorldView::dropEvent(QDropEvent * e)
+{
+    if (e->source() == m_window->objectsList()) {
+        m_selectedMap->addObject(m_dragObject);
+        m_dragObject = NULL;
+        this->update();
+        e->acceptProposedAction();
+    }
+}
+
+
+void WorldView::dragEnterEvent(QDragEnterEvent * e)
+{
+    if (m_selectedMap == NULL)
+        return;
+    if (e->source() == m_window->objectsList()) {
+        QString itemModelMime = "application/x-qabstractitemmodeldatalist";
+
+        const QMimeData * data = e->mimeData();
+        if(data->hasFormat(itemModelMime)) {
+            QStandardItemModel model;
+            model.dropMimeData(data, Qt::CopyAction, 0, 0, QModelIndex());
+            QString file = model.item(0,0)->data(Qt::UserRole).toString();
+
+            // load the object and set it as the drag object
+            m_dragObject = new EditorMap::MapObject;
+            m_dragObject->object = EditorObject::load(file);
+            m_dragObject->layer = m_selectedLayer;
+
+            e->acceptProposedAction();
+        }
+    }
+}
+
+void WorldView::dragMoveEvent(QDragMoveEvent * e)
+{
+    m_dragObject->tileX = (int) snapAbsoluteX(absoluteX(e->pos().x())) / Tile::size;
+    m_dragObject->tileY = (int) snapAbsoluteY(absoluteY(e->pos().y())) / Tile::size;
+    this->update();
+
+    e->acceptProposedAction();
+}
+
+void WorldView::dragLeaveEvent(QDragLeaveEvent * e)
+{
+    delete m_dragObject->object;
+    delete m_dragObject;
+    m_dragObject = NULL;
+    this->update();
 }

@@ -55,6 +55,12 @@ protected:
     void mouseMoveEvent(QMouseEvent * e);
     void keyPressEvent(QKeyEvent * e);
     void keyReleaseEvent(QKeyEvent * e);
+
+    void dropEvent(QDropEvent * e);
+    void dragEnterEvent(QDragEnterEvent * e);
+    void dragMoveEvent(QDragMoveEvent * e);
+    void dragLeaveEvent(QDragLeaveEvent * e);
+
 private: //variables
     enum MouseState {
         Normal,
@@ -117,6 +123,8 @@ private: //variables
 
     QTimer m_animationTimer;
 
+    EditorMap::MapObject * m_dragObject;
+
 private: //methods
     // transfer between absolute coordinates and editor coordinates
     int screenX(double absoluteX);
@@ -149,7 +157,7 @@ private: //methods
     void refreshLayersList();
     void setControlEnableStates();
 
-
+    void drawObject(QPainter &p, EditorMap::MapObject * object, int layerIndex, EditorMap * owner);
 
 private slots:
     void verticalScroll(int value);
