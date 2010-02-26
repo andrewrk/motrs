@@ -36,6 +36,17 @@ MainWindow::MainWindow() :
         std::exit(1);
     }
 
+    // Start SDL_mixer
+    /* These are the defaults that I got from the tutoral, don't know if we
+       have preferred chunk size.
+    */
+    if ( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 ) == -1 )
+    {
+        std::cerr << "Unable to load SDL Mixer: "
+                << SDL_GetError() << std::endl;
+        std::exit(1);
+    }
+
     // hide mouse cursor
     SDL_ShowCursor(SDL_DISABLE);
 

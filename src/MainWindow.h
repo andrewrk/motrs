@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "SDL.h"
+#include "SDL/SDL_mixer.h"
 
 class Gameplay;
 
@@ -26,6 +27,7 @@ private: //variables
 
     bool m_fullscreen;
     SDL_Surface * m_screen;
+    Mix_Music * m_ambientMusic;
     Gameplay * m_gameplay;
     Uint32 m_videoModeFlags;
 private: //methods
