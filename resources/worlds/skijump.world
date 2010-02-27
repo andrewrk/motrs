@@ -2,6 +2,7 @@ version=1
 
 # A world is a list of map declarations and where they are.
 # map=x,y,z,id
-map=0,0,0,tmp.map
+map=0,0,0,skijumpLeft.map
+map=1000,0,0,skijumpRight.map
 
 

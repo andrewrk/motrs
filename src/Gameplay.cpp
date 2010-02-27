@@ -243,7 +243,7 @@ void Gameplay::applyInput(Entity * entity, bool takesInput) {
 
     if (isFalling) {
         double altitudeVelocity = entity->altitudeVelocity();
-        double gravity = 0.3;
+        double gravity = 1.0;
         altitudeVelocity -= gravity;
         // TODO: terminal velocity
         entity->setAltitudeVelocity(altitudeVelocity);
@@ -291,8 +291,9 @@ void Gameplay::resolveWithWorld(Entity * entity) {
 
     // resolve collisions
     std::vector<Map::TileAndLocation> tiles;
+    Tile::PhysicalPresence minPhysicalPresence = entity->minPhysicalPresence();
     for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++)
-        m_loadedMapsCache[i]->intersectingTiles(tiles, x, y, radius, layer, Tile::ppRail);
+        m_loadedMapsCache[i]->intersectingTiles(tiles, x, y, radius, layer, minPhysicalPresence);
     // sort by proximity
     sortByProximity(x, y, tiles);
     // resolve collisions
