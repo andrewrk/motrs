@@ -4,6 +4,8 @@ PROJECT(${PROGRAM_NAME})
 
 CMAKE_POLICY(SET CMP0004 OLD)
 
+SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
+
 INCLUDE(AddFileDependencies)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
@@ -39,6 +41,22 @@ ELSE(SDL_FOUND)
     MESSAGE("Could not find SDL")
 ENDIF(SDL_FOUND)
 
+# check SDL_gfx
+FIND_PACKAGE(SDL_gfx)
+IF(SDLGFX_FOUND)
+    MESSAGE("Found SDL_gfx")
+
+    SET(DEP_INCLUDES ${DEP_INCLUDES} ${SDLGFX_INCLUDE_DIR})
+    SET(EDITOR_DEP_INCLUDES ${EDITOR_DEP_INCLUDES} ${SDLGFX_INCLUDE_DIR})
+    SET(DEP_LIBS ${DEP_LIBS} ${SDLGFX_LIBRARY})
+    SET(EDITOR_DEP_LIBS ${EDITOR_DEP_LIBS} ${SDLGFX_LIBRARY})
+    SET(HAVE_SDLGFX TRUE)
+    SET(STATUS_SDLGFX "OK")
+ELSE(SDLGFX_FOUND)
+    SET(STATUS_SDLGFX "not found")
+    MESSAGE("Could not find SDL_gfx")
+ENDIF(SDLGFX_FOUND)
+
 # check for SDL_image
 FIND_PACKAGE(SDL_image)
 IF(SDLIMAGE_FOUND)
@@ -71,22 +89,6 @@ ELSE(SDLMIXER_FOUND)
     MESSAGE("Could not find SDL_mixer")
 ENDIF(SDLMIXER_FOUND)
 
-# check for SDL_sound
-FIND_PACKAGE(SDL_sound)
-IF(SDL_SOUND_FOUND)
-    MESSAGE("Found SDL_sound")
-
-    SET(DEP_INCLUDES ${DEP_INCLUDES} ${SDL_SOUND_INCLUDE_DIR})
-    SET(EDITOR_DEP_INCLUDES ${EDITOR_DEP_INCLUDES} ${SDL_SOUND_INCLUDE_DIR})
-    SET(DEP_LIBS ${DEP_LIBS} ${SDL_SOUND_LIBRARIES})
-    SET(EDITOR_DEP_LIBS ${EDITOR_DEP_LIBS} ${SDL_SOUND_LIBRARIES})
-    SET(HAVE_SDLSOUND TRUE)
-    SET(STATUS_SDLSOUND "OK")
-ELSE(SDL_SOUND_FOUND)
-    SET(STATUS_SDLSOUND "not found")
-    MESSAGE("Could not find SDL_sound")
-ENDIF(SDL_SOUND_FOUND)
-
 # check for Qt4
 SET(QT_MIN_VERSION "4.4.0")
 FIND_PACKAGE(Qt4 4.4.3 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
@@ -107,7 +109,26 @@ ENDIF(QT_FOUND)
 ######### DLLs ###########
 IF(WIN32)
     SET(DLL_FILES
+        # SDL
         ${MINGW_DLL_PATH}/SDL.dll
+
+        # SDL_mixer
+        ${MINGW_DLL_PATH}/libogg-0.dll
+        ${MINGW_DLL_PATH}/libvorbis-0.dll
+        ${MINGW_DLL_PATH}/libvorbisfile-3.dll
+        ${MINGW_DLL_PATH}/mikmod.dll
+        ${MINGW_DLL_PATH}/SDL_mixer.dll
+        ${MINGW_DLL_PATH}/smpeg.dll
+
+        # SDL_image
+        ${MINGW_DLL_PATH}/jpeg.dll
+        ${MINGW_DLL_PATH}/libpng12-0.dll
+        ${MINGW_DLL_PATH}/libtiff-3.dll
+        ${MINGW_DLL_PATH}/SDL_image.dll
+        ${MINGW_DLL_PATH}/zlib1.dll
+
+        # SDL_gfx
+        ${MINGW_DLL_PATH}/SDL_gfx.dll
     )
 
     SET(EDITOR_DLL_FILES
@@ -259,7 +280,7 @@ MESSAGE(
 "------------------\n"
 " * SDL					: ${STATUS_SDL}\n"
 " * SDL_image				: ${STATUS_SDLIMAGE}\n"
-" * SDL_sound				: ${STATUS_SDLSOUND}\n"
+" * SDL_gfx				: ${STATUS_SDLGFX}\n"
 " * SDL_mixer				: ${STATUS_SDLMIXER}\n"
 " * Qt4					: ${STATUS_QT}\n"
 )
