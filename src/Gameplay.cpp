@@ -12,19 +12,18 @@
 
 #include <iostream>
 
-#ifndef RELEASE
-const char * Gameplay::ResourceFilePath = "resources.dat";
-#else
+#ifdef RELEASE
 const char * Gameplay::ResourceFilePath = RESOURCE_DIR "/resources.dat";
+#else
+const char * Gameplay::ResourceFilePath = "resources.dat";
 #endif
 
 Gameplay * Gameplay::s_inst = NULL;
 
-Gameplay::Gameplay(SDL_Surface * screen, int fps, MainWindow * owner) :
+Gameplay::Gameplay(MainWindow * owner) :
     m_good(true),
-    m_screen(screen),
-    m_fps(fps),
-    m_interval(1000/fps), //frames per second -> miliseconds
+    m_screen(owner->renderWindow()),
+    m_interval(1000/owner->fps()), //frames per second -> miliseconds
     m_frameCount(0),
     m_screenX(0.0), m_screenY(0.0),
     m_universe(NULL),
@@ -33,7 +32,8 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps, MainWindow * owner) :
     m_loadedMapsCache(),
     m_entities(),
     m_player(NULL),
-    m_window(owner)
+    m_window(owner),
+    m_input(new Input(m_screen->GetInput()))
 {
     assert(s_inst == NULL);
     s_inst = this;
@@ -56,66 +56,22 @@ Gameplay::Gameplay(SDL_Surface * screen, int fps, MainWindow * owner) :
         m_loadedMaps.insert((*allMaps)[i]);
 
     m_player = m_universe->player();
-
-    Input::init();
 }
 
-Gameplay::~Gameplay() {
+Gameplay::~Gameplay()
+{
     if (m_universe != NULL)
         delete m_universe;
     s_inst = NULL;
 }
 
-void Gameplay::mainLoop() {
-    Uint32 next_time = 0;
-    while (true) {
-        // input
-        if (!processEvents())
-            return;
-
-        // set up an interval
-        Uint32 now = SDL_GetTicks();
-        if (now >= next_time) {
-            // show the frame that is already drawn
-            SDL_Flip(m_screen);
-
-            // perform calculations
-            nextFrame();
-
-            // draw next frame
-            updateDisplay();
-
-            next_time = now + m_interval;
-        }
-
-        SDL_Delay(1); //give up the cpu
-    }
-}
-
-bool Gameplay::isGood() {
+bool Gameplay::isGood()
+{
     return m_good;
 }
 
-bool Gameplay::processEvents() {
-    SDL_Event event;
-    while(SDL_PollEvent(&event)){
-        switch(event.type){
-            case SDL_KEYDOWN:
-                // Handle Alt+F4 for windows
-                if (event.key.keysym.sym == SDLK_F4 && (event.key.keysym.mod & KMOD_ALT))
-                    return false;
-                else if (event.key.keysym.sym == SDLK_RETURN && (event.key.keysym.mod & KMOD_ALT) )
-                    m_window->toggleFullscreen();
-                break;
-            case SDL_QUIT:
-                return false;
-        }
-    }
-
-    return true;
-}
-
-void Gameplay::nextFrame() {
+void Gameplay::nextFrame()
+{
     // cache loaded maps
     m_loadedMapsCache.clear();
     for (std::set<Map*>::iterator iMap = m_loadedMaps.begin(); iMap != m_loadedMaps.end(); iMap++)
@@ -131,7 +87,7 @@ void Gameplay::nextFrame() {
 
 
     // refresh the input state
-    Input::refresh();
+    m_input->refresh();
 
     for (unsigned int i = 0; i < m_entities.size(); i++)
         applyInput(m_entities[i], m_entities[i] == m_player);
@@ -159,7 +115,8 @@ void Gameplay::nextFrame() {
     m_frameCount++;
 }
 
-void Gameplay::applyInput(Entity * entity, bool takesInput) {
+void Gameplay::applyInput(Entity * entity, bool takesInput)
+{
     // determin directional input
     double dx = entity->velocityX();
     double dy = entity->velocityY();
@@ -194,10 +151,10 @@ void Gameplay::applyInput(Entity * entity, bool takesInput) {
     }
 
     if (canChangeDirections) {
-        int north = Input::state(Input::North) ? 1 : 0;
-        int east = Input::state(Input::East) ? 1 : 0;
-        int south = Input::state(Input::South) ? 1 : 0;
-        int west = Input::state(Input::West) ? 1 : 0;
+        int north = m_input->state(Input::North) ? 1 : 0;
+        int east = m_input->state(Input::East) ? 1 : 0;
+        int south = m_input->state(Input::South) ? 1 : 0;
+        int west = m_input->state(Input::West) ? 1 : 0;
         int input_dx = east - west;
         int input_dy = south - north;
         Entity::Direction direction = (Entity::Direction)((input_dx + 1) + 3 * (input_dy + 1));
@@ -223,7 +180,7 @@ void Gameplay::applyInput(Entity * entity, bool takesInput) {
     }
 
     if (canStartJump) {
-        bool jump = Input::justPressed(Input::Jump);
+        bool jump = m_input->justPressed(Input::Jump);
         if (jump) {
             entity->setMovementMode(Entity::JumpUp);
             double jumpingSpeed = 5.0;
@@ -232,7 +189,7 @@ void Gameplay::applyInput(Entity * entity, bool takesInput) {
     }
 
     if (canKeepJumping) {
-        bool keepJumping = Input::state(Input::Jump);
+        bool keepJumping = m_input->state(Input::Jump);
         double maxAltidue = 30.0;
         if (keepJumping)
             keepJumping = entity->altitude() < maxAltidue;
@@ -243,7 +200,7 @@ void Gameplay::applyInput(Entity * entity, bool takesInput) {
 
     if (isFalling) {
         double altitudeVelocity = entity->altitudeVelocity();
-        double gravity = 0.3;
+        double gravity = 1.0;
         altitudeVelocity -= gravity;
         // TODO: terminal velocity
         entity->setAltitudeVelocity(altitudeVelocity);
@@ -263,7 +220,7 @@ void Gameplay::applyInput(Entity * entity, bool takesInput) {
     switch (entity->currentSequence()) {
     case Entity::None:
         if (canSwingSword) {
-            bool swingSword = Input::justPressed(Input::Attack_1);
+            bool swingSword = m_input->justPressed(Input::Attack_1);
             if (swingSword) {
                 entity->setCurrentSequence(Entity::Sword);
                 entity->resetSequencePosition();
@@ -282,17 +239,21 @@ void Gameplay::applyInput(Entity * entity, bool takesInput) {
     entity->setVelocity(dx, dy);
 }
 
-void Gameplay::resolveWithWorld(Entity * entity) {
+void Gameplay::resolveWithWorld(Entity * entity)
+{
     // calculate the desired location
-    double dx = entity->velocityX(), dy = entity->velocityY();
-    double x = entity->centerX() + dx, y = entity->centerY() + dy;
+    double dx = entity->velocityX();
+    double dy = entity->velocityY();
+    double x = entity->centerX() + dx;
+    double y = entity->centerY() + dy;
     double radius = entity->radius();
     int layer = entity->layer();
 
     // resolve collisions
     std::vector<Map::TileAndLocation> tiles;
+    Tile::PhysicalPresence minPhysicalPresence = entity->minPhysicalPresence();
     for (unsigned int i = 0; i < m_loadedMapsCache.size(); i++)
-        m_loadedMapsCache[i]->intersectingTiles(tiles, x, y, radius, layer, Tile::ppRail);
+        m_loadedMapsCache[i]->intersectingTiles(tiles, x, y, radius, layer, minPhysicalPresence);
     // sort by proximity
     sortByProximity(x, y, tiles);
     // resolve collisions
@@ -308,10 +269,11 @@ void Gameplay::resolveWithWorld(Entity * entity) {
     entity->setVelocity(dx, dy);
 }
 
-void Gameplay::sortByProximity(double x, double y, std::vector<Map::TileAndLocation> & tiles) {
+void Gameplay::sortByProximity(double x, double y, std::vector<Map::TileAndLocation> & tiles)
+{
     // TODO: code duplication
     if (tiles.size() == 0)
-        return; // we have to check for this because of stupid unsigned int size;
+        return; // we have to check for this because of stupid unsigned int size
     for (unsigned int i = 0; i < tiles.size(); i++)
         tiles[i].proximity2 = Utils::distance2(x, y, tiles[i].x + Tile::size / 2.0, tiles[i].y + Tile::size / 2.0);
     // selection sort
@@ -329,7 +291,8 @@ void Gameplay::sortByProximity(double x, double y, std::vector<Map::TileAndLocat
     }
 }
 
-void Gameplay::sortByCenterY(std::vector<Entity *> & entities) {
+void Gameplay::sortByCenterY(std::vector<Entity *> & entities)
+{
     // TODO: code duplication
     if (entities.size() == 0)
         return; // we have to check for this because of stupid unsigned int size;
@@ -348,9 +311,10 @@ void Gameplay::sortByCenterY(std::vector<Entity *> & entities) {
     }
 }
 
-void Gameplay::updateDisplay() {
-    //generic background color
-    SDL_FillRect(m_screen, NULL, SDL_MapRGB(m_screen->format, 0,0,0));
+void Gameplay::updateDisplay()
+{
+    // generic background color
+    m_screen->Clear();
 
     // find layer count
     int layerCount = 0;
@@ -371,4 +335,9 @@ void Gameplay::updateDisplay() {
         for (unsigned int i = 0; i < entities.size(); i++)
             entities[i]->draw(m_screenX, m_screenY);
     }
+}
+
+int Gameplay::fps()
+{
+    return m_window->fps();
 }

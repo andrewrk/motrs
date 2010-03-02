@@ -1,6 +1,7 @@
 #ifndef _ENTITY_H_
 #define _ENTITY_H_
 
+#include "Tile.h"
 #include "Graphic.h"
 
 // entities are responsible for:
@@ -77,6 +78,7 @@ public:
     // returns the next position
     int incrementSequencePosition() { return ++m_sequencePosition; }
 
+    Tile::PhysicalPresence minPhysicalPresence();
     void resolveCollision(Entity * other);
     void draw(double screenX, double screenY);
 

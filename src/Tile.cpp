@@ -5,7 +5,6 @@
 #include "ResourceManager.h"
 #include "Physics.h"
 
-#include "SDL.h"
 #include <cmath>
 
 const double Tile::size = 16.0;
