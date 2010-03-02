@@ -87,6 +87,20 @@ Entity::Entity(Shape shape, double radius, double centerOffsetX, double centerOf
     memset(m_sword, 0, sizeof(m_running));
 }
 
+Tile::PhysicalPresence Entity::minPhysicalPresence() {
+    switch (m_movementMode) {
+    case Stand:
+    case Walk:
+    case Run:
+        return Tile::ppRail;
+    case JumpUp:
+    case Falling:
+        return Tile::ppEmbrasure;
+    default:
+        assert(false);
+    }
+}
+
 void Entity::resolveCollision(Entity * other) {
     Entity * entity1 = NULL, * entity2 = NULL;
     double dx = 0.0, dy = 0.0;
