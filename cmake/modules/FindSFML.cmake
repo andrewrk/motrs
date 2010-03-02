@@ -17,6 +17,8 @@ SET(SFML_PATH_SEARCH_INCLUDE
     C:/msys/local/include
     C:/MinGW/include/SFML
     C:/MinGW/include
+    /usr/i586-mingw32msvc/include
+    /usr/i586-mingw32msvc/include/SFML
     NO_DEFAULT_PATH
 )
 ELSE(WIN32)
@@ -32,6 +34,7 @@ SET(SFML_PATH_SEARCH_LIB
     C:/cygwin/usr/local/lib
     C:/msys/local/lib
     C:/MinGW/lib
+    /usr/i586-mingw32msvc/lib
     NO_DEFAULT_PATH
 )
 
