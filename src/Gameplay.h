@@ -1,13 +1,14 @@
 #ifndef _GAMEPLAY_H_
 #define _GAMEPLAY_H_
 
-#include "SDL.h"
+#include <SFML/Window.hpp>
+
 #include "Universe.h"
 #include "Entity.h"
 #include "ResourceFile.h"
 #include "Debug.h"
-
 #include "Map.h"
+#include "Input.h"
 
 #include <set>
 
@@ -18,20 +19,22 @@ class Gameplay
 public:
     static inline Gameplay * instance();
 
-    Gameplay(SDL_Surface * screen, int fps, MainWindow * owner);
+    Gameplay(MainWindow * owner);
     ~Gameplay();
 
     void mainLoop();
     bool isGood();
 
     inline long long int frameCount();
-    inline int fps();
-    inline SDL_Surface * screen();
+    int fps();
+    inline sf::RenderWindow * screen();
 
     inline double screenWidth();
     inline double screenHeight();
-private: //variables
 
+    void updateDisplay();
+    void nextFrame();
+private: //variables
     static const char * ResourceFilePath;
     static Gameplay * s_inst;
 
@@ -40,8 +43,7 @@ private: //variables
 
 
     bool m_good;
-    SDL_Surface * m_screen;
-    int m_fps;
+    sf::RenderWindow * m_screen;
     int m_interval;
     long long int m_frameCount;
 
@@ -56,12 +58,9 @@ private: //variables
     Entity * m_player;
 
     MainWindow * m_window;
+    Input * m_input;
 
 private: //methods
-    bool processEvents();
-    void updateDisplay();
-    void nextFrame();
-
     void applyInput(Entity * entity, bool takesInput);
     void resolveWithWorld(Entity * entity);
 
@@ -83,14 +82,9 @@ inline long long int Gameplay::frameCount()
     return m_frameCount;
 }
 
-inline SDL_Surface * Gameplay::screen()
+inline sf::RenderWindow * Gameplay::screen()
 {
     return m_screen;
-}
-
-inline int Gameplay::fps()
-{
-    return m_fps;
 }
 
 inline double Gameplay::screenWidth()

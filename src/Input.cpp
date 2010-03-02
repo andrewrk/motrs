@@ -3,37 +3,40 @@
 #include "Utils.h"
 #include "Config.h"
 
-bool Input::s_state[] = {false};
-bool Input::s_lastState[] = {false};
-SDLKey Input::s_map[] = {SDLK_UNKNOWN};
-std::map<std::string, Input::Key> Input::s_namesToKeys;
+Input::Input(const sf::Input & input) :
+    m_input(input)
+{
+    // clear to 0
+    for (int k=0; k<InputActionCount; ++k) {
+        m_state[k] = false;
+        m_lastState[k] = false;
+        m_map[k] = (Input::KeyCode) -1;
+    }
 
-
-bool Input::state(Key key) {
-    return s_state[key];
-}
-
-bool Input::justPressed(Key key) {
-    return s_state[key] && !s_lastState[key];
-}
-
-void Input::init() {
     // read settings
     Config * conf = Config::instance();
-    s_map[North] = conf->keyNorth();
-    s_map[East] = conf->keyEast();
-    s_map[South] = conf->keySouth();
-    s_map[West] = conf->keyWest();
-    s_map[Jump] = conf->keyJump();
-    s_map[Attack_1] = conf->keyAttack1();
+    m_map[North] = conf->keyNorth();
+    m_map[East] = conf->keyEast();
+    m_map[South] = conf->keySouth();
+    m_map[West] = conf->keyWest();
+    m_map[Jump] = conf->keyJump();
+    m_map[Attack_1] = conf->keyAttack1();
 }
 
-void Input::refresh() {
-    SDL_PumpEvents();
+bool Input::state(Action key)
+{
+    return m_state[key];
+}
 
-    Uint8 * keystate = SDL_GetKeyState(NULL);
-    for (int k = 0; k < Key_size; k++) {
-        s_lastState[k] = s_state[k];
-        s_state[k] = keystate[s_map[k]];
+bool Input::justPressed(Action key)
+{
+    return m_state[key] && !m_lastState[key];
+}
+
+void Input::refresh()
+{
+    for (int k = 0; k < InputActionCount; ++k) {
+        m_lastState[k] = m_state[k];
+        m_state[k] = m_input.IsKeyDown((sf::Key::Code)m_map[k]);
     }
 }

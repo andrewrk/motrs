@@ -33,83 +33,93 @@ Graphic * Graphic::load(const char * buffer)
         return NULL;
     }
 
-    if (storageType == stBMP) {
-        // load the .bmp
-        SDL_RWops * rw = SDL_RWFromConstMem(buffer, header->imageSize);
-        SDL_Surface * temp = SDL_LoadBMP_RW(rw, 1);
+    if (storageType == stBMP || storageType == stPNG) {
+        // initialize
+        out->m_image = new sf::Image();
+        out->m_spriteSheet = new sf::Sprite();
 
-        assert(temp != NULL);
-        if (temp == NULL) {
-            std::cerr << "Error turning Graphic buffer into SDL_Surface" << std::endl;
+        // load the .bmp
+        bool good = out->m_image->LoadFromMemory(buffer, header->imageSize);
+
+        if (! good) {
+            std::cerr << "Error loading Graphic from memory" << std::endl;
             delete out;
             return NULL;
         }
 
-        out->m_spriteSheet = SDL_DisplayFormat(temp);
-        SDL_FreeSurface(temp);
-        SDL_SetColorKey(out->m_spriteSheet, SDL_SRCCOLORKEY|SDL_RLEACCEL,
-            SDL_MapRGB(out->m_spriteSheet->format, colorKey->r,
-                colorKey->g, colorKey->b));
-    } else if (storageType == stPNG) {
-        // TODO: implement PNG support
-        assert(false);
+        out->m_image->CreateMaskFromColor(sf::Color(colorKey->r, colorKey->g, colorKey->b));
+
+        out->m_spriteSheet->SetImage(*out->m_image);
     } else {
         std::cerr << "unknown storageType: " << storageType << std::endl;
         return NULL;
     }
 
-    // generate SDL_Rects for each frame
+    // generate a rectangle for each frame
     for (int i = 0; i < out->m_frameCount; i++) {
-        SDL_Rect rect;
-        rect.x = i * header->frameWidth;
-        rect.y = 0;
-        rect.w = header->frameWidth;
-        rect.h = header->frameHeight;
+        sf::IntRect rect;
+        rect.Left = i * header->frameWidth;
+        rect.Top = 0;
+        rect.Right = (i+1) * header->frameWidth;
+        rect.Bottom = header->frameHeight;
         out->m_spriteBounds.push_back(rect);
     }
+
     return out;
 }
 
 Graphic::Graphic() :
+    m_image(NULL),
     m_spriteSheet(NULL),
     m_offset(0),
     m_spriteBounds()
 {
-
 }
 
-Graphic::~Graphic() {
+Graphic::~Graphic()
+{
+    if (m_image)
+        delete m_image;
     if (m_spriteSheet)
-        SDL_FreeSurface(m_spriteSheet);
+        delete m_spriteSheet;
 }
 
 // calculate which frame to draw
-int Graphic::currentFrame() {
+int Graphic::currentFrame()
+{
     return (Gameplay::instance()->frameCount() * m_fps / Gameplay::instance()->fps() + m_offset) % m_frameCount;
 }
 
-void Graphic::draw(SDL_Surface * dest, int x, int y) {
+void Graphic::draw(sf::RenderWindow * dest, int x, int y)
+{
     int frame = currentFrame();
 
-    SDL_Rect destRect;
-    destRect.x = x;
-    destRect.y = y;
-    destRect.w = m_spriteBounds[frame].w / 4;
-    destRect.h = m_spriteBounds[frame].h / 4;
+    sf::IntRect destRect;
+    destRect.Left = x;
+    destRect.Top = y;
+    destRect.Right = x + m_spriteBounds[frame].GetWidth();
+    destRect.Bottom = y + m_spriteBounds[frame].GetHeight();
 
-    SDL_BlitSurface(m_spriteSheet, &m_spriteBounds[frame], dest, &destRect);
+    draw(dest, destRect);
 }
 
-void Graphic::draw(SDL_Surface * dest, SDL_Rect * destRect) {
-    SDL_BlitSurface(m_spriteSheet, &m_spriteBounds[currentFrame()], dest, destRect);
+void Graphic::draw(sf::RenderWindow * dest, const sf::IntRect & destRect)
+{
+    int frame = currentFrame();
+
+    m_spriteSheet->SetPosition(destRect.Left, destRect.Top);
+    m_spriteSheet->SetScale(destRect.GetWidth() / (float) m_spriteBounds[frame].GetWidth(),
+                           destRect.GetHeight() / (float) m_spriteBounds[frame].GetHeight());
+    m_spriteSheet->SetSubRect(m_spriteBounds[frame]);
+    dest->Draw(*m_spriteSheet);
 }
 
 int Graphic::width()
 {
-    return m_spriteBounds[0].w;
+    return m_spriteBounds[0].GetWidth();
 }
 
 int Graphic::height()
 {
-    return m_spriteBounds[0].h;
+    return m_spriteBounds[0].GetHeight();
 }

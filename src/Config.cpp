@@ -27,32 +27,38 @@ bool Config::fullscreen()
     return ! Utils::stringToBool(m_configManager->value("windowed", Utils::boolToString(false)));
 }
 
-SDLKey Config::keyNorth()
+Input::KeyCode Config::keyNorth()
 {
-    return (SDLKey) Utils::stringToInt(m_configManager->value("key.north", Utils::intToString(SDLK_w)));
+    return (Input::KeyCode) Utils::stringToInt(
+        m_configManager->value("key.north", Utils::intToString(Input::kcW)));
 }
 
-SDLKey Config::keyEast()
+Input::KeyCode Config::keyEast()
 {
-    return (SDLKey) Utils::stringToInt(m_configManager->value("key.east", Utils::intToString(SDLK_d)));
+    return (Input::KeyCode) Utils::stringToInt(
+        m_configManager->value("key.east", Utils::intToString(Input::kcD)));
 }
 
-SDLKey Config::keySouth()
+Input::KeyCode Config::keySouth()
 {
-    return (SDLKey) Utils::stringToInt(m_configManager->value("key.south", Utils::intToString(SDLK_s)));
+    return (Input::KeyCode) Utils::stringToInt(
+        m_configManager->value("key.south", Utils::intToString(Input::kcS)));
 }
 
-SDLKey Config::keyWest()
+Input::KeyCode Config::keyWest()
 {
-    return (SDLKey) Utils::stringToInt(m_configManager->value("key.west", Utils::intToString(SDLK_a)));
+    return (Input::KeyCode) Utils::stringToInt(
+        m_configManager->value("key.west", Utils::intToString(Input::kcA)));
 }
 
-SDLKey Config::keyJump()
+Input::KeyCode Config::keyJump()
 {
-    return (SDLKey) Utils::stringToInt(m_configManager->value("key.jump", Utils::intToString(SDLK_SPACE)));
+    return (Input::KeyCode) Utils::stringToInt(
+        m_configManager->value("key.jump", Utils::intToString(Input::kcSpace)));
 }
 
-SDLKey Config::keyAttack1()
+Input::KeyCode Config::keyAttack1()
 {
-    return (SDLKey) Utils::stringToInt(m_configManager->value("key.attack_1", Utils::intToString(SDLK_j)));
+    return (Input::KeyCode) Utils::stringToInt(
+        m_configManager->value("key.attack_1", Utils::intToString(Input::kcJ)));
 }
