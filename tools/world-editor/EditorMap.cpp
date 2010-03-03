@@ -298,3 +298,8 @@ double EditorMap::height()
 {
     return m_tileCountY * Tile::size;
 }
+
+QRectF EditorMap::geometry()
+{
+    return QRectF(QPointF(left(), top()), QSizeF(width(), height()));
+}

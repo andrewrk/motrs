@@ -20,6 +20,12 @@ public: //variables
         int tileX; // tile index
         int tileY;
         int layer;
+
+        QRectF geometry()
+        {
+            return QRectF(QPointF(tileX*Tile::size, tileY*Tile::size),
+                QSizeF(object->tileCountX()*Tile::size, object->tileCountY()*Tile::size));
+        }
     } MapObject;
 
     typedef struct {
@@ -50,6 +56,8 @@ public: //methods
     void setHeight(double value);
     double width();
     double height();
+
+    QRectF geometry();
 
     void addLayer(QString name = "");
     void deleteLayer(int index);

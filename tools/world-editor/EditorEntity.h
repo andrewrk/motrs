@@ -17,6 +17,8 @@ public:
     inline int width();
     inline int height();
 
+    QRectF geometry();
+
     inline QString name() const;
 private:
     EditorEntity();

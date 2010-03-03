@@ -691,11 +691,8 @@ EditorObject::ObjectGraphic * ObjectView::graphicAt(int x, int y)
             QList<EditorObject::ObjectGraphic *> * list = graphics->at(layer);
             for(int i=0; i<list->size(); ++i) {
                 EditorObject::ObjectGraphic * graphic = list->at(i);
-                if( absX >= graphic->x && absX <= graphic->x + graphic->width &&
-                    absY >= graphic->y && absY <= graphic->y + graphic->height )
-                {
+                if (graphic->geometry().contains(absX, absY))
                     return graphic;
-                }
             }
         }
     }

@@ -21,6 +21,8 @@ public: //variables
         QString graphicName; // file name in resources/graphics
         EditorGraphic * graphic;
         int layer;
+
+        QRectF geometry() { return QRectF(QPointF(x,y), QSizeF(width, height)); }
     } ObjectGraphic;
 
 public: //methods

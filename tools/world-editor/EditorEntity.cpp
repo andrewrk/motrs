@@ -62,3 +62,7 @@ EditorEntity::EditorEntity()
 {
 }
 
+QRectF EditorEntity::geometry()
+{
+    return QRectF(QPointF(centerX()-centerOffsetX(), centerY()-centerOffsetY()), QSizeF(width(), height()));
+}

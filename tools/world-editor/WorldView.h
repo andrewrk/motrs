@@ -75,7 +75,7 @@ private: //variables
         MoveMap,
     };
 
-    typedef struct {
+    struct ArtItem {
         // representation
         QPixmap * pixmap;
         // location on disk
@@ -85,7 +85,45 @@ private: //variables
         double y;
         int layer;
         EditorMap * map;
-    } ArtItem;
+    };
+
+    enum SelectableItemType {
+        sitMapObject,
+        sitEditorEntity,
+    };
+
+    struct SelectableItem {
+        // NULL constructor
+        SelectableItem() :
+            type(sitMapObject),
+            object(NULL),
+            entity(NULL)
+        {
+        }
+
+        SelectableItem(EditorMap::MapObject * _object) :
+            type(sitMapObject),
+            object(_object),
+            entity(NULL)
+        {
+        }
+
+        SelectableItem(EditorEntity * _entity) :
+            type(sitEditorEntity),
+            object(NULL),
+            entity(_entity)
+        {
+        }
+
+        bool isNull()
+        {
+            return (type == sitMapObject) ? (object == NULL) : (entity == NULL);
+        }
+
+        SelectableItemType type;
+        EditorMap::MapObject * object;
+        EditorEntity * entity;
+    };
 
     QScrollBar * m_hsb;
     QScrollBar * m_vsb;
@@ -128,12 +166,16 @@ private: //variables
 
     EditorMap::MapObject * m_dragObject;
 
+    QList<SelectableItem> m_selection;
+
 private: //methods
     // transfer between absolute coordinates and editor coordinates
     int screenX(double absoluteX);
     int screenY(double absoluteY);
+    QRect screenRect(QRectF absoluteRect);
     double absoluteX(int screenX);
     double absoluteY(int screenY);
+    QRectF absoluteRect(QRect screenRect);
 
     int snapScreenX(int x);
     int snapScreenY(int y);
@@ -141,11 +183,7 @@ private: //methods
     double snapAbsoluteY(double y);
 
     void drawGrid(QPainter &p);
-
     void updateViewCache();
-
-    void selectMap(EditorMap * map);
-    EditorMap * mapAt(int x, int y);
 
     // determining if cursor is in range of resizing maps
     bool overMapLeft(int x, int y);
@@ -153,14 +191,21 @@ private: //methods
     bool overMapTop(int x, int y);
     bool overMapBottom(int x, int y);
     bool overSelectedMap(int x, int y);
-    EditorMap * overAnyMap(int x, int y);
 
-    void determineCursor();
+    // if we're over it, return it, otherwise return null
+    EditorMap * mapAt(int x, int y);
+    SelectableItem selectableItemAt(int x, int y);
 
     void refreshLayersList();
     void setControlEnableStates();
+    void determineCursor();
 
     void drawObject(QPainter &p, EditorMap::MapObject * object, int layerIndex, EditorMap * owner);
+
+    void selectMap(EditorMap * map);
+    void selectOnly(SelectableItem item);
+    void selectAlso(SelectableItem item);
+    void selectNone();
 
 private slots:
     void verticalScroll(int value);

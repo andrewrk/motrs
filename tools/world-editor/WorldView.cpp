@@ -111,6 +111,8 @@ void WorldView::paintEvent(QPaintEvent * e)
     p.eraseRect(0, 0, this->width(), this->height());
 
     if( m_world ) {
+        drawGrid(p);
+
         for(int layerIndex=0; layerIndex<m_maxLayer; ++layerIndex) {
             // draw map at this layer
             for(int mapIndex=0; mapIndex<m_mapCache.size(); ++mapIndex) {
@@ -153,9 +155,25 @@ void WorldView::paintEvent(QPaintEvent * e)
                 }
             }
         }
+
+        // selection rectangles
+        p.setPen(QPen(Qt::blue, 2));
+        p.setBrush(Qt::NoBrush);
+        for (int i=0; i<m_selection.size(); ++i) {
+            const SelectableItem * item = &m_selection.at(i);
+            QRectF bound;
+            if (item->type == sitEditorEntity) {
+                bound = item->entity->geometry();
+            } else if (item->type == sitMapObject) {
+                bound = item->object->geometry();
+            }
+            QRect screenBound = screenRect(bound);
+            p.drawRect(screenBound);
+        }
+
         // draw a bold line around map borders
-        QPen normalMapBorder(Qt::black, 2);
-        QPen selectedMapBorder(Qt::blue, 2);
+        QPen normalMapBorder(Qt::black, 3);
+        QPen selectedMapBorder(Qt::blue, 3);
         p.setBrush(Qt::NoBrush);
         for (int i = 0; i < m_mapCache.size(); i++) {
             EditorMap * map = m_mapCache[i];
@@ -184,7 +202,6 @@ void WorldView::paintEvent(QPaintEvent * e)
             p.drawRect(outline);
         }
 
-        drawGrid(p);
     } else {
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
             tr("Double click a world to edit"));
@@ -242,6 +259,27 @@ void WorldView::drawGrid(QPainter &p)
             }
         }
     }
+}
+
+
+QRect WorldView::screenRect(QRectF absoluteRect)
+{
+    QRect out;
+    out.setX(screenX(absoluteRect.x()));
+    out.setY(screenY(absoluteRect.y()));
+    out.setWidth(absoluteRect.width() * m_zoom);
+    out.setHeight(absoluteRect.height() * m_zoom);
+    return out;
+}
+
+QRectF WorldView::absoluteRect(QRect screenRect)
+{
+    QRectF out;
+    out.setX(absoluteX(screenRect.x()));
+    out.setY(absoluteY(screenRect.y()));
+    out.setWidth(screenRect.width() / m_zoom);
+    out.setHeight(screenRect.height() / m_zoom);
+    return out;
 }
 
 int WorldView::screenX(double absoluteX)
@@ -348,7 +386,6 @@ bool WorldView::overSelectedMap(int x, int y)
     return  absX > m_selectedMap->left() && absX < m_selectedMap->left() + m_selectedMap->width() &&
             absY > m_selectedMap->top() && absY < m_selectedMap->top() + m_selectedMap->height();
 }
-
 
 void WorldView::keyPressEvent(QKeyEvent * e)
 {
@@ -523,8 +560,22 @@ void WorldView::mousePressEvent(QMouseEvent * e)
                 m_mouseState = StretchMapBottom;
             else if( overSelectedMap(e->x(), e->y()) && e->modifiers() & Qt::ControlModifier )
                 m_mouseState = MoveMap;
-            else
-                selectMap(mapAt(e->x(), e->y())); // if they clicked inside a map, select it
+            else {
+                // if they clicked inside a map, select it
+                selectMap(mapAt(e->x(), e->y()));
+
+                // if they click an object, select it
+                SelectableItem item = selectableItemAt(e->x(), e->y());
+                if (item.isNull()) {
+                    if (! (e->modifiers() & Qt::ShiftModifier))
+                        selectNone();
+                } else {
+                    if (e->modifiers() & Qt::ShiftModifier)
+                        selectAlso(item);
+                    else
+                        selectOnly(item);
+                }
+            }
         } break;
         case Eraser:
 
@@ -546,17 +597,44 @@ void WorldView::mousePressEvent(QMouseEvent * e)
     }
 }
 
+
+WorldView::SelectableItem WorldView::selectableItemAt(int x, int y)
+{
+    if (m_selectedMap == NULL)
+        return SelectableItem();
+
+    double absX = absoluteX(x);
+    double absY = absoluteY(y);
+
+    for (int layerIndex=0; layerIndex<m_selectedMap->layerCount(); ++layerIndex) {
+        const EditorMap::MapLayer * layer = m_selectedMap->layer(layerIndex);
+        // check objects
+        for (int i=0; i<layer->objects.size(); ++i) {
+            EditorMap::MapObject * object = layer->objects.at(i);
+            if (object->geometry().contains(absX, absY))
+                return SelectableItem(object);
+        }
+
+        // check entities
+        for (int i=0; i<layer->entities.size(); ++i) {
+            EditorEntity * entity = layer->entities.at(i);
+            if (entity->geometry().contains(absX, absY))
+                return SelectableItem(entity);
+        }
+    }
+
+    return SelectableItem((EditorEntity *)NULL);
+}
+
 EditorMap * WorldView::mapAt(int x, int y)
 {
     double absX = absoluteX(x);
     double absY = absoluteY(y);
+
     for(int i=0; i<m_mapCache.size(); ++i) {
         EditorMap * map = m_mapCache[i];
-        if( absX > map->left() && absX < map->left() + map->width() &&
-            absY > map->top() && absY < map->top() + map->height() )
-        {
+        if (map->geometry().contains(absX, absY))
             return map;
-        }
     }
     return NULL;
 }
@@ -761,4 +839,24 @@ void WorldView::dragLeaveEvent(QDragLeaveEvent * e)
 void WorldView::saveTheWorld()
 {
     m_world->save();
+}
+
+
+void WorldView::selectOnly(SelectableItem item)
+{
+    m_selection.clear();
+    m_selection.append(item);
+    this->update();
+}
+
+void WorldView::selectAlso(SelectableItem item)
+{
+    m_selection.append(item);
+    this->update();
+}
+
+void WorldView::selectNone()
+{
+    m_selection.clear();
+    this->update();
 }
