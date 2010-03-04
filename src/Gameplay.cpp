@@ -60,8 +60,8 @@ Gameplay::Gameplay(MainWindow * owner) :
 
 Gameplay::~Gameplay()
 {
-    if (m_universe != NULL)
-        delete m_universe;
+    delete m_universe;
+    delete m_input;
     s_inst = NULL;
 }
 

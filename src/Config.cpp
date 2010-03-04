@@ -11,6 +11,13 @@ Config::Config(int argc, char * argv[], std::string configFile) :
     m_configManager->addArgs(argc, argv);
 }
 
+Config::~Config()
+{
+    delete m_configManager;
+    delete s_inst;
+    s_inst = NULL;
+}
+
 Config * Config::instance()
 {
     assert(s_inst != NULL);

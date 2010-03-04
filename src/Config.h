@@ -13,6 +13,7 @@ class Config
 {
 public:
     static Config * instance();
+    ~Config();
 
     // initialize with command line arguments and a configuration file
     static void initialize(int argc, char * argv[], std::string configFile);

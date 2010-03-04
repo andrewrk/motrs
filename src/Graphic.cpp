@@ -71,6 +71,8 @@ Graphic * Graphic::load(const char * buffer)
 Graphic::Graphic() :
     m_image(NULL),
     m_spriteSheet(NULL),
+    m_frameCount(1),
+    m_fps(1),
     m_offset(0),
     m_spriteBounds()
 {
@@ -78,10 +80,8 @@ Graphic::Graphic() :
 
 Graphic::~Graphic()
 {
-    if (m_image)
-        delete m_image;
-    if (m_spriteSheet)
-        delete m_spriteSheet;
+    delete m_image;
+    delete m_spriteSheet;
 }
 
 // calculate which frame to draw

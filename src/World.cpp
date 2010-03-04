@@ -38,7 +38,11 @@ World * World::load(const char * buffer)
 }
 
 World::World() :
-    m_maps()
+    m_maps(),
+    m_left(0),
+    m_top(0),
+    m_width(0),
+    m_height(0)
 {
     m_maps.clear();
 }

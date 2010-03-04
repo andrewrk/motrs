@@ -36,10 +36,8 @@ MainWindow::MainWindow() :
 
 MainWindow::~MainWindow()
 {
-    if (m_window)
-        delete m_window;
-    if (m_gameplay)
-        delete m_gameplay;
+    delete m_window;
+    delete m_gameplay;
 }
 
 int MainWindow::exec()
