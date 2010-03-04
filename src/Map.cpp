@@ -87,7 +87,6 @@ Map::Map() :
     m_palette(),
     m_tiles(NULL),
     m_submaps(),
-    m_triggers(),
     m_entities(),
     m_x(0.0), m_y(0.0),
     m_width(0.0), m_height(0.0),

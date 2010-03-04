@@ -4,7 +4,6 @@
 #include "Array3.h"
 #include "ResourceFile.h"
 #include "Tile.h"
-#include "Trigger.h"
 #include "Entity.h"
 
 #include <vector>
@@ -56,7 +55,6 @@ protected:
     std::vector<Tile*> m_palette;
     Array3<int> * m_tiles;
     std::vector<Map*> m_submaps;
-    std::vector<Trigger*> m_triggers;
     std::vector<Entity*> m_entities;
 
     // absolute coordinates
