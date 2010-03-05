@@ -92,7 +92,8 @@ private: //variables
         sitEditorEntity,
     };
 
-    struct SelectableItem {
+    class SelectableItem {
+    public:
         // NULL constructor
         SelectableItem() :
             type(sitMapObject),
@@ -118,6 +119,28 @@ private: //variables
         bool isNull()
         {
             return (type == sitMapObject) ? (object == NULL) : (entity == NULL);
+        }
+
+        // return the area of the item
+        int area() const
+        {
+            if (type == sitEditorEntity) {
+                if (entity == NULL)
+                    return 0;
+                else
+                    return rectArea(entity->geometry());
+            } else if (type == sitMapObject) {
+                if (object == NULL)
+                    return 0;
+                else
+                    return rectArea(object->geometry());
+            }
+            return 0;
+        }
+
+        static int rectArea(QRectF rect)
+        {
+            return rect.width() * rect.height();
         }
 
         SelectableItemType type;

@@ -606,24 +606,40 @@ WorldView::SelectableItem WorldView::selectableItemAt(int x, int y)
     double absX = absoluteX(x);
     double absY = absoluteY(y);
 
+    // get a list of all items at this point
+    QList<SelectableItem> items;
     for (int layerIndex=0; layerIndex<m_selectedMap->layerCount(); ++layerIndex) {
         const EditorMap::MapLayer * layer = m_selectedMap->layer(layerIndex);
         // check objects
         for (int i=0; i<layer->objects.size(); ++i) {
             EditorMap::MapObject * object = layer->objects.at(i);
             if (object->geometry().contains(absX, absY))
-                return SelectableItem(object);
+                items.append(SelectableItem(object));
         }
 
         // check entities
         for (int i=0; i<layer->entities.size(); ++i) {
             EditorEntity * entity = layer->entities.at(i);
             if (entity->geometry().contains(absX, absY))
-                return SelectableItem(entity);
+                items.append(SelectableItem(entity));
         }
     }
 
-    return SelectableItem((EditorEntity *)NULL);
+    // return the smallest one
+    if (items.size() == 0) {
+        return SelectableItem((EditorEntity *)NULL);
+    } else {
+        int area = items.at(0).area();
+        int index = 0;
+        for (int i=1; i<items.size(); ++i) {
+            if (items.at(i).area() < area) {
+                area = items.at(i).area();
+                index = i;
+            }
+        }
+
+        return items.at(index);
+    }
 }
 
 EditorMap * WorldView::mapAt(int x, int y)
