@@ -4,7 +4,6 @@
 #include "Array3.h"
 #include "ResourceFile.h"
 #include "Tile.h"
-#include "Trigger.h"
 #include "Entity.h"
 
 #include <vector>
@@ -16,8 +15,8 @@ public:
         double x, y;
         Tile * tile;
         double proximity2; // used when sorting tiles by proximity
-        TileAndLocation() {}
-        TileAndLocation(double x, double y, Tile * tile) : x(x), y(y), tile(tile) {}
+        TileAndLocation() : x(0), y(0), tile(NULL), proximity2(0) {}
+        TileAndLocation(double x, double y, Tile * tile) : x(x), y(y), tile(tile), proximity2(0) {}
     };
 
     static Map * load(const char * buffer);
@@ -56,7 +55,6 @@ protected:
     std::vector<Tile*> m_palette;
     Array3<int> * m_tiles;
     std::vector<Map*> m_submaps;
-    std::vector<Trigger*> m_triggers;
     std::vector<Entity*> m_entities;
 
     // absolute coordinates

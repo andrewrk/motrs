@@ -4,9 +4,14 @@ PROJECT(${PROGRAM_NAME})
 
 CMAKE_POLICY(SET CMP0004 OLD)
 
-INCLUDE(AddFileDependencies)
+# === configurable variables ===
+SET(TEXT_OK "OK")
+SET(TEXT_NOTFOUND "not found")
+# ==============================
 
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
+
+INCLUDE(AddFileDependencies)
 
 # prepare for special include files
 SET(OUT_INCLUDE_PATH "${CMAKE_BINARY_DIR}/cmakeincludes")
@@ -23,6 +28,7 @@ MESSAGE("Compiling version ${VERSION}")
 
 ####################### Dependencies #######################
 
+<<<<<<< HEAD:CMakeLists.txt
 # check for SDL
 FIND_PACKAGE(SDL)
 IF(SDL_FOUND)
@@ -88,26 +94,50 @@ ELSE(SDL_SOUND_FOUND)
 ENDIF(SDL_SOUND_FOUND)
 
 # check for Qt4
+=======
+# check for SFML
+FIND_PACKAGE(SFML)
+IF(SFML_FOUND)
+    SET(DEP_INCLUDES ${DEP_INCLUDES} ${SFML_INCLUDE_DIR})
+    SET(DEP_LIBS ${DEP_LIBS}
+        ${SFML_WINDOW_LIBRARY}
+        ${SFML_GRAPHICS_LIBRARY}
+        ${SFML_AUDIO_LIBRARY}
+        ${SFML_SYSTEM_LIBRARY}
+    )
+
+    SET(HAVE_SFML TRUE)
+    SET(STATUS_SFML ${TEXT_OK})
+ELSE(SFML_FOUND)
+    SET(STATUS_SFML ${TEXT_NOTFOUND})
+ENDIF(SFML_FOUND)
+
+# Qt4 for the editor and updater, which need QtGui and QtNetwork as well
+>>>>>>> 7f71f697e4943e90893297de34f8b0da5dfc8e6b:CMakeLists.txt
 SET(QT_MIN_VERSION "4.4.0")
 FIND_PACKAGE(Qt4 4.4.3 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
 IF(QT_FOUND)
-    MESSAGE("Found Qt")
-
     INCLUDE(${QT_USE_FILE})
     SET(EDITOR_DEP_LIBS ${EDITOR_DEP_LIBS} ${QT_LIBRARIES})
     SET(UPDATER_DEP_LIBS ${UPDATER_DEP_LIBS} ${QT_LIBRARIES})
 
     SET(HAVE_QT TRUE)
-    SET(STATUS_QT "OK")
+    SET(STATUS_QT ${TEXT_OK})
 ELSE(QT_FOUND)
-    SET(STATUS_QT "not found")
-    MESSAGE("Could not find Qt4")
+    SET(STATUS_QT ${TEXT_NOTFOUND})
 ENDIF(QT_FOUND)
 
 ######### DLLs ###########
 IF(WIN32)
     SET(DLL_FILES
-        ${MINGW_DLL_PATH}/SDL.dll
+        # SFML
+        ${MINGW_DLL_PATH}/sfml-audio.dll
+        ${MINGW_DLL_PATH}/sfml-graphics.dll
+        ${MINGW_DLL_PATH}/sfml-system.dll
+        ${MINGW_DLL_PATH}/sfml-window.dll
+
+        # Qt
+        ${MINGW_DLL_PATH}/QtCore4.dll
     )
 
     SET(EDITOR_DLL_FILES
@@ -116,13 +146,16 @@ IF(WIN32)
         ${MINGW_DLL_PATH}/QtNetwork4.dll
         ${MINGW_DLL_PATH}/libgcc_s_dw2-1.dll
         ${MINGW_DLL_PATH}/mingwm10.dll
-        ${MINGW_DLL_PATH}/SDL.dll
     )
 
     SET(ALL_DLL_FILES ${DLL_FILES} ${EDITOR_DLL_FILES})
 ENDIF()
 ################################################################
-SET(CMAKE_CXX_FLAGS "-ggdb -Wall")
+IF(RELEASE)
+    SET(CMAKE_CXX_FLAGS "-O3")
+ELSE(RELEASE)
+    SET(CMAKE_CXX_FLAGS "-ggdb -Wall")
+ENDIF(RELEASE)
 
 # compile resource compiling tools
 SET(TOOLS_OUT_DIR "${CMAKE_BINARY_DIR}/tools")
@@ -152,23 +185,8 @@ TARGET_LINK_LIBRARIES(${PROGRAM_NAME} ${DEP_LIBS})
 
 # compile world editor
 SET(EDITOR_NAME "world-editor")
-SET(REUSABLE_CLASSES
-    ${CMAKE_SOURCE_DIR}/src/World.cpp
-    ${CMAKE_SOURCE_DIR}/src/Map.cpp
-    ${CMAKE_SOURCE_DIR}/src/Utils.cpp
-    ${CMAKE_SOURCE_DIR}/src/Tile.cpp
-    ${CMAKE_SOURCE_DIR}/src/ResourceManager.cpp
-    ${CMAKE_SOURCE_DIR}/src/Graphic.cpp
-    ${CMAKE_SOURCE_DIR}/src/ResourceFile.cpp
-    ${CMAKE_SOURCE_DIR}/src/Universe.cpp
-    ${CMAKE_SOURCE_DIR}/src/Gameplay.cpp
-    ${CMAKE_SOURCE_DIR}/src/Input.cpp
-    ${CMAKE_SOURCE_DIR}/src/Entity.cpp
-    ${CMAKE_SOURCE_DIR}/src/Physics.cpp
-    ${CMAKE_SOURCE_DIR}/src/MainWindow.cpp
-    ${CMAKE_SOURCE_DIR}/src/Config.cpp
-    ${CMAKE_SOURCE_DIR}/src/ConfigManager.cpp
-)
+SET(REUSABLE_CLASSES ${SOURCES})
+LIST(REMOVE_ITEM REUSABLE_CLASSES ${CMAKE_SOURCE_DIR}/src/main.cpp)
 
 FILE(GLOB_RECURSE EDITOR_UI_FILES ${CMAKE_SOURCE_DIR}/tools/world-editor/*.ui)
 FILE(GLOB_RECURSE EDITOR_SOURCES ${CMAKE_SOURCE_DIR}/tools/world-editor/*.cpp)
@@ -179,13 +197,14 @@ QT4_WRAP_UI(EDITOR_UI_OUT ${EDITOR_UI_FILES})
 
 ADD_EXECUTABLE(${EDITOR_NAME} ${EDITOR_SOURCES} ${REUSABLE_CLASSES} ${EDITOR_UI_OUT} ${CMAKE_BINARY_DIR}/cmakeincludes/version.h)
 INCLUDE_DIRECTORIES(
+    ${DEP_INCLUDES}
     ${EDITOR_DEP_INCLUDES}
     ${CMAKE_BINARY_DIR}
     ${OUT_INCLUDE_PATH}
     ${CMAKE_SOURCE_DIR}/tools/world-editor
     ${CMAKE_BINARY_DIR}/tools/world-editor
 )
-TARGET_LINK_LIBRARIES(${EDITOR_NAME} ${EDITOR_DEP_LIBS})
+TARGET_LINK_LIBRARIES(${EDITOR_NAME} ${EDITOR_DEP_LIBS} ${DEP_LIBS})
 
 # compile updater
 SET(UPDATER_NAME "updater")
@@ -232,6 +251,7 @@ IF(WIN32)
 
     INSTALL(TARGETS ${EDITOR_NAME} RUNTIME DESTINATION ${EDITOR_NAME})
     INSTALL(FILES ${EDITOR_DLL_FILES} DESTINATION ${EDITOR_NAME})
+    INSTALL(FILES ${DLL_FILES} DESTINATION ${EDITOR_NAME})
 
     INSTALL(TARGETS ${UPDATER_NAME} RUNTIME DESTINATION ${EDITOR_NAME})
 ELSE(WIN32)
@@ -257,10 +277,7 @@ MESSAGE("\n"
 MESSAGE(
 "Required Libraries\n"
 "------------------\n"
-" * SDL					: ${STATUS_SDL}\n"
-" * SDL_image				: ${STATUS_SDLIMAGE}\n"
-" * SDL_sound				: ${STATUS_SDLSOUND}\n"
-" * SDL_mixer				: ${STATUS_SDLMIXER}\n"
+" * SFML					: ${STATUS_SFML}\n"
 " * Qt4					: ${STATUS_QT}\n"
 )
 
@@ -272,11 +289,11 @@ MESSAGE(
     FOREACH(DLL ${ALL_DLL_FILES})
         IF(EXISTS ${DLL})
 MESSAGE(
-"${DLL}		: OK"
+"${DLL}		: ${TEXT_OK}"
 )
         ELSE()
 MESSAGE(
-"${DLL}		: missing"
+"${DLL}		: ${TEXT_NOTFOUND}"
 )
         ENDIF()
     ENDFOREACH()

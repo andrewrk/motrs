@@ -6,82 +6,81 @@
 #include <iostream>
 #include <cstdlib>
 
-const int MainWindow::c_fps = 48;
 const int MainWindow::c_width = 800;
 const int MainWindow::c_height = 600;
 const int MainWindow::c_colorDepth = 32;
 const char * MainWindow::c_caption = "Myth of the Ruby Sword";
+const int MainWindow::c_fps = 60; // logic frames per second
 
 MainWindow::MainWindow() :
-    m_screen(NULL),
-    m_videoModeFlags(SDL_HWSURFACE | SDL_DOUBLEBUF)
+    m_videoModeFlags(c_width, c_height, c_colorDepth),
+    m_windowStyle(sf::Style::Close),
+    m_window(NULL),
+    m_gameplay(NULL)
 {
     // set fullscreen flag
     setFullscreenFlags(Config::instance()->fullscreen());
 
-    // initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cerr << "Unable to init SDL: " << SDL_GetError() << std::endl;
-        std::exit(1);
-    }
-    atexit(SDL_Quit);
-
-    // create and display the window
-    SDL_WM_SetCaption(c_caption, c_caption);
-    // TODO: SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL); http://sdl.beuc.net/sdl.wiki/SDL_WM_SetIcon
-    m_screen = SDL_SetVideoMode(c_width, c_height, c_colorDepth, m_videoModeFlags);
-    if (m_screen == NULL) {
-        std::cerr << "Unable to create SDL video surface: "
-            << SDL_GetError() << std::endl;
-        std::exit(1);
-    }
-
-    // Start SDL_mixer
-    /* These are the defaults that I got from the tutoral, don't know if we
-       have preferred chunk size.
-    */
-    if ( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 ) == -1 )
-    {
-        std::cerr << "Unable to load SDL Mixer: "
-                << SDL_GetError() << std::endl;
-        std::exit(1);
-    }
-
-    // hide mouse cursor
-    SDL_ShowCursor(SDL_DISABLE);
+    m_window = new sf::RenderWindow(m_videoModeFlags, c_caption, m_windowStyle);
+    m_window->UseVerticalSync(true);
 
     // initialize gameplay
-    m_gameplay = new Gameplay(m_screen, c_fps, this);
-    if (! m_gameplay->isGood()) {
-        std::cerr << "Gameplay did not initialize properly." << std::endl;
-        std::exit(1);
+    if (m_window->IsOpened()) {
+        m_gameplay = new Gameplay(this);
+        if (! m_gameplay->isGood()) {
+            std::cerr << "Gameplay did not initialize properly." << std::endl;
+            std::exit(1);
+        }
     }
 }
 
 MainWindow::~MainWindow()
 {
+    delete m_window;
     delete m_gameplay;
 }
 
 int MainWindow::exec()
 {
-    m_gameplay->mainLoop();
-    return 0;
+    sf::Clock clock;
+    float goalTime = clock.GetElapsedTime();
+    float interval = 1.0f / c_fps;
+
+    while (m_window->IsOpened()) {
+        // Process events
+        sf::Event event;
+        while (m_window->GetEvent(event)) {
+            if (event.Type == sf::Event::Closed)
+                m_window->Close();
+        }
+
+        // next logic frame in the gameplay
+        m_gameplay->nextFrame();
+        goalTime += interval;
+
+        // draw. frame skip if we're too late!
+        if (clock.GetElapsedTime() < goalTime) {
+            m_gameplay->updateDisplay();
+            m_window->Display();
+        }
+    }
+
+    return (m_gameplay != NULL && m_gameplay->isGood()) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 void MainWindow::toggleFullscreen()
 {
     setFullscreenFlags(! m_fullscreen);
-    m_screen = SDL_SetVideoMode(c_width, c_height, c_colorDepth, m_videoModeFlags);
+    m_window->Create(m_videoModeFlags, c_caption, m_windowStyle);
 }
 
 void MainWindow::setFullscreenFlags(bool fullscreen)
 {
     m_fullscreen = fullscreen;
     if( m_fullscreen )
-        m_videoModeFlags |= SDL_FULLSCREEN;
+        m_windowStyle |= sf::Style::Fullscreen;
     else
-        m_videoModeFlags &= ~SDL_FULLSCREEN;
+        m_windowStyle &= ~sf::Style::Fullscreen;
 }
 
 

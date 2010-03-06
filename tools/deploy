@@ -35,6 +35,8 @@ RELEASE=$BUILD/motrs-$VERSION
 cd $BUILD
 cmake $SOURCE -DCMAKE_TOOLCHAIN_FILE=$SOURCE/cmake/win32-toolchain.cmake -DCMAKE_INSTALL_PREFIX=$RELEASE -DRELEASE=1
 make
+# resource squeeze
+./resource-edit squeeze resources.dat
 make install
 
 # pack into a zip

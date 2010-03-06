@@ -9,6 +9,7 @@
 #include <cmath>
 
 Entity::Entity():
+    m_shape(Shapeless),
     m_centerX(0.0), m_centerY(0.0), m_radius(0),
     m_velocityX(0.0), m_velocityY(0.0),
     m_layer(0),
@@ -85,6 +86,20 @@ Entity::Entity(Shape shape, double radius, double centerOffsetX, double centerOf
     memset(m_walking, 0, sizeof(m_walking));
     memset(m_running, 0, sizeof(m_running));
     memset(m_sword, 0, sizeof(m_running));
+}
+
+Tile::PhysicalPresence Entity::minPhysicalPresence() {
+    switch (m_movementMode) {
+    case Stand:
+    case Walk:
+    case Run:
+        return Tile::ppRail;
+    case JumpUp:
+    case Falling:
+        return Tile::ppEmbrasure;
+    default:
+        assert(false);
+    }
 }
 
 void Entity::resolveCollision(Entity * other) {

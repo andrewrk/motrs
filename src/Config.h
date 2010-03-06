@@ -3,8 +3,7 @@
 
 #include "ConfigManager.h"
 #include "Debug.h"
-
-#include "SDL.h"
+#include "Input.h"
 
 #include <string>
 
@@ -14,6 +13,7 @@ class Config
 {
 public:
     static Config * instance();
+    ~Config();
 
     // initialize with command line arguments and a configuration file
     static void initialize(int argc, char * argv[], std::string configFile);
@@ -22,12 +22,12 @@ public:
     bool fullscreen();
 
     // keys
-    SDLKey keyNorth();
-    SDLKey keyEast();
-    SDLKey keySouth();
-    SDLKey keyWest();
-    SDLKey keyJump();
-    SDLKey keyAttack1();
+    Input::KeyCode keyNorth();
+    Input::KeyCode keyEast();
+    Input::KeyCode keySouth();
+    Input::KeyCode keyWest();
+    Input::KeyCode keyJump();
+    Input::KeyCode keyAttack1();
 
 private: //variables
     static Config * s_inst;
