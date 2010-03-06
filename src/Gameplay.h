@@ -22,7 +22,6 @@ public:
     Gameplay(MainWindow * owner);
     ~Gameplay();
 
-    void mainLoop();
     bool isGood();
 
     inline long long int frameCount();
