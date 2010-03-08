@@ -160,7 +160,7 @@ void WorldView::paintEvent(QPaintEvent * e)
         p.setPen(QPen(Qt::blue, 2));
         p.setBrush(Qt::NoBrush);
         for (int i=0; i<m_selection.size(); ++i) {
-            const SelectableItem * item = &m_selection.at(i);
+            const SelectableItem * item = m_selection.at(i);
             QRectF bound;
             if (item->type == sitEditorEntity) {
                 bound = item->entity->geometry();
@@ -444,30 +444,44 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
     m_mouseY = e->y();
     m_keyboardModifiers = e->modifiers();
 
+    double deltaX = (e->x() - m_mouseDownX) * m_zoom;
+    double deltaY = (e->y() - m_mouseDownY) * m_zoom;
+
     determineCursor();
     switch(m_mouseState) {
-        case Normal: {
+    case Normal:
+        {
             switch(m_mouseDownTool) {
-                case Nothing: break;
-                case Arrow: break;
-                case Eraser: break;
-                case Pan: break;
-                case Center: break;
-                case Pencil: break;
-                case Brush: break;
+            case Nothing: break;
+            case Arrow: break;
+            case Eraser: break;
+            case Pan: break;
+            case Center: break;
+            case Pencil: break;
+            case Brush: break;
             }
-        } break;
-        case SetStartPoint: break;
-
-        // update the screen when we're making a stretch box
-        case StretchMapLeft:
-        case StretchMapTop:
-        case StretchMapRight:
-        case StretchMapBottom:
-        case MoveMap:
-            this->update();
             break;
+        }
+    case SetStartPoint: break;
+
+        // update the screen when we're doing stuff
+    case StretchMapLeft:
+    case StretchMapTop:
+    case StretchMapRight:
+    case StretchMapBottom:
+    case MoveMap:
+        this->update();
+        break;
+    case MoveSelectedItems:
+        moveSelectedItems(deltaX, deltaY);
+        this->update();
     }
+}
+
+void WorldView::moveSelectedItems(double deltaX, double deltaY)
+{
+    for (int i=0; i<m_selection.size(); ++i)
+        m_selection.at(i)->moveByDelta(deltaX, deltaY);
 }
 
 void WorldView::mouseReleaseEvent(QMouseEvent * e)
@@ -486,31 +500,34 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
     double deltaX = (e->x() - m_mouseDownX) * m_zoom;
     double deltaY = (e->y() - m_mouseDownY) * m_zoom;
     switch(m_mouseState) {
-        case StretchMapLeft:
+    case StretchMapLeft:
         {
             double newLeft = snapAbsoluteX(m_selectedMap->left() + deltaX);
             int deltaWidth = (int) (m_selectedMap->left() - newLeft) / Tile::size;
             m_selectedMap->setLeft(newLeft);
             m_selectedMap->addTilesLeft(deltaWidth);
+            break;
         }
-        break;
-        case StretchMapTop:this->setCursor(Qt::ArrowCursor);
+    case StretchMapTop:this->setCursor(Qt::ArrowCursor);
         {
             double newTop = snapAbsoluteY(m_selectedMap->top() + deltaY);
             int deltaHeight = (int) (m_selectedMap->top() - newTop) / Tile::size;
             m_selectedMap->setTop(newTop);
             m_selectedMap->addTilesTop(deltaHeight);
+            break;
         }
+    case StretchMapRight:
+        m_selectedMap->setWidth(snapAbsoluteX(m_selectedMap->width() + deltaX));
         break;
-        case StretchMapRight:
-            m_selectedMap->setWidth(snapAbsoluteX(m_selectedMap->width() + deltaX));
+    case StretchMapBottom:
+        m_selectedMap->setHeight(snapAbsoluteY(m_selectedMap->height() + deltaY));
         break;
-        case StretchMapBottom:
-            m_selectedMap->setHeight(snapAbsoluteY(m_selectedMap->height() + deltaY));
+    case MoveMap:
+        m_selectedMap->setLeft(snapAbsoluteX(m_selectedMap->left() + deltaX));
+        m_selectedMap->setTop(snapAbsoluteY(m_selectedMap->top() + deltaY));
         break;
-        case MoveMap:
-            m_selectedMap->setLeft(snapAbsoluteX(m_selectedMap->left() + deltaX));
-            m_selectedMap->setTop(snapAbsoluteY(m_selectedMap->top() + deltaY));
+    case MoveSelectedItems:
+        moveSelectedItems(deltaX, deltaY);
         break;
     }
 
@@ -572,8 +589,14 @@ void WorldView::mousePressEvent(QMouseEvent * e)
                 } else {
                     if (e->modifiers() & Qt::ShiftModifier)
                         selectAlso(item);
-                    else
+                    else if(! itemIsSelected(item))
                         selectOnly(item);
+                }
+
+                // begin dragging selection
+                if (! e->modifiers()) {
+                    m_mouseState = MoveSelectedItems;
+                    saveSelectionMouseDownCoords();
                 }
             }
         } break;
@@ -597,6 +620,23 @@ void WorldView::mousePressEvent(QMouseEvent * e)
     }
 }
 
+bool WorldView::itemIsSelected(SelectableItem item)
+{
+    if (item.isNull())
+        return false;
+
+    for (int i=0; i<m_selection.size(); ++i) {
+        if (m_selection.at(i)->equals(item))
+            return true;
+    }
+    return false;
+}
+
+void WorldView::saveSelectionMouseDownCoords()
+{
+    for (int i=0; i<m_selection.size(); ++i)
+        m_selection.at(i)->saveMouseDownCoords();
+}
 
 WorldView::SelectableItem WorldView::selectableItemAt(int x, int y)
 {
@@ -857,22 +897,32 @@ void WorldView::saveTheWorld()
     m_world->save();
 }
 
-
 void WorldView::selectOnly(SelectableItem item)
 {
-    m_selection.clear();
-    m_selection.append(item);
+    selectNone();
+
+    // copy the item and append
+    SelectableItem * newItem = new SelectableItem();
+    *newItem = item;
+    m_selection.append(newItem);
+
     this->update();
 }
 
 void WorldView::selectAlso(SelectableItem item)
 {
-    m_selection.append(item);
+    // copy the item and append
+    SelectableItem * newItem = new SelectableItem();
+    *newItem = item;
+    m_selection.append(newItem);
+
     this->update();
 }
 
 void WorldView::selectNone()
 {
+    for (int i=0; i<m_selection.size(); ++i)
+        delete m_selection.at(i);
     m_selection.clear();
     this->update();
 }

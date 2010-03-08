@@ -73,6 +73,7 @@ private: //variables
         StretchMapRight,
         StretchMapBottom,
         MoveMap,
+        MoveSelectedItems,
     };
 
     struct ArtItem {
@@ -116,7 +117,7 @@ private: //variables
         {
         }
 
-        bool isNull()
+        bool isNull() const
         {
             return (type == sitMapObject) ? (object == NULL) : (entity == NULL);
         }
@@ -138,14 +139,56 @@ private: //variables
             return 0;
         }
 
-        static int rectArea(QRectF rect)
+        void saveMouseDownCoords()
         {
-            return rect.width() * rect.height();
+            if (isNull())
+                return;
+            if (type == sitEditorEntity) {
+                mouseDownX = entity->centerX();
+                mouseDownY = entity->centerY();
+            } else if (type == sitMapObject) {
+                mouseDownX = object->tileX * Tile::sizeInt;
+                mouseDownY = object->tileY * Tile::sizeInt;
+            }
+        }
+
+        void moveByDelta(double deltaX, double deltaY) const
+        {
+            if (isNull())
+                return;
+            if (type == sitEditorEntity) {
+                entity->setCenter(mouseDownX+deltaX, mouseDownY+deltaY);
+            } else if (type == sitMapObject) {
+                object->tileX = (int) round((mouseDownX+deltaX) / Tile::size);
+                object->tileY = (int) round((mouseDownY+deltaY) / Tile::size);
+            }
+        }
+
+        bool equals(SelectableItem & item)
+        {
+            if (item.type == type) {
+                if (item.type == sitEditorEntity)
+                    return item.entity == entity;
+                else if (item.type == sitMapObject)
+                    return item.object == object;
+            }
+            return false;
         }
 
         SelectableItemType type;
         EditorMap::MapObject * object;
         EditorEntity * entity;
+
+
+    private:
+        static int rectArea(QRectF rect)
+        {
+            return rect.width() * rect.height();
+        }
+
+        // stores the location for dragging
+        double mouseDownX;
+        double mouseDownY;
     };
 
     QScrollBar * m_hsb;
@@ -189,7 +232,7 @@ private: //variables
 
     EditorMap::MapObject * m_dragObject;
 
-    QList<SelectableItem> m_selection;
+    QList<SelectableItem *> m_selection;
 
 private: //methods
     // transfer between absolute coordinates and editor coordinates
@@ -229,6 +272,10 @@ private: //methods
     void selectOnly(SelectableItem item);
     void selectAlso(SelectableItem item);
     void selectNone();
+
+    void moveSelectedItems(double deltaX, double deltaY);
+    void saveSelectionMouseDownCoords();
+    bool itemIsSelected(SelectableItem item);
 
 private slots:
     void verticalScroll(int value);
