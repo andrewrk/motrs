@@ -83,7 +83,11 @@ IF(WIN32)
     SET(ALL_DLL_FILES ${DLL_FILES} ${EDITOR_DLL_FILES})
 ENDIF()
 ################################################################
-SET(CMAKE_CXX_FLAGS "-ggdb -Wall")
+IF(RELEASE)
+    SET(CMAKE_CXX_FLAGS "-O3")
+ELSE(RELEASE)
+    SET(CMAKE_CXX_FLAGS "-ggdb -Wall")
+ENDIF(RELEASE)
 
 # compile resource compiling tools
 SET(TOOLS_OUT_DIR "${CMAKE_BINARY_DIR}/tools")

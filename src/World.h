@@ -28,10 +28,10 @@ public:
 protected:
     std::vector<Map*> m_maps;
 
+    double m_left;
+    double m_top;
     double m_width;
     double m_height;
-    double m_top;
-    double m_left;
     void calculateBoundaries();
 };
 

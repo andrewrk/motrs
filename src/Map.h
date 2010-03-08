@@ -15,8 +15,8 @@ public:
         double x, y;
         Tile * tile;
         double proximity2; // used when sorting tiles by proximity
-        TileAndLocation() {}
-        TileAndLocation(double x, double y, Tile * tile) : x(x), y(y), tile(tile) {}
+        TileAndLocation() : x(0), y(0), tile(NULL), proximity2(0) {}
+        TileAndLocation(double x, double y, Tile * tile) : x(x), y(y), tile(tile), proximity2(0) {}
     };
 
     static Map * load(const char * buffer);

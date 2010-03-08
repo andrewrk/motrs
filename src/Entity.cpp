@@ -9,6 +9,7 @@
 #include <cmath>
 
 Entity::Entity():
+    m_shape(Shapeless),
     m_centerX(0.0), m_centerY(0.0), m_radius(0),
     m_velocityX(0.0), m_velocityY(0.0),
     m_layer(0),

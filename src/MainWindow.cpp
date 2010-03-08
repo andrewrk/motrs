@@ -36,10 +36,8 @@ MainWindow::MainWindow() :
 
 MainWindow::~MainWindow()
 {
-    if (m_window)
-        delete m_window;
-    if (m_gameplay)
-        delete m_gameplay;
+    delete m_window;
+    delete m_gameplay;
 }
 
 int MainWindow::exec()
@@ -54,6 +52,12 @@ int MainWindow::exec()
         while (m_window->GetEvent(event)) {
             if (event.Type == sf::Event::Closed)
                 m_window->Close();
+            else if(event.Type == sf::Event::KeyPressed) {
+                if (event.Key.Code == sf::Key::F4 && event.Key.Alt)
+                    m_window->Close();
+                else if (event.Key.Alt && event.Key.Code == sf::Key::Return)
+                    toggleFullscreen();
+            }
         }
 
         // next logic frame in the gameplay
@@ -74,6 +78,7 @@ void MainWindow::toggleFullscreen()
 {
     setFullscreenFlags(! m_fullscreen);
     m_window->Create(m_videoModeFlags, c_caption, m_windowStyle);
+    m_window->UseVerticalSync(true);
 }
 
 void MainWindow::setFullscreenFlags(bool fullscreen)
