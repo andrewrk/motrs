@@ -1,16 +1,17 @@
 #include "WorldEditor.h"
 #include "ui_WorldEditor.h"
+
 #include "SettingsDialog.h"
 #include "EditorResourceManager.h"
 #include "WorldView.h"
 #include "ObjectEditor.h"
 #include "EditorGraphic.h"
+#include "EditorSettings.h"
 
 #include <QDir>
 #include <QGraphicsPixmapItem>
 #include <QListWidget>
 #include <QDebug>
-#include <QSettings>
 #include <QMessageBox>
 
 #include "moc_WorldEditor.cxx"
@@ -32,24 +33,13 @@ WorldEditor::WorldEditor(QWidget *parent) :
     fillToolComboBox(*m_ui->cboMiddleClick);
     fillToolComboBox(*m_ui->cboRightClick);
 
-    // load window/dock state
-    QDir localDataDir(EditorResourceManager::localDataDir());
-    QFile defaultLayoutFile(localDataDir.absoluteFilePath("default-layout"));
-    QByteArray defaultLayout;
-    bool haveDefaultLayout = false;
-    if( defaultLayoutFile.open(QIODevice::ReadOnly) ) {
-        defaultLayout = defaultLayoutFile.readAll();
-        haveDefaultLayout = true;
-    }
+    // restore window size and dock state from settings
+    this->restoreState(EditorSettings::worldEditorState());
+    this->restoreGeometry(EditorSettings::worldEditorGeometry());
 
-    QSettings settings;
-    this->restoreState(settings.value("windowState",
-        haveDefaultLayout ? defaultLayout : QVariant()).toByteArray());
-    this->restoreGeometry(settings.value("windowGeometry").toByteArray());
-
-    m_ui->cboLeftClick->setCurrentIndex(settings.value("state/tool/left", WorldView::Arrow).toInt());
-    m_ui->cboMiddleClick->setCurrentIndex(settings.value("state/tool/middle", WorldView::Pan).toInt());
-    m_ui->cboRightClick->setCurrentIndex(settings.value("state/tool/right", WorldView::Eraser).toInt());
+    m_ui->cboLeftClick->setCurrentIndex(EditorSettings::worldEditorToolLeft());
+    m_ui->cboMiddleClick->setCurrentIndex(EditorSettings::worldEditorToolMiddle());
+    m_ui->cboRightClick->setCurrentIndex(EditorSettings::worldEditorToolRight());
 
     m_view->setFocusPolicy(Qt::StrongFocus);
     setCentralWidget(m_view);
@@ -71,19 +61,20 @@ void WorldEditor::on_cboRightClick_currentIndexChanged(int index)
 
 void WorldEditor::closeEvent(QCloseEvent * e)
 {
-    QSettings settings;
-    settings.setValue("windowState", this->saveState());
-    settings.setValue("windowGeometry", this->saveGeometry());
+    EditorSettings::setWorldEditorState(this->saveState());
+    EditorSettings::setWorldEditorGeometry(this->saveGeometry());
 
-    settings.setValue("state/tool/left", m_view->toolLeftClick());
-    settings.setValue("state/tool/middle", m_view->toolMiddleClick());
-    settings.setValue("state/tool/right", m_view->toolRightClick());
+    EditorSettings::setWorldEditorToolLeft(m_view->toolLeftClick());
+    EditorSettings::setWorldEditorToolMiddle(m_view->toolMiddleClick());
+    EditorSettings::setWorldEditorToolRight(m_view->toolRightClick());
 
     // TODO: make sure we're not going to clobber someone's work
 
     // close all other forms
-    QApplication::quit();
+    for (int i=0; i<m_objectWindows.size(); ++i)
+        m_objectWindows.at(i)->close();
 
+    this->close();
 }
 
 void WorldEditor::fillToolComboBox(QComboBox & cbo)
@@ -236,6 +227,7 @@ void WorldEditor::on_actionQuit_triggered()
 void WorldEditor::on_btnNewObject_clicked()
 {
     ObjectEditor * editor = new ObjectEditor(this);
+    m_objectWindows.append(editor);
     connect(editor, SIGNAL(objectSaved()), this, SLOT(refreshObjectList()));
     editor->createEmpty();
     editor->show();
@@ -249,6 +241,7 @@ void WorldEditor::on_btnNewEntity_clicked()
 void WorldEditor::on_lstObjects_itemDoubleClicked(QListWidgetItem* item)
 {
     ObjectEditor * editor = new ObjectEditor(this);
+    m_objectWindows.append(editor);
     editor->open(item->data(Qt::UserRole).toString());
     editor->show();
 }

@@ -9,6 +9,7 @@
 #include <QPushButton>
 
 class WorldView;
+class ObjectEditor;
 
 namespace Ui
 {
@@ -34,13 +35,18 @@ protected:
     void showEvent(QShowEvent * e);
     void closeEvent(QCloseEvent * e);
 
-private:
+private: //variables
     Ui::WorldEditor * m_ui;
 
     WorldView * m_view;
 
     QStringList m_toolNames;
 
+    QMenu * m_objectMenu;
+
+    QList<ObjectEditor *> m_objectWindows;
+
+private: //methods
     void refreshWorldList();
     void openWorld(QString file);
     void fillToolComboBox(QComboBox & comboBox);
