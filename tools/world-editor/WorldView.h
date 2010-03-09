@@ -24,6 +24,8 @@ public: //variables
         Center,
         Pencil,
         Brush,
+        SetStartingPoint,
+        CreateMap,
     };
 public: //methods
     WorldView(WorldEditor * window, QWidget * parent = NULL);

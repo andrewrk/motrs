@@ -58,6 +58,21 @@ WorldEditor::WorldEditor(QWidget *parent) :
     this->restoreState(EditorSettings::worldEditorState());
     this->restoreGeometry(EditorSettings::worldEditorGeometry());
 
+    // hook window menu clicks to dock show/hide
+    connect(m_ui->actionEntities, SIGNAL(toggled(bool)), m_ui->dockEntities, SLOT(setShown(bool)));
+    connect(m_ui->actionLayers, SIGNAL(toggled(bool)), m_ui->dockLayers, SLOT(setShown(bool)));
+    connect(m_ui->actionObjects, SIGNAL(toggled(bool)), m_ui->dockObjects, SLOT(setShown(bool)));
+    connect(m_ui->actionTools, SIGNAL(toggled(bool)), m_ui->dockTools, SLOT(setShown(bool)));
+    connect(m_ui->actionTriggers, SIGNAL(toggled(bool)), m_ui->dockTriggers, SLOT(setShown(bool)));
+    connect(m_ui->actionWorlds, SIGNAL(toggled(bool)), m_ui->dockWorlds, SLOT(setShown(bool)));
+
+    connect(m_ui->dockEntities, SIGNAL(visibilityChanged(bool)), m_ui->actionEntities, SLOT(setChecked(bool)));
+    connect(m_ui->dockLayers, SIGNAL(visibilityChanged(bool)), m_ui->actionLayers, SLOT(setChecked(bool)));
+    connect(m_ui->dockObjects, SIGNAL(visibilityChanged(bool)), m_ui->actionObjects, SLOT(setChecked(bool)));
+    connect(m_ui->dockTools, SIGNAL(visibilityChanged(bool)), m_ui->actionTools, SLOT(setChecked(bool)));
+    connect(m_ui->dockTriggers, SIGNAL(visibilityChanged(bool)), m_ui->actionTriggers, SLOT(setChecked(bool)));
+    connect(m_ui->dockWorlds, SIGNAL(visibilityChanged(bool)), m_ui->actionWorlds, SLOT(setChecked(bool)));
+
     m_ui->cboLeftClick->setCurrentIndex(EditorSettings::worldEditorToolLeft());
     m_ui->cboMiddleClick->setCurrentIndex(EditorSettings::worldEditorToolMiddle());
     m_ui->cboRightClick->setCurrentIndex(EditorSettings::worldEditorToolRight());
@@ -135,6 +150,7 @@ void WorldEditor::fillToolComboBox(QComboBox & cbo)
         m_toolNames << "Pencil";
         m_toolNames << "Brush";
         m_toolNames << "SetStartingPoint";
+        m_toolNames << "CreateMap";
     }
 
     cbo.clear();

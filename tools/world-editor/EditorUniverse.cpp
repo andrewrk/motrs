@@ -81,12 +81,9 @@ void EditorUniverse::save()
 void EditorUniverse::renameWorld(QString oldName, QString newName)
 {
     for (int i=0; i<m_worlds.size(); ++i) {
-        if (m_worlds.at(i) == oldName) {
+        if (m_worlds.at(i) == oldName)
             m_worlds.replace(i, newName);
-            return;
-        }
     }
-    assert(false);
 }
 
 void EditorUniverse::removeWorld(QString worldName)

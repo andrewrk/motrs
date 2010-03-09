@@ -20,9 +20,20 @@ ObjectEditor::ObjectEditor(QWidget *parent) :
 
     this->setCentralWidget(m_view);
 
+    // hook window checks to docks
+    connect(m_ui->actionWindowArt, SIGNAL(toggled(bool)), m_ui->dockArt, SLOT(setShown(bool)));
+    connect(m_ui->actionWindowLayers, SIGNAL(toggled(bool)), m_ui->dockLayers, SLOT(setShown(bool)));
+    connect(m_ui->actionWindowProperties, SIGNAL(toggled(bool)), m_ui->dockProperties, SLOT(setShown(bool)));
+
+    connect(m_ui->dockArt, SIGNAL(visibilityChanged(bool)), m_ui->actionWindowArt, SLOT(setChecked(bool)));
+    connect(m_ui->dockLayers, SIGNAL(visibilityChanged(bool)), m_ui->actionWindowLayers, SLOT(setChecked(bool)));
+    connect(m_ui->dockProperties, SIGNAL(visibilityChanged(bool)), m_ui->actionWindowProperties, SLOT(setChecked(bool)));
+
+
     QSettings settings;
     this->restoreState(settings.value("ObjectEditor/windowState").toByteArray());
     this->restoreGeometry(settings.value("ObjectEditor/windowGeometry").toByteArray());
+
 
 }
 
@@ -263,3 +274,4 @@ void ObjectEditor::on_actionSave_triggered()
     m_view->saveObject();
     emit objectSaved();
 }
+

@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -55,10 +55,19 @@
     <addaction name="actionPaste"/>
     <addaction name="actionDelete"/>
    </widget>
+   <widget class="QMenu" name="menu_Window">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+    <addaction name="actionWindowArt"/>
+    <addaction name="actionWindowLayers"/>
+    <addaction name="actionWindowProperties"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Edit"/>
    <addaction name="menu_View"/>
    <addaction name="menu_Zoom"/>
+   <addaction name="menu_Window"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockArt">
@@ -391,6 +400,39 @@
    </property>
    <property name="shortcut">
     <string>Del</string>
+   </property>
+  </action>
+  <action name="actionWindowArt">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Art</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle Art dock</string>
+   </property>
+  </action>
+  <action name="actionWindowLayers">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Layers</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle Layers dock</string>
+   </property>
+  </action>
+  <action name="actionWindowProperties">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Properties</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle Properties dock</string>
    </property>
   </action>
  </widget>
