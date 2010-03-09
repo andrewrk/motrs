@@ -16,6 +16,8 @@ public:
     // changes a world's name, in memory and on disk.
     void renameWorld(QString oldName, QString newName);
 
+    void removeWorld(QString worldName);
+
 private: //variables
     QStringList m_worlds;
 

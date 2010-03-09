@@ -88,3 +88,8 @@ void EditorUniverse::renameWorld(QString oldName, QString newName)
     }
     assert(false);
 }
+
+void EditorUniverse::removeWorld(QString worldName)
+{
+    m_worlds.removeOne(worldName);
+}

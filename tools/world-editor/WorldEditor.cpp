@@ -369,13 +369,30 @@ void WorldEditor::renameSelectedWorld()
         assert(universe);
         universe->renameWorld(item->text(), newName);
         universe->save();
+        delete universe;
+
+        refreshWorldList();
     }
 }
 
 void WorldEditor::deleteSelectedWorld()
 {
+    QListWidgetItem * item = m_ui->lstWorlds->currentItem();
 
+    if (item == NULL)
+        return;
 
+    // delete from universe
+    EditorUniverse * universe = EditorUniverse::load(EditorResourceManager::universeFile());
+    assert(universe);
+    universe->removeWorld(item->text());
+    universe->save();
+    delete universe;
+
+    // don't delete from disk
+    //QFile::remove(QDir(EditorResourceManager::worldsDir()).absoluteFilePath(item->text()));
+
+    refreshWorldList();
 }
 
 
