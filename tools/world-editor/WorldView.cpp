@@ -957,3 +957,36 @@ void WorldView::selectNone()
     m_selection.clear();
     this->update();
 }
+
+void WorldView::selectAll()
+{
+    // TODO
+}
+
+void WorldView::deleteSelection()
+{
+    if (m_selectedMap == NULL)
+        return;
+
+    for (int i=0; i<m_selection.size(); ++i) {
+        SelectableItem * item = m_selection.at(i);
+        if (item->type == sitEditorEntity) {
+            m_selectedMap->removeEntity(item->entity);
+        } else if (item->type == sitMapObject) {
+            m_selectedMap->removeObject(item->object);
+        }
+    }
+
+    selectNone();
+}
+
+void WorldView::copySelection()
+{
+    // TODO
+}
+
+void WorldView::paste()
+{
+    // TODO
+}
+

@@ -257,3 +257,29 @@ void WorldEditor::on_actionSave_triggered()
 {
     m_view->saveTheWorld();
 }
+
+void WorldEditor::on_actionDelete_triggered()
+{
+    m_view->deleteSelection();
+}
+
+void WorldEditor::on_actionCut_triggered()
+{
+    m_view->copySelection();
+    m_view->deleteSelection();
+}
+
+void WorldEditor::on_actionCopy_triggered()
+{
+    m_view->copySelection();
+}
+
+void WorldEditor::on_actionPaste_triggered()
+{
+    m_view->paste();
+}
+
+void WorldEditor::on_actionSelectAll_triggered()
+{
+    m_view->selectAll();
+}

@@ -43,13 +43,24 @@
      <string>&amp;Window</string>
     </property>
     <addaction name="actionObjects"/>
-    <addaction name="action_Entities"/>
+    <addaction name="actionEntities"/>
     <addaction name="actionWorlds"/>
     <addaction name="actionTriggers"/>
     <addaction name="actionLayers"/>
     <addaction name="actionTools"/>
    </widget>
+   <widget class="QMenu" name="menu_Edit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="actionCut"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
+    <addaction name="actionDelete"/>
+    <addaction name="actionSelectAll"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menu_Edit"/>
    <addaction name="menu_Tools"/>
    <addaction name="menu_Window"/>
   </widget>
@@ -371,7 +382,7 @@
     <string>Set Starting &amp;Point</string>
    </property>
   </action>
-  <action name="action_Entities">
+  <action name="actionEntities">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -388,6 +399,46 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="text">
+    <string>&amp;Cut</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>C&amp;opy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="text">
+    <string>&amp;Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="text">
+    <string>&amp;Delete</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="actionSelectAll">
+   <property name="text">
+    <string>Select &amp;All</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
    </property>
   </action>
  </widget>

@@ -46,6 +46,11 @@ private:
     void fillToolComboBox(QComboBox & comboBox);
 
 private slots:
+    void on_actionSelectAll_triggered();
+    void on_actionPaste_triggered();
+    void on_actionCopy_triggered();
+    void on_actionCut_triggered();
+    void on_actionDelete_triggered();
     void on_actionSave_triggered();
     void on_lstObjects_itemDoubleClicked(QListWidgetItem* item);
     void on_btnNewEntity_clicked();

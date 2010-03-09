@@ -50,6 +50,12 @@ public: //methods
 
     // save the opened world to the data folder
     void saveTheWorld();
+
+    // modifiers for the current selection. acts on objects and entities
+    void selectAll();
+    void deleteSelection();
+    void copySelection();
+    void paste();
 protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
@@ -278,6 +284,7 @@ private: //methods
     void moveSelectedItems(double deltaX, double deltaY);
     void saveSelectionMouseDownCoords();
     bool itemIsSelected(SelectableItem item);
+
 
 private slots:
     void verticalScroll(int value);
