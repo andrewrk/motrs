@@ -44,6 +44,7 @@ private: //variables
     QStringList m_toolNames;
 
     QMenu * m_objectMenu;
+    QMenu * m_worldMenu;
 
     QList<ObjectEditor *> m_objectWindows;
 
@@ -53,6 +54,8 @@ private: //methods
     void fillToolComboBox(QComboBox & comboBox);
 
 private slots:
+    void on_lstWorlds_customContextMenuRequested(QPoint pos);
+    void on_btnNewWorld_clicked();
     void on_lstObjects_customContextMenuRequested(QPoint pos);
     void on_actionSelectAll_triggered();
     void on_actionPaste_triggered();
@@ -68,9 +71,9 @@ private slots:
     void on_btnNewLayer_clicked();
     void on_btnMoveLayerDown_clicked();
     void on_btnMoveLayerUp_clicked();
-    void on_list_layers_itemChanged(QListWidgetItem* item);
-    void on_list_layers_itemSelectionChanged();
-    void on_list_worlds_doubleClicked(QModelIndex index);
+    void on_lstLayers_itemChanged(QListWidgetItem* item);
+    void on_lstLayers_itemSelectionChanged();
+    void on_lstWorlds_doubleClicked(QModelIndex index);
 
     void on_actionSettings_triggered();
 
@@ -82,6 +85,10 @@ private slots:
 
     void editSelectedObject();
     void deleteSelectedObject();
+
+    void editSelectedWorld();
+    void renameSelectedWorld();
+    void deleteSelectedWorld();
 
 };
 

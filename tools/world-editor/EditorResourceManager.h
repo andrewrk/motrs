@@ -23,6 +23,7 @@ public:
     static QString mapsDir();
     static QString objectsDir();
     static QString worldsDir();
+    static QString universesDir();
     static QString universeFile();
 
     // the resources that don't have to do with in-game graphics (editor resources)

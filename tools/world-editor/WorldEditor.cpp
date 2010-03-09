@@ -7,12 +7,14 @@
 #include "ObjectEditor.h"
 #include "EditorGraphic.h"
 #include "EditorSettings.h"
+#include "EditorUniverse.h"
 
 #include <QDir>
 #include <QGraphicsPixmapItem>
 #include <QListWidget>
 #include <QDebug>
 #include <QMessageBox>
+#include <QInputDialog>
 
 #include "moc_WorldEditor.cxx"
 
@@ -30,8 +32,20 @@ WorldEditor::WorldEditor(QWidget *parent) :
     m_objectMenu = new QMenu(m_ui->lstObjects);
     m_objectMenu->addAction(tr("&Edit Object"), this, SLOT(editSelectedObject()));
     m_objectMenu->addAction(tr("&Delete Object"), this, SLOT(deleteSelectedObject()));
+    m_objectMenu->addSeparator();
+    m_objectMenu->addAction(tr("Create &New Object"), this, SLOT(on_btnNewObject_clicked()));
 
     m_ui->lstObjects->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    m_worldMenu = new QMenu(m_ui->lstWorlds);
+    m_worldMenu->addAction(tr("&Edit World"), this, SLOT(editSelectedWorld()));
+    m_worldMenu->addAction(tr("&Rename World"), this, SLOT(renameSelectedWorld()));
+    m_worldMenu->addAction(tr("&Delete World"), this, SLOT(deleteSelectedWorld()));
+    m_worldMenu->addSeparator();
+    m_worldMenu->addAction(tr("Create &New World"), this, SLOT(on_btnNewWorld_clicked()));
+
+    m_ui->lstWorlds->setContextMenuPolicy(Qt::CustomContextMenu);
+
 
     EditorGraphic::initialize();
 
@@ -153,7 +167,7 @@ void WorldEditor::on_actionSettings_triggered()
 
 void WorldEditor::refreshWorldList()
 {
-    m_ui->list_worlds->clear();
+    m_ui->lstWorlds->clear();
 
     // do a directory listing of data/worlds
     QDir dir(EditorResourceManager::worldsDir());
@@ -161,7 +175,7 @@ void WorldEditor::refreshWorldList()
     filters << "*.world";
     QStringList entries = dir.entryList(filters, QDir::Files | QDir::Readable,
         QDir::Name | QDir::IgnoreCase);
-    m_ui->list_worlds->addItems(entries);
+    m_ui->lstWorlds->addItems(entries);
 }
 
 void WorldEditor::refreshObjectList()
@@ -169,11 +183,9 @@ void WorldEditor::refreshObjectList()
     m_view->refreshObjectsList();
 }
 
-void WorldEditor::on_list_worlds_doubleClicked(QModelIndex index)
+void WorldEditor::on_lstWorlds_doubleClicked(QModelIndex index)
 {
-    QListWidgetItem * item = m_ui->list_worlds->item(index.row());
-    QDir dir(EditorResourceManager::worldsDir());
-    openWorld(dir.absoluteFilePath(item->text()));
+    editSelectedWorld();
 }
 
 void WorldEditor::openWorld(QString file)
@@ -189,7 +201,7 @@ void WorldEditor::openWorld(QString file)
 
 QListWidget * WorldEditor::layersList()
 {
-    return m_ui->list_layers;
+    return m_ui->lstLayers;
 }
 
 QListWidget * WorldEditor::objectsList()
@@ -217,28 +229,26 @@ QPushButton * WorldEditor::moveLayerDownButton()
     return m_ui->btnMoveLayerDown;
 }
 
-
-
-void WorldEditor::on_list_layers_itemSelectionChanged()
+void WorldEditor::on_lstLayers_itemSelectionChanged()
 {
-    m_view->setSelectedLayer(m_ui->list_layers->currentRow());
+    m_view->setSelectedLayer(m_ui->lstLayers->currentRow());
 }
 
-void WorldEditor::on_list_layers_itemChanged(QListWidgetItem* item)
+void WorldEditor::on_lstLayers_itemChanged(QListWidgetItem* item)
 {
     m_view->update();
 }
 
 void WorldEditor::on_btnMoveLayerUp_clicked()
 {
-    if( m_ui->list_layers->currentRow() > 0 )
-        m_view->swapLayers(m_ui->list_layers->currentRow(), m_ui->list_layers->currentRow()-1);
+    if( m_ui->lstLayers->currentRow() > 0 )
+        m_view->swapLayers(m_ui->lstLayers->currentRow(), m_ui->lstLayers->currentRow()-1);
 }
 
 void WorldEditor::on_btnMoveLayerDown_clicked()
 {
-    if( m_ui->list_layers->currentRow() < m_ui->list_layers->count() - 1 )
-        m_view->swapLayers(m_ui->list_layers->currentRow(), m_ui->list_layers->currentRow()+1);
+    if( m_ui->lstLayers->currentRow() < m_ui->lstLayers->count() - 1 )
+        m_view->swapLayers(m_ui->lstLayers->currentRow(), m_ui->lstLayers->currentRow()+1);
 }
 
 void WorldEditor::on_btnNewLayer_clicked()
@@ -248,8 +258,8 @@ void WorldEditor::on_btnNewLayer_clicked()
 
 void WorldEditor::on_btnDeleteLayer_clicked()
 {
-    if( m_ui->list_layers->currentRow() > -1 )
-        m_view->deleteLayer(m_ui->list_layers->currentRow());
+    if( m_ui->lstLayers->currentRow() > -1 )
+        m_view->deleteLayer(m_ui->lstLayers->currentRow());
 }
 
 void WorldEditor::on_actionQuit_triggered()
@@ -310,4 +320,66 @@ void WorldEditor::on_actionSelectAll_triggered()
 void WorldEditor::on_lstObjects_customContextMenuRequested(QPoint pos)
 {
     m_objectMenu->popup(m_ui->lstObjects->mapToGlobal(pos));
+}
+
+void WorldEditor::on_btnNewWorld_clicked()
+{
+    // create an empty world and save it to disk
+}
+
+
+void WorldEditor::editSelectedWorld()
+{
+    QListWidgetItem * item = m_ui->lstWorlds->currentItem();
+    QDir dir(EditorResourceManager::worldsDir());
+    openWorld(dir.absoluteFilePath(item->text()));
+}
+
+void WorldEditor::renameSelectedWorld()
+{
+    QListWidgetItem * item = m_ui->lstWorlds->currentItem();
+
+    if (item == NULL)
+        return;
+
+    QString newName = QInputDialog::getText(this, tr("Rename World"),
+        tr("New name for the world:"), QLineEdit::Normal, item->text());
+
+    if (! newName.isNull()) {
+        QDir worldsDir = QDir(EditorResourceManager::worldsDir());
+        QString oldFile = worldsDir.absoluteFilePath(item->text());
+        QString newFile = worldsDir.absoluteFilePath(newName);
+        if (QFileInfo(newFile).exists()) {
+            if (QMessageBox::question(this, tr("File exists"),
+                tr("A world with that name already exists. Do you want to overwrite it?"),
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
+            {
+                return;
+            }
+            QFile::remove(newFile);
+        }
+
+        // replace on disk
+        if (! QFile::copy(oldFile, newFile))
+            return;
+        QFile::remove(oldFile);
+
+        // replace in universe
+        EditorUniverse * universe = EditorUniverse::load(EditorResourceManager::universeFile());
+        assert(universe);
+        universe->renameWorld(item->text(), newName);
+        universe->save();
+    }
+}
+
+void WorldEditor::deleteSelectedWorld()
+{
+
+
+}
+
+
+void WorldEditor::on_lstWorlds_customContextMenuRequested(QPoint pos)
+{
+    m_worldMenu->popup(m_ui->lstWorlds->mapToGlobal(pos));
 }

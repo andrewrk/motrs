@@ -116,10 +116,14 @@ QString EditorResourceManager::worldsDir()
     return dir.absoluteFilePath("worlds");
 }
 
-QString EditorResourceManager::universeFile()
+QString EditorResourceManager::universesDir()
 {
     QDir dir(dataDir());
-    dir.cd("universes");
-    return dir.absoluteFilePath("main.universe");
+    return dir.absoluteFilePath("universes");
+}
+
+QString EditorResourceManager::universeFile()
+{
+    return QDir(universesDir()).absoluteFilePath("main.universe");
 }
 

@@ -40,7 +40,7 @@
    </widget>
    <widget class="QMenu" name="menu_Window">
     <property name="title">
-     <string>&amp;Window</string>
+     <string>W&amp;indow</string>
     </property>
     <addaction name="actionObjects"/>
     <addaction name="actionEntities"/>
@@ -86,7 +86,14 @@
       <widget class="QLineEdit" name="txtFilterWorld"/>
      </item>
      <item>
-      <widget class="QListWidget" name="list_worlds"/>
+      <widget class="QListWidget" name="lstWorlds"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnNewWorld">
+       <property name="text">
+        <string>New &amp;World</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -217,7 +224,7 @@
    <widget class="QWidget" name="dockWidgetContents_5">
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QListWidget" name="list_layers"/>
+      <widget class="QListWidget" name="lstLayers"/>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_4">
