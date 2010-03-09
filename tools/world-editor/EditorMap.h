@@ -8,6 +8,8 @@
 #include <QString>
 #include <QList>
 
+class EditorWorld;
+
 // An EditorMap has a list of EditorObjects and EditorEntities that are tile-aligned.
 // The game editor can use this class to edit maps that have movable EditorObjects and EditorEntities
 // Call the compile() method to turn it into a real Map which will break
@@ -88,6 +90,10 @@ public: //methods
 
     inline QString name() const;
 
+    // set the parent world of the map
+    void setWorld(EditorWorld * world);
+    EditorWorld * world();
+
 private: //variables
     // we simply remember the dimensions because we don't actually have a tile
     // grid until we compile into a Map
@@ -97,6 +103,8 @@ private: //variables
     QList<MapLayer *> m_layers;
 
     QString m_name;
+
+    EditorWorld * m_world;
 };
 
 inline int EditorMap::tileCountX()

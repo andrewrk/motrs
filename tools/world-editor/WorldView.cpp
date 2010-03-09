@@ -527,7 +527,6 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
         m_selectedMap->setTop(snapAbsoluteY(m_selectedMap->top() + deltaY));
         break;
     case MoveSelectedItems:
-        moveSelectedItems(deltaX, deltaY);
         break;
     }
 
@@ -538,7 +537,30 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
         determineCursor();
     }
 
+
+    updateScrollBars();
+
     this->update();
+}
+
+
+void WorldView::wheelEvent(QWheelEvent * e)
+{
+    double degrees = e->delta() / 8;
+    double steps = degrees / 15;
+
+    if( e->modifiers() & Qt::ControlModifier ) {
+        // zoom
+        // TODO
+        //m_zoom = Utils::max(Utils::min(m_zoom * std::pow(1.2, steps), 100.0), 0.2);
+    } else if( e->orientation() == Qt::Vertical ) {
+        m_vsb->setValue((int)(m_vsb->value() - steps * 100 / m_zoom));
+    } else if( e->orientation() == Qt::Horizontal ) {
+        m_hsb->setValue((int)(m_hsb->value() - steps * 100 / m_zoom));
+    }
+
+    this->update();
+    e->accept();
 }
 
 void WorldView::mousePressEvent(QMouseEvent * e)
@@ -700,18 +722,27 @@ void WorldView::setWorld(EditorWorld * world)
     m_world = world;
     selectMap(NULL);
 
-    // set up scroll bars
-    const int bufferRoom = 800;
-    m_hsb->setMinimum((int)(m_world->left() - bufferRoom));
-    m_hsb->setMaximum((int)(m_world->left() + m_world->width()));
+    updateScrollBars();
+
     m_hsb->setValue((int)m_world->left());
-    m_vsb->setMinimum((int)(m_world->top() - bufferRoom));
-    m_vsb->setMaximum((int)(m_world->top() + m_world->height()));
     m_vsb->setValue((int)(m_world->top()));
 
     updateViewCache();
 
     refreshGui();
+}
+
+void WorldView::updateScrollBars()
+{
+    if (m_world == NULL)
+        return;
+
+    const int bufferRoom = 800;
+
+    m_hsb->setMinimum((int)(m_world->left() - bufferRoom));
+    m_hsb->setMaximum((int)(m_world->left() + m_world->width()));
+    m_vsb->setMinimum((int)(m_world->top() - bufferRoom));
+    m_vsb->setMaximum((int)(m_world->top() + m_world->height()));
 }
 
 void WorldView::refreshLayersList()

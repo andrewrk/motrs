@@ -90,7 +90,6 @@ void World::calculateBoundaries() {
         return;
     }
 
-    // Calculate width
     double left = m_maps[0]->left();
     double top = m_maps[0]->top();
     double right = left + m_maps[0]->width();

@@ -45,9 +45,11 @@ EditorWorld * EditorWorld::load(QString file)
             QDir dir(EditorResourceManager::mapsDir());
             QString mapFile = dir.absoluteFilePath(coords[3]);
             EditorMap * map = EditorMap::load(mapFile);
+            map->setWorld(out);
             assert(map);
             if (map == NULL) {
                 qDebug() << "Error loading EditorMap for " << mapFile;
+                delete map;
                 delete out;
                 return NULL;
             }
@@ -95,4 +97,48 @@ void EditorWorld::save()
         out << "map=" << map->left() << "," << map->top() << "," << 0 << "," << map->name() << "\n";
     }
 
+}
+
+void EditorWorld::addMap(EditorMap * map)
+{
+    map->setWorld(this);
+    m_maps.push_back(map);
+    calculateBoundaries();
+}
+
+void EditorWorld::calculateBoundaries()
+{
+    if (m_maps.size() == 0) {
+        m_width = 0;
+        m_height = 0;
+        m_top = 0;
+        m_left = 0;
+        return;
+    }
+
+    EditorMap * map = (EditorMap *) m_maps.at(0);
+    double left = map->left();
+    double top = map->top();
+    double right = left + map->width();
+    double bottom = top + map->height();
+
+    for (unsigned int i = 1; i < m_maps.size(); i++) {
+        map = (EditorMap *) m_maps.at(i);
+
+        if (left > map->left())
+            left = map->left();
+
+        if (top > map->top())
+            top = map->top();
+
+        if (right < map->left() + map->width())
+            right = map->left() + map->width();
+
+        if (bottom < map->top() + map->height())
+            bottom = map->top() + map->height();
+    }
+    m_left = left;
+    m_top = top;
+    m_height = bottom - top;
+    m_width = right - left;
 }

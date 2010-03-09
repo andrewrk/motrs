@@ -2,6 +2,7 @@
 
 #include "EditorResourceManager.h"
 #include "EditorEntity.h"
+#include "EditorWorld.h"
 
 #include <QPixmap>
 #include <QDir>
@@ -182,11 +183,13 @@ void EditorMap::removeEntity(EditorEntity * entity)
 void EditorMap::setLeft(double value)
 {
     this->m_x = value;
+    m_world->calculateBoundaries();
 }
 
 void EditorMap::setTop(double value)
 {
     this->m_y = value;
+    m_world->calculateBoundaries();
 }
 
 void EditorMap::setWidth(double value)
@@ -194,13 +197,16 @@ void EditorMap::setWidth(double value)
     int tileCount = (int)(value / Tile::size);
     if (tileCount > 0)
         m_tileCountX = tileCount;
+
+    m_world->calculateBoundaries();
 }
 
 void EditorMap::setHeight(double value)
 {
     int tileCount = (int)(value / Tile::size);
     if (tileCount > 0)
-        m_tileCountY = value;
+        m_tileCountY = tileCount;
+    m_world->calculateBoundaries();
 }
 
 void EditorMap::addLayer(QString name)
@@ -271,22 +277,26 @@ void EditorMap::addTilesLeft(int amount)
 {
     m_x -= amount * Tile::size;
     m_tileCountX += amount;
+    m_world->calculateBoundaries();
 }
 
 void EditorMap::addTilesRight(int amount)
 {
     m_tileCountX += amount;
+    m_world->calculateBoundaries();
 }
 
 void EditorMap::addTilesTop(int amount)
 {
     m_y -= amount * Tile::size;
     m_tileCountY += amount;
+    m_world->calculateBoundaries();
 }
 
 void EditorMap::addTilesBottom(int amount)
 {
     m_tileCountY += amount;
+    m_world->calculateBoundaries();
 }
 
 double EditorMap::width()
@@ -302,4 +312,14 @@ double EditorMap::height()
 QRectF EditorMap::geometry()
 {
     return QRectF(QPointF(left(), top()), QSizeF(width(), height()));
+}
+
+void EditorMap::setWorld(EditorWorld * world)
+{
+    m_world = world;
+}
+
+EditorWorld * EditorMap::world()
+{
+    return m_world;
 }

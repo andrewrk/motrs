@@ -5,14 +5,18 @@
 
 #include "World.h"
 
+class EditorMap;
+
 class EditorWorld : public World
 {
 public:
     ~EditorWorld();
 
     static EditorWorld * load(QString file);
-
     void save();
+
+    void addMap(EditorMap * map);
+    void calculateBoundaries();
 
 private: //variables
     // name of the world, e.g. "tower1.world"

@@ -56,6 +56,7 @@ protected:
     void mousePressEvent(QMouseEvent * e);
     void mouseReleaseEvent(QMouseEvent * e);
     void mouseMoveEvent(QMouseEvent * e);
+    void wheelEvent(QWheelEvent * e);
     void keyPressEvent(QKeyEvent * e);
     void keyReleaseEvent(QKeyEvent * e);
 
@@ -250,6 +251,7 @@ private: //methods
 
     void drawGrid(QPainter &p);
     void updateViewCache();
+    void updateScrollBars();
 
     // determining if cursor is in range of resizing maps
     bool overMapLeft(int x, int y);
