@@ -24,7 +24,14 @@ WorldEditor::WorldEditor(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
+    // set up menus
     m_ui->actionQuit->setShortcut(QKeySequence(Qt::AltModifier | Qt::Key_F4));
+
+    m_objectMenu = new QMenu(m_ui->lstObjects);
+    m_objectMenu->addAction(tr("&Edit Object"), this, SLOT(editSelectedObject()));
+    m_objectMenu->addAction(tr("&Delete Object"), this, SLOT(deleteSelectedObject()));
+
+    m_ui->lstObjects->setContextMenuPolicy(Qt::CustomContextMenu);
 
     EditorGraphic::initialize();
 
@@ -44,6 +51,32 @@ WorldEditor::WorldEditor(QWidget *parent) :
     m_view->setFocusPolicy(Qt::StrongFocus);
     setCentralWidget(m_view);
     m_view->refreshGui();
+}
+
+
+void WorldEditor::editSelectedObject()
+{
+    QListWidgetItem * item = m_ui->lstObjects->currentItem();
+
+    if (item == NULL)
+        return;
+
+    ObjectEditor * editor = new ObjectEditor(this);
+    m_objectWindows.append(editor);
+    editor->open(item->data(Qt::UserRole).toString());
+    editor->show();
+}
+
+void WorldEditor::deleteSelectedObject()
+{
+    QListWidgetItem * item = m_ui->lstObjects->currentItem();
+
+    if (item == NULL)
+        return;
+
+    QString file = item->data(Qt::UserRole).toString();
+    QFile::remove(file);
+    refreshObjectList();
 }
 
 void WorldEditor::on_cboLeftClick_currentIndexChanged(int index)
@@ -240,10 +273,7 @@ void WorldEditor::on_btnNewEntity_clicked()
 
 void WorldEditor::on_lstObjects_itemDoubleClicked(QListWidgetItem* item)
 {
-    ObjectEditor * editor = new ObjectEditor(this);
-    m_objectWindows.append(editor);
-    editor->open(item->data(Qt::UserRole).toString());
-    editor->show();
+    editSelectedObject();
 }
 
 void WorldEditor::on_actionSave_triggered()
@@ -275,4 +305,9 @@ void WorldEditor::on_actionPaste_triggered()
 void WorldEditor::on_actionSelectAll_triggered()
 {
     m_view->selectAll();
+}
+
+void WorldEditor::on_lstObjects_customContextMenuRequested(QPoint pos)
+{
+    m_objectMenu->popup(m_ui->lstObjects->mapToGlobal(pos));
 }

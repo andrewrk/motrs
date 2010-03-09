@@ -7,6 +7,7 @@
 #include <QModelIndex>
 #include <QComboBox>
 #include <QPushButton>
+#include <QMenu>
 
 class WorldView;
 class ObjectEditor;
@@ -52,6 +53,7 @@ private: //methods
     void fillToolComboBox(QComboBox & comboBox);
 
 private slots:
+    void on_lstObjects_customContextMenuRequested(QPoint pos);
     void on_actionSelectAll_triggered();
     void on_actionPaste_triggered();
     void on_actionCopy_triggered();
@@ -77,6 +79,9 @@ private slots:
     void on_cboRightClick_currentIndexChanged(int index);
 
     void refreshObjectList();
+
+    void editSelectedObject();
+    void deleteSelectedObject();
 
 };
 
