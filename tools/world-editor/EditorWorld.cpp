@@ -16,6 +16,13 @@ EditorWorld::~EditorWorld()
 {
 }
 
+EditorWorld * EditorWorld::createEmpty(QString name)
+{
+    EditorWorld * out = new EditorWorld();
+    out->m_name = name;
+    return out;
+}
+
 EditorWorld * EditorWorld::load(QString file)
 {
     QList< QPair<QString, QString> > props;

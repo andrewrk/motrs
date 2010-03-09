@@ -325,6 +325,11 @@ void WorldEditor::on_lstObjects_customContextMenuRequested(QPoint pos)
 void WorldEditor::on_btnNewWorld_clicked()
 {
     // create an empty world and save it to disk
+    EditorWorld * world = EditorWorld::createEmpty(tr("New World.world"));
+    world->save();
+    delete world;
+
+    refreshWorldList();
 }
 
 
@@ -382,6 +387,14 @@ void WorldEditor::deleteSelectedWorld()
     if (item == NULL)
         return;
 
+    // this is dangerous. confirm
+    if (QMessageBox::question(this, tr("Confirm delete world"),
+        tr("Are you sure you want to delete this world?"),
+        QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No)
+    {
+        return;
+    }
+
     // delete from universe
     EditorUniverse * universe = EditorUniverse::load(EditorResourceManager::universeFile());
     assert(universe);
@@ -389,8 +402,8 @@ void WorldEditor::deleteSelectedWorld()
     universe->save();
     delete universe;
 
-    // don't delete from disk
-    //QFile::remove(QDir(EditorResourceManager::worldsDir()).absoluteFilePath(item->text()));
+    // delete from disk
+    QFile::remove(QDir(EditorResourceManager::worldsDir()).absoluteFilePath(item->text()));
 
     refreshWorldList();
 }
