@@ -489,12 +489,12 @@ int ObjectView::snapScreenY(int y)
 
 double ObjectView::snapAbsoluteX(double x)
 {
-    return std::floor(x / Tile::size) * Tile::size;
+    return round(x / Tile::size) * Tile::size;
 }
 
 double ObjectView::snapAbsoluteY(double y)
 {
-    return std::floor(y / Tile::size) * Tile::size;
+    return round(y / Tile::size) * Tile::size;
 }
 
 void ObjectView::on_btnLeftPlus_clicked()

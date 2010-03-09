@@ -11,7 +11,8 @@
 
 EditorMap::EditorMap() :
     m_tileCountX(0),
-    m_tileCountY(0)
+    m_tileCountY(0),
+    m_world(NULL)
 {
 }
 
@@ -183,13 +184,17 @@ void EditorMap::removeEntity(EditorEntity * entity)
 void EditorMap::setLeft(double value)
 {
     this->m_x = value;
-    m_world->calculateBoundaries();
+
+    if (m_world != NULL)
+        m_world->calculateBoundaries();
 }
 
 void EditorMap::setTop(double value)
 {
     this->m_y = value;
-    m_world->calculateBoundaries();
+
+    if (m_world != NULL)
+        m_world->calculateBoundaries();
 }
 
 void EditorMap::setWidth(double value)
@@ -198,7 +203,8 @@ void EditorMap::setWidth(double value)
     if (tileCount > 0)
         m_tileCountX = tileCount;
 
-    m_world->calculateBoundaries();
+    if (m_world != NULL)
+        m_world->calculateBoundaries();
 }
 
 void EditorMap::setHeight(double value)
@@ -206,7 +212,9 @@ void EditorMap::setHeight(double value)
     int tileCount = (int)(value / Tile::size);
     if (tileCount > 0)
         m_tileCountY = tileCount;
-    m_world->calculateBoundaries();
+
+    if (m_world != NULL)
+        m_world->calculateBoundaries();
 }
 
 void EditorMap::addLayer(QString name)
@@ -277,26 +285,34 @@ void EditorMap::addTilesLeft(int amount)
 {
     m_x -= amount * Tile::size;
     m_tileCountX += amount;
-    m_world->calculateBoundaries();
+
+    if (m_world != NULL)
+        m_world->calculateBoundaries();
 }
 
 void EditorMap::addTilesRight(int amount)
 {
     m_tileCountX += amount;
-    m_world->calculateBoundaries();
+
+    if (m_world != NULL)
+        m_world->calculateBoundaries();
 }
 
 void EditorMap::addTilesTop(int amount)
 {
     m_y -= amount * Tile::size;
     m_tileCountY += amount;
-    m_world->calculateBoundaries();
+
+    if (m_world != NULL)
+        m_world->calculateBoundaries();
 }
 
 void EditorMap::addTilesBottom(int amount)
 {
     m_tileCountY += amount;
-    m_world->calculateBoundaries();
+
+    if (m_world != NULL)
+        m_world->calculateBoundaries();
 }
 
 double EditorMap::width()
@@ -322,4 +338,19 @@ void EditorMap::setWorld(EditorWorld * world)
 EditorWorld * EditorMap::world()
 {
     return m_world;
+}
+
+EditorMap * EditorMap::createEmpty(const QString & name, const QRect & geometry)
+{
+    EditorMap * out = new EditorMap();
+    out->m_name = name;
+
+    out->setLeft(geometry.left());
+    out->setTop(geometry.top());
+    out->setWidth(geometry.width());
+    out->setHeight(geometry.height());
+
+    out->addLayer(QObject::tr("Layer 1"));
+
+    return out;
 }

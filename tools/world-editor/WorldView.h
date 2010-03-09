@@ -17,15 +17,15 @@ class WorldView : public QWidget
     Q_OBJECT
 public: //variables
     enum MouseTool {
-        Nothing,
-        Arrow,
-        Eraser,
-        Pan,
-        Center,
-        Pencil,
-        Brush,
-        SetStartingPoint,
-        CreateMap,
+        mtNothing,
+        mtArrow,
+        mtEraser,
+        mtPan,
+        mtCenter,
+        mtPencil,
+        mtBrush,
+        mtSetStartPoint,
+        mtCreateMap,
     };
 public: //methods
     WorldView(WorldEditor * window, QWidget * parent = NULL);
@@ -75,14 +75,14 @@ protected:
 
 private: //variables
     enum MouseState {
-        Normal,
-        SetStartPoint,
-        StretchMapLeft,
-        StretchMapTop,
-        StretchMapRight,
-        StretchMapBottom,
-        MoveMap,
-        MoveSelectedItems,
+        msNormal,
+        msStretchMapLeft,
+        msStretchMapTop,
+        msStretchMapRight,
+        msStretchMapBottom,
+        msMoveMap,
+        msMoveSelectedItems,
+        msCreateMap,
     };
 
     struct ArtItem {
@@ -173,7 +173,7 @@ private: //variables
             }
         }
 
-        bool equals(SelectableItem & item)
+        bool equals(const SelectableItem & item)
         {
             if (item.type == type) {
                 if (item.type == sitEditorEntity)
@@ -285,7 +285,8 @@ private: //methods
 
     void moveSelectedItems(double deltaX, double deltaY);
     void saveSelectionMouseDownCoords();
-    bool itemIsSelected(SelectableItem item);
+    bool itemIsSelected(const SelectableItem & item);
+    void deleteSelectableItem(const SelectableItem & item);
 
 
 private slots:

@@ -127,3 +127,21 @@ QString EditorResourceManager::universeFile()
     return QDir(universesDir()).absoluteFilePath("main.universe");
 }
 
+QString EditorResourceManager::newUniqueMapName(QString worldName)
+{
+    QDir maps(mapsDir());
+
+    QString prefix;
+    QString suffix = ".map";
+    int digit = 1;
+    if (worldName.isNull())
+        prefix = "map_";
+    else
+        prefix = worldName + QString("-map_");
+
+    while(QFileInfo(maps.absoluteFilePath(prefix + QString::number(digit) + suffix)).exists())
+        ++digit;
+
+    return prefix + QString::number(digit) + suffix;
+}
+

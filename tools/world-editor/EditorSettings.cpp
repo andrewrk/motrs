@@ -69,7 +69,7 @@ void EditorSettings::setWorldEditorGeometry(QByteArray value)
 WorldView::MouseTool EditorSettings::worldEditorToolLeft()
 {
     QSettings settings;
-    return (WorldView::MouseTool)settings.value("state/tool/left", WorldView::Arrow).toInt();
+    return (WorldView::MouseTool)settings.value("state/tool/left", WorldView::mtArrow).toInt();
 }
 
 void EditorSettings::setWorldEditorToolLeft(WorldView::MouseTool value)
@@ -82,7 +82,7 @@ void EditorSettings::setWorldEditorToolLeft(WorldView::MouseTool value)
 WorldView::MouseTool EditorSettings::worldEditorToolMiddle()
 {
     QSettings settings;
-    return (WorldView::MouseTool)settings.value("state/tool/middle", WorldView::Pan).toInt();
+    return (WorldView::MouseTool)settings.value("state/tool/middle", WorldView::mtPan).toInt();
 
 }
 
@@ -96,7 +96,7 @@ void EditorSettings::setWorldEditorToolMiddle(WorldView::MouseTool value)
 WorldView::MouseTool EditorSettings::worldEditorToolRight()
 {
     QSettings settings;
-    return (WorldView::MouseTool)settings.value("state/tool/right", WorldView::Eraser).toInt();
+    return (WorldView::MouseTool)settings.value("state/tool/right", WorldView::mtEraser).toInt();
 }
 
 void EditorSettings::setWorldEditorToolRight(WorldView::MouseTool value)

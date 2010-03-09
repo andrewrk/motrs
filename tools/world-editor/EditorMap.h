@@ -44,11 +44,13 @@ public: //variables
 
 public: //methods
     // default Map. empty dimensions and layers.
-    EditorMap();
     ~EditorMap();
 
     // load a Map from a text format file
     static EditorMap * load(QString file);
+
+    // create an empty map
+    static EditorMap * createEmpty(const QString & name, const QRect & geometry);
 
     void save();
 
@@ -105,6 +107,8 @@ private: //variables
     QString m_name;
 
     EditorWorld * m_world;
+private: //methods
+    EditorMap();
 };
 
 inline int EditorMap::tileCountX()

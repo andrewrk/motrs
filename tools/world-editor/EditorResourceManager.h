@@ -32,6 +32,8 @@ public:
     // get the EditorGraphic that represents the graphic name. don't worry
     // about calling it twice - it uses a cache.
     static EditorGraphic * graphic(QString name);
+
+    static QString newUniqueMapName(QString worldName = QString());
 private:
     static QMap<QString, EditorGraphic *> s_graphics;
 };
