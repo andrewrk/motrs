@@ -17,6 +17,7 @@ public:
 
     // initialize with command line arguments and a configuration file
     static void initialize(int argc, char * argv[], std::string configFile);
+    static void initialize(std::string configFile);
 
     // settings. priority: 1. command line argument 2. config file 3. default
     bool fullscreen();
@@ -35,6 +36,7 @@ private: //variables
     ConfigManager * m_configManager;
 private: //methods
     Config(int argc, char * argv[], std::string configFile);
+    Config(std::string configFile);
 };
 
 #endif // CONFIG_H

@@ -11,10 +11,15 @@ Config::Config(int argc, char * argv[], std::string configFile) :
     m_configManager->addArgs(argc, argv);
 }
 
+Config::Config(std::string configFile) :
+    m_configManager(new ConfigManager())
+{
+    m_configManager->addFile(configFile);
+}
+
 Config::~Config()
 {
     delete m_configManager;
-    delete s_inst;
     s_inst = NULL;
 }
 
@@ -26,7 +31,14 @@ Config * Config::instance()
 
 void Config::initialize(int argc, char * argv[], std::string configFile)
 {
+    delete s_inst;
     s_inst = new Config(argc, argv, configFile);
+}
+
+void Config::initialize(std::string configFile)
+{
+    delete s_inst;
+    s_inst = new Config(configFile);
 }
 
 bool Config::fullscreen()

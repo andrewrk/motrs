@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>959</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -370,7 +370,7 @@
   </action>
   <action name="actionTest">
    <property name="text">
-    <string>&amp;Test</string>
+    <string>&amp;Playtest</string>
    </property>
    <property name="shortcut">
     <string>F5</string>

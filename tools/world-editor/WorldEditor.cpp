@@ -22,7 +22,8 @@ WorldEditor::WorldEditor(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::WorldEditor),
     m_view(new WorldView(this, this)),
-    m_toolNames()
+    m_toolNames(),
+    m_playtestThread(NULL)
 {
     m_ui->setupUi(this);
 
@@ -429,4 +430,30 @@ void WorldEditor::deleteSelectedWorld()
 void WorldEditor::on_lstWorlds_customContextMenuRequested(QPoint pos)
 {
     m_worldMenu->popup(m_ui->lstWorlds->mapToGlobal(pos));
+}
+
+void WorldEditor::on_actionTest_triggered()
+{
+    // call compile on the universe which will generate a resources.dat file
+    // in this folder ready to be played.
+    EditorUniverse * universe = EditorUniverse::load(EditorResourceManager::universeFile());
+    assert(universe);
+    //universe->compile();
+    delete universe;
+
+    // start the gameplay thread
+    if (m_playtestThread == NULL) {
+        m_playtestThread = new PlaytestThread();
+        connect(m_playtestThread, SIGNAL(finished()), this, SLOT(deletePlaytestThread()));
+        m_playtestThread->start();
+    } else {
+        m_playtestThread->endGameplay();
+        m_playtestThread->start();
+    }
+}
+
+void WorldEditor::deletePlaytestThread()
+{
+    delete m_playtestThread;
+    m_playtestThread = NULL;
 }

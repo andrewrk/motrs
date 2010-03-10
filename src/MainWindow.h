@@ -26,6 +26,9 @@ public:
 
     // number of logic frames per second
     inline int fps();
+
+    // close window and end gameplay
+    void close();
 private: //variables
     static const int c_fps;
     static const int c_width;

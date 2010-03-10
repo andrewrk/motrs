@@ -59,7 +59,10 @@ bool ConfigManager::addFile(std::string filename)
 bool ConfigManager::addArgs(int argc, char * argv[])
 {
     bool success = true;
-    m_command = std::string(argv[0]);
+
+    if (argc > 0)
+        m_command = std::string(argv[0]);
+
     for(int i=1; i<argc; ++i) {
         // gimme C++ string
         std::string arg(argv[i]);

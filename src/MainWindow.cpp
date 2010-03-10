@@ -90,4 +90,8 @@ void MainWindow::setFullscreenFlags(bool fullscreen)
         m_windowStyle &= ~sf::Style::Fullscreen;
 }
 
+void MainWindow::close()
+{
+    m_window->Close();
+}
 

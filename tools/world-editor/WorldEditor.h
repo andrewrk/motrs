@@ -9,6 +9,8 @@
 #include <QPushButton>
 #include <QMenu>
 
+#include "PlaytestThread.h"
+
 class WorldView;
 class ObjectEditor;
 
@@ -48,12 +50,15 @@ private: //variables
 
     QList<ObjectEditor *> m_objectWindows;
 
+    PlaytestThread * m_playtestThread;
+
 private: //methods
     void refreshWorldList();
     void openWorld(QString file);
     void fillToolComboBox(QComboBox & comboBox);
 
 private slots:
+    void on_actionTest_triggered();
     void on_lstWorlds_customContextMenuRequested(QPoint pos);
     void on_btnNewWorld_clicked();
     void on_lstObjects_customContextMenuRequested(QPoint pos);
@@ -89,6 +94,8 @@ private slots:
     void editSelectedWorld();
     void renameSelectedWorld();
     void deleteSelectedWorld();
+
+    void deletePlaytestThread();
 
 };
 
