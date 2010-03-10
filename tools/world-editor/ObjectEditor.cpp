@@ -21,9 +21,9 @@ ObjectEditor::ObjectEditor(QWidget *parent) :
     this->setCentralWidget(m_view);
 
     // hook window checks to docks
-    connect(m_ui->actionWindowArt, SIGNAL(toggled(bool)), m_ui->dockArt, SLOT(setShown(bool)));
-    connect(m_ui->actionWindowLayers, SIGNAL(toggled(bool)), m_ui->dockLayers, SLOT(setShown(bool)));
-    connect(m_ui->actionWindowProperties, SIGNAL(toggled(bool)), m_ui->dockProperties, SLOT(setShown(bool)));
+    connect(m_ui->actionWindowArt, SIGNAL(triggered(bool)), m_ui->dockArt, SLOT(setShown(bool)));
+    connect(m_ui->actionWindowLayers, SIGNAL(triggered(bool)), m_ui->dockLayers, SLOT(setShown(bool)));
+    connect(m_ui->actionWindowProperties, SIGNAL(triggered(bool)), m_ui->dockProperties, SLOT(setShown(bool)));
 
     connect(m_ui->dockArt, SIGNAL(visibilityChanged(bool)), m_ui->actionWindowArt, SLOT(setChecked(bool)));
     connect(m_ui->dockLayers, SIGNAL(visibilityChanged(bool)), m_ui->actionWindowLayers, SLOT(setChecked(bool)));

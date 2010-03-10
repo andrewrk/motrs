@@ -54,17 +54,14 @@ WorldEditor::WorldEditor(QWidget *parent) :
     fillToolComboBox(*m_ui->cboMiddleClick);
     fillToolComboBox(*m_ui->cboRightClick);
 
-    // restore window size and dock state from settings
-    this->restoreState(EditorSettings::worldEditorState());
-    this->restoreGeometry(EditorSettings::worldEditorGeometry());
 
     // hook window menu clicks to dock show/hide
-    connect(m_ui->actionEntities, SIGNAL(toggled(bool)), m_ui->dockEntities, SLOT(setShown(bool)));
-    connect(m_ui->actionLayers, SIGNAL(toggled(bool)), m_ui->dockLayers, SLOT(setShown(bool)));
-    connect(m_ui->actionObjects, SIGNAL(toggled(bool)), m_ui->dockObjects, SLOT(setShown(bool)));
-    connect(m_ui->actionTools, SIGNAL(toggled(bool)), m_ui->dockTools, SLOT(setShown(bool)));
-    connect(m_ui->actionTriggers, SIGNAL(toggled(bool)), m_ui->dockTriggers, SLOT(setShown(bool)));
-    connect(m_ui->actionWorlds, SIGNAL(toggled(bool)), m_ui->dockWorlds, SLOT(setShown(bool)));
+    connect(m_ui->actionEntities, SIGNAL(triggered(bool)), m_ui->dockEntities, SLOT(setShown(bool)));
+    connect(m_ui->actionLayers, SIGNAL(triggered(bool)), m_ui->dockLayers, SLOT(setShown(bool)));
+    connect(m_ui->actionObjects, SIGNAL(triggered(bool)), m_ui->dockObjects, SLOT(setShown(bool)));
+    connect(m_ui->actionTools, SIGNAL(triggered(bool)), m_ui->dockTools, SLOT(setShown(bool)));
+    connect(m_ui->actionTriggers, SIGNAL(triggered(bool)), m_ui->dockTriggers, SLOT(setShown(bool)));
+    connect(m_ui->actionWorlds, SIGNAL(triggered(bool)), m_ui->dockWorlds, SLOT(setShown(bool)));
 
     connect(m_ui->dockEntities, SIGNAL(visibilityChanged(bool)), m_ui->actionEntities, SLOT(setChecked(bool)));
     connect(m_ui->dockLayers, SIGNAL(visibilityChanged(bool)), m_ui->actionLayers, SLOT(setChecked(bool)));
@@ -72,6 +69,10 @@ WorldEditor::WorldEditor(QWidget *parent) :
     connect(m_ui->dockTools, SIGNAL(visibilityChanged(bool)), m_ui->actionTools, SLOT(setChecked(bool)));
     connect(m_ui->dockTriggers, SIGNAL(visibilityChanged(bool)), m_ui->actionTriggers, SLOT(setChecked(bool)));
     connect(m_ui->dockWorlds, SIGNAL(visibilityChanged(bool)), m_ui->actionWorlds, SLOT(setChecked(bool)));
+
+    // restore window size and dock state from settings
+    this->restoreState(EditorSettings::worldEditorState());
+    this->restoreGeometry(EditorSettings::worldEditorGeometry());
 
     m_ui->cboLeftClick->setCurrentIndex(EditorSettings::worldEditorToolLeft());
     m_ui->cboMiddleClick->setCurrentIndex(EditorSettings::worldEditorToolMiddle());
