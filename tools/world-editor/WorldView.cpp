@@ -734,7 +734,10 @@ void WorldView::mousePressEvent(QMouseEvent * e)
         determineCursor();
         break;
     case mtCenter:
-
+        // make the click location the center of the screen
+        m_hsb->setValue(absoluteX(e->x() - width() / 2));
+        m_vsb->setValue(absoluteY(e->y() - height() / 2));
+        updateViewCache();
         break;
     case mtPencil:
 
