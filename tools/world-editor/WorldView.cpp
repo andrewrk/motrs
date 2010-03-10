@@ -173,32 +173,30 @@ void WorldView::paintEvent(QPaintEvent * e)
         }
 
         // draw a bold line around map borders
-        QPen normalMapBorder(Qt::black, 3);
-        QPen selectedMapBorder(Qt::blue, 3);
         p.setBrush(Qt::NoBrush);
-        for (int i = 0; i < m_mapCache.size(); i++) {
-            EditorMap * map = m_mapCache[i];
+        p.setPen(QPen(Qt::black, 3));
+        for (int i = 0; i < m_mapCache.size(); i++)
+            p.drawRect(screenRect(m_mapCache[i]->geometry()));
 
-            p.setPen(m_selectedMap == map ? selectedMapBorder : normalMapBorder);
-            QRect outline((int)screenX(map->left()), (int)screenY(map->top()),
-                (int)(map->width() * m_zoom), (int)(map->height() * m_zoom));
+        // draw selected map outline in blue
+        if (m_selectedMap != NULL) {
+            p.setPen(QPen(Qt::blue, 3));
+
+            QRect outline = screenRect(m_selectedMap->geometry());
 
             // if we're dragging boundaries, move the blue line
-            if( m_selectedMap == map ) {
-                int deltaX = m_mouseX - m_mouseDownX;
-                int deltaY = m_mouseY - m_mouseDownY;
-                if (m_mouseState == msStretchMapLeft)
-                    outline.setLeft(snapScreenX(outline.left() + deltaX));
-                else if (m_mouseState == msStretchMapBottom)
-                    outline.setBottom(snapScreenY(outline.bottom() + deltaY));
-                else if (m_mouseState == msStretchMapRight)
-                    outline.setRight(snapScreenX(outline.right() + deltaX));
-                else if (m_mouseState == msStretchMapTop)
-                    outline.setTop(snapScreenY(outline.top() + deltaY));
-                else if (m_mouseState == msMoveMap)
-                    outline.moveTo(snapScreenX(outline.left() + deltaX), snapScreenY(outline.top() + deltaY));
-
-            }
+            int deltaX = m_mouseX - m_mouseDownX;
+            int deltaY = m_mouseY - m_mouseDownY;
+            if (m_mouseState == msStretchMapLeft)
+                outline.setLeft(snapScreenX(outline.left() + deltaX));
+            else if (m_mouseState == msStretchMapBottom)
+                outline.setBottom(snapScreenY(outline.bottom() + deltaY));
+            else if (m_mouseState == msStretchMapRight)
+                outline.setRight(snapScreenX(outline.right() + deltaX));
+            else if (m_mouseState == msStretchMapTop)
+                outline.setTop(snapScreenY(outline.top() + deltaY));
+            else if (m_mouseState == msMoveMap)
+                outline.moveTo(snapScreenX(outline.left() + deltaX), snapScreenY(outline.top() + deltaY));
 
             p.drawRect(outline);
         }
