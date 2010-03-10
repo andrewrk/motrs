@@ -946,6 +946,9 @@ void WorldView::setToolRightClick(MouseTool tool)
 
 void WorldView::dropEvent(QDropEvent * e)
 {
+    if (m_selectedMap == NULL)
+        return;
+
     if (e->source() == m_window->objectsList()) {
         m_selectedMap->addObject(m_dragObject);
         m_dragObject = NULL;
@@ -957,8 +960,6 @@ void WorldView::dropEvent(QDropEvent * e)
 
 void WorldView::dragEnterEvent(QDragEnterEvent * e)
 {
-    if (m_selectedMap == NULL)
-        return;
     if (e->source() == m_window->objectsList()) {
         QString itemModelMime = "application/x-qabstractitemmodeldatalist";
 
@@ -971,7 +972,7 @@ void WorldView::dragEnterEvent(QDragEnterEvent * e)
             // load the object and set it as the drag object
             m_dragObject = new EditorMap::MapObject;
             m_dragObject->object = EditorObject::load(file);
-            m_dragObject->layer = m_selectedLayer;
+            m_dragObject->layer = -1;
 
             e->acceptProposedAction();
         }
@@ -980,6 +981,21 @@ void WorldView::dragEnterEvent(QDragEnterEvent * e)
 
 void WorldView::dragMoveEvent(QDragMoveEvent * e)
 {
+    EditorMap * dragOverMap = mapAt(e->pos().x(), e->pos().y());
+
+    if (dragOverMap == NULL) {
+        m_dragObject->layer = -1;
+        e->ignore();
+        return; // don't accept event
+    }
+
+    if (m_selectedMap != dragOverMap) {
+        selectMap(dragOverMap);
+        m_dragObject->layer = m_selectedLayer;
+    } else if (m_dragObject->layer == -1) {
+        m_dragObject->layer = m_selectedLayer;
+    }
+
     m_dragObject->tileX = (int) (snapAbsoluteX(mapX(e->pos().x(), m_selectedMap)) / Tile::size);
     m_dragObject->tileY = (int) (snapAbsoluteY(mapY(e->pos().y(), m_selectedMap)) / Tile::size);
     this->update();
