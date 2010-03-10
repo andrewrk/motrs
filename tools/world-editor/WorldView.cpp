@@ -461,12 +461,16 @@ void WorldView::determineCursor()
                             this->setCursor(Qt::SizeAllCursor);
                         else
                             this->setCursor(Qt::ArrowCursor);
+                    } else {
+                        this->setCursor(Qt::ArrowCursor);
                     }
                     break;
                 }
             case mtArrow: break;
             case mtEraser: break;
-            case mtPan: break;
+            case mtPan:
+                this->setCursor(Qt::SizeAllCursor);
+                break;
             case mtCenter: break;
             case mtPencil: break;
             case mtBrush: break;
@@ -518,7 +522,9 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
             case mtPan: break;
             case mtCenter: break;
             case mtPencil: break;
-            case mtBrush: break;
+            case mtBrush:
+                drawSelectedObjectAt(e->x(), e->y());
+                break;
             case mtSetStartPoint: break;
             case mtCreateMap: break;
             }
@@ -740,10 +746,10 @@ void WorldView::mousePressEvent(QMouseEvent * e)
         updateViewCache();
         break;
     case mtPencil:
-
+        drawSelectedObjectAt(e->x(), e->y());
         break;
     case mtBrush:
-
+        mouseMoveEvent(e);
         break;
     case mtSetStartPoint:
         break;
@@ -753,6 +759,45 @@ void WorldView::mousePressEvent(QMouseEvent * e)
     default:
         qDebug() << "Invalid tool selected in mousePressEvent";
     }
+}
+
+void WorldView::drawSelectedObjectAt(int x, int y)
+{
+    QListWidget * list = m_window->objectsList();
+    QListWidgetItem * item = list->currentItem();
+
+    if (item == NULL)
+        return;
+
+    // get selected object
+    QString file = item->data(Qt::UserRole).toString();
+    EditorMap::MapObject * mapObject = new EditorMap::MapObject;
+    mapObject->object = EditorObject::load(file);
+    mapObject->layer = m_selectedLayer;
+    mapObject->tileX = (int) round(mapX(x, m_selectedMap) / Tile::size);
+    mapObject->tileY = (int) round(mapY(y, m_selectedMap) / Tile::size);
+
+    // find out if we wouldn't overlap anything by drawing
+    bool overlaps = false;
+    const EditorMap::MapLayer * layer = m_selectedMap->layer(m_selectedLayer);
+    // check objects
+    for (int i=0; i<layer->objects.size(); ++i) {
+        EditorMap::MapObject * object = layer->objects.at(i);
+        if (object->geometry().intersects(mapObject->geometry())) {
+            overlaps = true;
+            break;
+        }
+    }
+
+    if (overlaps) {
+        delete mapObject;
+        return;
+    }
+
+    // draw an object at the location
+    m_selectedMap->addObject(mapObject);
+
+    this->update();
 }
 
 bool WorldView::itemIsSelected(const SelectableItem & item)

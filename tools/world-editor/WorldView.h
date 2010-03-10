@@ -353,6 +353,8 @@ private: //methods
     bool itemIsSelected(const SelectableItem & item);
     void deleteSelectableItem(const SelectableItem & item);
 
+    void drawSelectedObjectAt(int x, int y);
+
 
 private slots:
     void verticalScroll(int value);
