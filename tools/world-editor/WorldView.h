@@ -244,13 +244,22 @@ private: //variables
     QList<SelectableItem *> m_selection;
 
 private: //methods
-    // transfer between absolute coordinates and editor coordinates
+    // world coordinates to screen coordinates
     int screenX(double absoluteX);
     int screenY(double absoluteY);
     QRect screenRect(QRectF absoluteRect);
+
+    // screen coordinates to world coordinates
     double absoluteX(int screenX);
     double absoluteY(int screenY);
     QRectF absoluteRect(QRect screenRect);
+
+    // screen coordinates to selected map coordinates
+    double mapX(int screenX, EditorMap * map);
+    double mapY(int screenY, EditorMap * map);
+
+    // map coordinates to screen coordinates
+    QRect mapToScreenRect(QRectF mapRect, EditorMap * map);
 
     int snapScreenX(int x);
     int snapScreenY(int y);

@@ -168,7 +168,7 @@ void WorldView::paintEvent(QPaintEvent * e)
             } else if (item->type == sitMapObject) {
                 bound = item->object->geometry();
             }
-            QRect screenBound = screenRect(bound);
+            QRect screenBound = mapToScreenRect(bound, m_selectedMap);
             p.drawRect(screenBound);
         }
 
@@ -306,6 +306,26 @@ int WorldView::screenY(double absoluteY)
     return (int)(absoluteY - m_offsetY) * m_zoom;
 }
 
+QRect WorldView::mapToScreenRect(QRectF mapRect, EditorMap * map)
+{
+    QRect out;
+    out.setLeft(screenX(mapRect.left() + map->left()));
+    out.setTop(screenY(mapRect.top() + map->top()));
+    out.setWidth(mapRect.width() * m_zoom);
+    out.setHeight(mapRect.height() * m_zoom);
+    return out;
+}
+
+double WorldView::mapX(int screenX, EditorMap * map)
+{
+    return (screenX / m_zoom) + m_offsetX - map->left();
+}
+
+double WorldView::mapY(int screenY, EditorMap * map)
+{
+    return (screenY / m_zoom) + m_offsetY - map->top();
+}
+
 double WorldView::absoluteX(int screenX)
 {
     return (screenX / m_zoom) + m_offsetX;
@@ -315,7 +335,6 @@ double WorldView::absoluteY(int screenY)
 {
     return (screenY / m_zoom) + m_offsetY;
 }
-
 
 int WorldView::snapScreenX(int x)
 {
@@ -722,8 +741,8 @@ WorldView::SelectableItem WorldView::selectableItemAt(int x, int y)
     if (m_selectedMap == NULL)
         return SelectableItem();
 
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
+    double absX = mapX(x, m_selectedMap);
+    double absY = mapY(y, m_selectedMap);
 
     // get a list of all items at this point
     QList<SelectableItem> items;
@@ -965,8 +984,8 @@ void WorldView::dragEnterEvent(QDragEnterEvent * e)
 
 void WorldView::dragMoveEvent(QDragMoveEvent * e)
 {
-    m_dragObject->tileX = (int) snapAbsoluteX(absoluteX(e->pos().x())) / Tile::size;
-    m_dragObject->tileY = (int) snapAbsoluteY(absoluteY(e->pos().y())) / Tile::size;
+    m_dragObject->tileX = (int) (snapAbsoluteX(mapX(e->pos().x(), m_selectedMap)) / Tile::size);
+    m_dragObject->tileY = (int) (snapAbsoluteY(mapY(e->pos().y(), m_selectedMap)) / Tile::size);
     this->update();
 
     e->acceptProposedAction();

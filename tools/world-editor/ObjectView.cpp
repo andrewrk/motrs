@@ -51,7 +51,6 @@ ObjectView::ObjectView(ObjectEditor * window, QWidget * parent) :
     QWidget(parent),
     m_window(window),
     m_object(NULL),
-    m_dragGraphic(NULL),
     m_btnTopPlus(new QPushButton("+", this)),
     m_btnTopMinus(new QPushButton("-", this)),
     m_btnBottomPlus(new QPushButton("+", this)),
@@ -203,13 +202,6 @@ void ObjectView::paintEvent(QPaintEvent * e)
                         graphic->graphic->draw(p, screenX(graphic->x), screenY(graphic->y),
                             (int)graphic->width * m_zoom, (int)graphic->height * m_zoom);
                     }
-
-                    // draw dragged stuff
-                    if( layer == m_selectedLayer && m_dragGraphic != NULL ) {
-                        m_dragGraphic->draw(p, m_dragGraphicX, m_dragGraphicY,
-                            (int)m_dragGraphic->width() * m_zoom,
-                            (int)m_dragGraphic->height() * m_zoom);
-                    }
                 }
             }
 
@@ -250,7 +242,6 @@ void ObjectView::dropEvent(QDropEvent * e)
     QString itemModelMime = "application/x-qabstractitemmodeldatalist";
 
     // don't show the art in paintevent
-    m_dragGraphic = NULL;
     const QMimeData * data = e->mimeData();
     if(data->hasFormat(itemModelMime)) {
         QStandardItemModel model;
@@ -289,8 +280,6 @@ void ObjectView::dragEnterEvent(QDragEnterEvent * e)
 
             QFileInfo info(file);
             QString title = info.fileName();
-            EditorGraphic * graphic = EditorResourceManager::graphic(title);
-            m_dragGraphic = graphic;
 
             e->acceptProposedAction();
         }
@@ -299,16 +288,12 @@ void ObjectView::dragEnterEvent(QDragEnterEvent * e)
 
 void ObjectView::dragMoveEvent(QDragMoveEvent * e)
 {
-    m_dragGraphicX = e->pos().x();
-    m_dragGraphicY = e->pos().y();
     this->update();
-
     e->acceptProposedAction();
 }
 
 void ObjectView::dragLeaveEvent(QDragLeaveEvent * e)
 {
-    m_dragGraphic = NULL;
     this->update();
 }
 

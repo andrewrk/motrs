@@ -97,11 +97,6 @@ private: //variables
     // the object we are editing
     EditorObject * m_object;
 
-    // contains a graphic to draw when dragging art and such
-    EditorGraphic * m_dragGraphic;
-    int m_dragGraphicX;
-    int m_dragGraphicY;
-
     // gui elements on the edges of the view
     QPushButton * m_btnTopPlus;
     QPushButton * m_btnTopMinus;
