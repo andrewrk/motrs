@@ -4,6 +4,8 @@
 #include "Entity.h"
 #include "EditorGraphic.h"
 
+class EditorMap;
+
 class EditorEntity : public Entity
 {
 public:
@@ -20,11 +22,16 @@ public:
     QRectF geometry();
 
     inline QString name() const;
+
+    inline EditorMap * parent();
+    void setParent(EditorMap * map);
 private:
     EditorEntity();
     EditorGraphic * m_graphic;
 
     QString m_name;
+
+    EditorMap * m_parent;
 };
 
 inline EditorGraphic * EditorEntity::graphic()
@@ -55,6 +62,11 @@ inline double EditorEntity::centerOffsetY()
 inline QString EditorEntity::name() const
 {
     return m_name;
+}
+
+inline EditorMap * EditorEntity::parent()
+{
+    return m_parent;
 }
 
 #endif // EDITORENTITY_H

@@ -153,6 +153,11 @@ void EditorMap::save()
 
 void EditorMap::addObject(MapObject * object)
 {
+    if (object->parent != NULL)
+        object->parent->removeObject(object);
+
+    object->parent = this;
+
     for (int i=0; i<object->object->layerCount(); ++i) {
         int layerIndex = object->layer + i;
         while (layerIndex >= layerCount())
@@ -171,6 +176,11 @@ void EditorMap::removeObject(MapObject * object)
 
 void EditorMap::addEntity(EditorEntity * entity)
 {
+    if (entity->parent() != NULL)
+        entity->parent()->removeEntity(entity);
+
+    entity->setParent(this);
+
     while (entity->layer() >= layerCount())
         addLayer();
     m_layers.at(entity->layer())->entities.append(entity);

@@ -3,12 +3,12 @@
 
 #include "Map.h"
 #include "EditorObject.h"
-#include "EditorEntity.h"
 
 #include <QString>
 #include <QList>
 
 class EditorWorld;
+class EditorEntity;
 
 // An EditorMap has a list of EditorObjects and EditorEntities that are tile-aligned.
 // The game editor can use this class to edit maps that have movable EditorObjects and EditorEntities
@@ -17,20 +17,29 @@ class EditorWorld;
 class EditorMap : public Map
 {
 public: //variables
-    typedef struct {
+    struct MapObject {
         EditorObject * object;
         int tileX; // tile index
         int tileY;
         int layer;
+
+        // the map that owns this object
+        EditorMap * parent;
 
         QRectF geometry()
         {
             return QRectF(QPointF(tileX*Tile::size, tileY*Tile::size),
                 QSizeF(object->tileCountX()*Tile::size, object->tileCountY()*Tile::size));
         }
-    } MapObject;
 
-    typedef struct {
+        MapObject() :
+            object(NULL),
+            parent(NULL)
+        {
+        }
+    };
+
+    struct MapLayer {
         // layer name
         QString name;
         // list of objects per layer. Layer 0 of the object == the layer it is on.
@@ -40,7 +49,7 @@ public: //variables
         QList<MapObject *> objects;
         // list of entities per layer
         QList<EditorEntity *> entities;
-    } MapLayer;
+    };
 
 public: //methods
     // default Map. empty dimensions and layers.

@@ -314,6 +314,16 @@ QRect WorldView::mapToScreenRect(QRectF mapRect, EditorMap * map)
     return out;
 }
 
+int WorldView::mapToScreenX(double mapX, EditorMap * map)
+{
+    return screenX(mapX + map->left());
+}
+
+int WorldView::mapToScreenY(double mapY, EditorMap * map)
+{
+    return screenY(mapY + map->top());
+}
+
 double WorldView::mapX(int screenX, EditorMap * map)
 {
     return (screenX / m_zoom) + m_offsetX - map->left();
@@ -469,6 +479,8 @@ void WorldView::determineCursor()
     case msStretchMapRight: break;
     case msStretchMapBottom: break;
     case msMoveMap: break;
+    case msPan:
+        this->setCursor(Qt::SizeAllCursor);
     }
 }
 
@@ -478,8 +490,11 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
     m_mouseY = e->y();
     m_keyboardModifiers = e->modifiers();
 
-    double deltaX = (e->x() - m_mouseDownX) * m_zoom;
-    double deltaY = (e->y() - m_mouseDownY) * m_zoom;
+
+    int screenDeltaX = e->x() - m_mouseDownX;
+    int screenDeltaY = e->y() - m_mouseDownY;
+    double deltaX = screenDeltaX * m_zoom;
+    double deltaY = screenDeltaY * m_zoom;
 
     determineCursor();
     switch(m_mouseState) {
@@ -522,13 +537,31 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
         moveSelectedItems(deltaX, deltaY);
         this->update();
         break;
+    case msPan:
+        m_hsb->setValue(m_mouseDownHScroll - deltaX);
+        m_vsb->setValue(m_mouseDownVScroll - deltaY);
+        updateViewCache();
+        break;
     }
 }
 
 void WorldView::moveSelectedItems(double deltaX, double deltaY)
 {
-    for (int i=0; i<m_selection.size(); ++i)
-        m_selection.at(i)->moveByDelta(deltaX, deltaY);
+    // if a destination is not in a map, refuse to move it
+    for (int i=0; i<m_selection.size(); ++i) {
+        SelectableItem * item = m_selection.at(i);
+
+        double destX = mapToScreenX(item->mouseDownX + deltaX, item->parentMap());
+        double destY = mapToScreenY(item->mouseDownY + deltaY, item->parentMap());
+
+        EditorMap * destMap = mapAt(destX, destY);
+
+        // TODO: allow changing parents
+        if (destMap != item->parentMap())
+            continue;
+
+        item->moveByDelta(deltaX, deltaY);
+    }
 }
 
 void WorldView::mouseReleaseEvent(QMouseEvent * e)
@@ -693,7 +726,12 @@ void WorldView::mousePressEvent(QMouseEvent * e)
         mouseMoveEvent(e);
         break;
     case mtPan:
+        // show hand cursor, and allow dragging the view
+        m_mouseDownHScroll = m_hsb->value();
+        m_mouseDownVScroll = m_vsb->value();
 
+        m_mouseState = msPan;
+        determineCursor();
         break;
     case mtCenter:
 

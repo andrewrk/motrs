@@ -83,6 +83,7 @@ private: //variables
         msMoveMap,
         msMoveSelectedItems,
         msCreateMap,
+        msPan,
     };
 
     struct ArtItem {
@@ -173,6 +174,57 @@ private: //variables
             }
         }
 
+        // relative to parent map
+        double x() const {
+            if (isNull())
+                return -1;
+            if (type == sitEditorEntity) {
+                return entity->centerX();
+            } else if (type == sitMapObject){
+                return object->tileX * Tile::size;
+            }
+            return -1.0;
+        }
+
+        // relative to parent map
+        double y() const {
+            if (isNull())
+                return -1;
+            if (type == sitEditorEntity) {
+                return entity->centerY();
+            } else if (type == sitMapObject){
+                return object->tileY * Tile::size;
+            }
+            return -1.0;
+        }
+
+        EditorMap * parentMap()
+        {
+            if (isNull())
+                return NULL;
+
+            if (type == sitEditorEntity) {
+                return entity->parent();
+            } else if (type == sitMapObject){
+                return object->parent;
+            }
+
+            return NULL;
+        }
+
+        void setParentMap(EditorMap * map)
+        {
+            if (isNull())
+                return;
+
+            if (type == sitEditorEntity) {
+                map->addEntity(entity);
+            } else if (type == sitMapObject){
+                map->addObject(object);
+            }
+        }
+
+
         bool equals(const SelectableItem & item)
         {
             if (item.type == type) {
@@ -188,6 +240,9 @@ private: //variables
         EditorMap::MapObject * object;
         EditorEntity * entity;
 
+        // stores the location for dragging
+        double mouseDownX;
+        double mouseDownY;
 
     private:
         static int rectArea(QRectF rect)
@@ -195,9 +250,6 @@ private: //variables
             return rect.width() * rect.height();
         }
 
-        // stores the location for dragging
-        double mouseDownX;
-        double mouseDownY;
     };
 
     QScrollBar * m_hsb;
@@ -223,6 +275,8 @@ private: //variables
     int m_mouseDownY;
     MouseTool m_mouseDownTool;
     int m_mouseState;
+    int m_mouseDownHScroll;
+    int m_mouseDownVScroll;
 
     // location of the mouse
     int m_mouseX;
@@ -260,6 +314,8 @@ private: //methods
 
     // map coordinates to screen coordinates
     QRect mapToScreenRect(QRectF mapRect, EditorMap * map);
+    int mapToScreenX(double mapX, EditorMap * map);
+    int mapToScreenY(double mapY, EditorMap * map);
 
     int snapScreenX(int x);
     int snapScreenY(int y);

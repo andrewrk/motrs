@@ -2,6 +2,7 @@
 
 #include "EditorResourceManager.h"
 #include "WorldView.h"
+#include "EditorMap.h"
 
 #include <QDebug>
 #include <QPainter>
@@ -58,11 +59,17 @@ EditorEntity * EditorEntity::load(QString file)
     return out;
 }
 
-EditorEntity::EditorEntity()
+EditorEntity::EditorEntity() :
+    m_parent(NULL)
 {
 }
 
 QRectF EditorEntity::geometry()
 {
     return QRectF(QPointF(centerX()-centerOffsetX(), centerY()-centerOffsetY()), QSizeF(width(), height()));
+}
+
+void EditorEntity::setParent(EditorMap * map)
+{
+    m_parent = map;
 }
