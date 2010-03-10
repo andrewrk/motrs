@@ -552,16 +552,14 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
     case msStretchMapLeft:
         {
             double newLeft = snapAbsoluteX(m_selectedMap->left() + deltaX);
-            int deltaWidth = (int) (m_selectedMap->left() - newLeft) / Tile::size;
-            m_selectedMap->setLeft(newLeft);
+            int deltaWidth = (int) ((m_selectedMap->left() - newLeft) / Tile::size);
             m_selectedMap->addTilesLeft(deltaWidth);
             break;
         }
     case msStretchMapTop:this->setCursor(Qt::ArrowCursor);
         {
             double newTop = snapAbsoluteY(m_selectedMap->top() + deltaY);
-            int deltaHeight = (int) (m_selectedMap->top() - newTop) / Tile::size;
-            m_selectedMap->setTop(newTop);
+            int deltaHeight = (int) ((m_selectedMap->top() - newTop) / Tile::size);
             m_selectedMap->addTilesTop(deltaHeight);
             break;
         }
