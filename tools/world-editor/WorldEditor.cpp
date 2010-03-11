@@ -447,7 +447,7 @@ void WorldEditor::on_actionTest_triggered()
         return;
     }
 
-    EditorUniverse * universe = EditorUniverse::load(EditorResourceManager::universeFile());
+    EditorUniverse * universe = EditorUniverse::load(EditorResourceManager::testUniverseFile());
     assert(universe);
     bool ok = universe->build(resources);
     delete universe;

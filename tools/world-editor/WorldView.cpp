@@ -812,7 +812,7 @@ void WorldView::setStartingPoint(QString universeFile, int screenX, int screenY)
     EditorUniverse * universe = EditorUniverse::load(universeFile);
     universe->setStartWorld(m_world);
     universe->setStartPosition(absoluteX(screenX), absoluteY(screenY), m_selectedLayer);
-    universe->save();
+    universe->save(universeFile);
     delete universe;
 
     updateUniverseCache();

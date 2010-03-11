@@ -52,9 +52,12 @@ EditorUniverse * EditorUniverse::load(QString filename)
     return out;
 }
 
-void EditorUniverse::save()
+void EditorUniverse::save(QString _filename)
 {
-    QString filename = QDir(EditorResourceManager::universesDir()).absoluteFilePath(m_name);
+    QString filename = _filename;
+    if (_filename.isNull())
+        filename = QDir(EditorResourceManager::universesDir()).absoluteFilePath(m_name);
+
     QFile file(filename);
     file.open(QIODevice::WriteOnly | QIODevice::Text);
 

@@ -14,8 +14,8 @@ public:
     // load from disk
     static EditorUniverse * load(QString file);
 
-    // save to disk
-    void save();
+    // save to disk. By default to the universes folder
+    void save(QString file = QString());
 
     // changes a world's name, in memory and on disk.
     void renameWorld(QString oldName, QString newName);
