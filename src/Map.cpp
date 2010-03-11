@@ -8,10 +8,7 @@
 Map * Map::load(const char *buffer) {
     const char * cursor = buffer;
     int version = Utils::readInt(&cursor);
-    if (version != 3) {
-        std::cerr << "Unsupported Map version: " << version << std::endl;
-        return NULL;
-    }
+    assert(version == 4);
 
     int sizeX = Utils::readInt(&cursor);
     int sizeY = Utils::readInt(&cursor);

@@ -36,6 +36,7 @@ Universe * Universe::load(const char * buffer)
     for (int i = 0; i < worldCount; i++) {
         std::string worldId = Utils::readString(&cursor);
         World * world = ResourceManager::getWorld(worldId);
+        assert(world);
         if (world == NULL) {
             std::cerr << "Cannot continue loading Universe because a world failed to load." << std::endl;
             delete out;

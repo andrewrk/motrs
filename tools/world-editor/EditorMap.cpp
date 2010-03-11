@@ -379,6 +379,8 @@ bool EditorMap::build(ResourceFile & resources)
 {
     QByteArray mapData;
 
+    mapData.append("M");
+
     // version
     mapData.append((char *) &c_codeVersion, 4);
 
@@ -450,6 +452,16 @@ bool EditorMap::build(ResourceFile & resources)
         // always sparse array
         int arrayType = Map::ltSparse;
         mapData.append((char *) &arrayType, 4);
+
+        // calculate number of sparse tiles
+        int sparseTileCount = 0;
+        for (int i=0; i<objectInstances.size(); ++i) {
+            MapObject * instance = objectInstances.at(i);
+            EditorObject * object = instance->object;
+            sparseTileCount += object->tileCountX() * object->tileCountY();
+        }
+        mapData.append((char *) &sparseTileCount, 4);
+
         for (int i=0; i<objectInstances.size(); ++i) {
             MapObject * instance = objectInstances.at(i);
             EditorObject * object = instance->object;

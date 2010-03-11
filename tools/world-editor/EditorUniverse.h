@@ -26,10 +26,6 @@ public:
     // resources. returns success
     bool build(ResourceFile & resources);
 
-    // compile into binary. allocates memory. if size is supplied, the size
-    // of the binary data is written to it.
-    char * compile(int * size = NULL);
-
     // set the starting point
     void setStartWorld(EditorWorld * world);
     void setStartPosition(int x, int y, int story); // absolute coordinates

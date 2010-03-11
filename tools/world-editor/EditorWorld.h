@@ -35,10 +35,6 @@ public:
     // returns success
     bool build(ResourceFile & resources);
 
-    // compile the world and return a buffer. if size is specified, sets
-    // it to the size of the binary data
-    char * compile(int * size = NULL);
-
 private: //variables
     static const int c_codeVersion;
 

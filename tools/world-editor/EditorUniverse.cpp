@@ -96,44 +96,6 @@ void EditorUniverse::removeWorld(QString worldName)
     m_worlds.removeOne(worldName);
 }
 
-char * EditorUniverse::compile(int * size)
-{
-    QByteArray out;
-
-    // identifier character
-    out.append("U");
-
-    // code version
-    out.append((const char *) &c_codeVersion, 4);
-
-    // number of worlds
-    int worldCount = m_worlds.size();
-    out.append((const char *) &worldCount, 4);
-
-    // names of worlds, in order
-    foreach (QString worldName, m_worlds) {
-        int worldNameSize = worldName.size();
-        out.append((const char *) &worldNameSize, 4);
-        out.append(worldName);
-    }
-
-    // player name
-    int playerNameSize = m_player.size();
-    out.append((const char *) &playerNameSize, 4);
-    out.append(m_player);
-
-    // start world index, x, y, z
-    out.append((const char *) &m_startWorld, 4);
-    out.append((const char *) &m_startX, 4);
-    out.append((const char *) &m_startY, 4);
-    out.append((const char *) &m_startLayer, 4);
-
-    if (size != NULL)
-        *size = out.size();
-
-    return out.data();
-}
-
 bool EditorUniverse::build(ResourceFile & resources)
 {
     // build each world
@@ -157,9 +119,37 @@ bool EditorUniverse::build(ResourceFile & resources)
     }
 
     // put the compiled universe into resources.dat
-    int size;
-    char * data = compile(&size);
-    resources.updateResource(m_name.toStdString(), data, size);
+    QByteArray data;
+
+    // identifier character
+    data.append("U");
+
+    // code version
+    data.append((char *) &c_codeVersion, 4);
+
+    // number of worlds
+    int worldCount = m_worlds.size();
+    data.append((char *) &worldCount, 4);
+
+    // names of worlds, in order
+    foreach (QString worldName, m_worlds) {
+        int worldNameSize = worldName.size();
+        data.append((char *) &worldNameSize, 4);
+        data.append(worldName);
+    }
+
+    // player name
+    int playerNameSize = m_player.size();
+    data.append((char *) &playerNameSize, 4);
+    data.append(m_player);
+
+    // start world index, x, y, z
+    data.append((char *) &m_startWorld, 4);
+    data.append((char *) &m_startX, 4);
+    data.append((char *) &m_startY, 4);
+    data.append((char *) &m_startLayer, 4);
+
+    resources.updateResource("main.universe", data.constData(), data.size());
 
     return true;
 }

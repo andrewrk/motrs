@@ -357,6 +357,9 @@ bool EditorObject::build(ResourceFile & resources)
 
                 // create the binary data
                 QByteArray tile;
+                // magic character
+                tile.append("G");
+
                 int codeVersion = 1;
                 tile.append((char *) &codeVersion, 4);
 

@@ -154,42 +154,6 @@ void EditorWorld::calculateBoundaries()
     m_width = right - left;
 }
 
-char * EditorWorld::compile(int *size)
-{
-    QByteArray out;
-
-    // character identifier
-    out.append("W");
-
-    // version
-    out.append((const char *) &c_codeVersion, 4);
-
-    // number of maps
-    int mapCount = m_maps.size();
-    out.append((const char *) &mapCount, 4);
-
-    for (int i=0; i<m_maps.size(); ++i) {
-        int left = (int) round(m_left);
-        int top = (int) round(m_top);
-        int layer = 0; // TODO: support stories or something
-
-        // map x,y,z
-        out.append((const char *) &left, 4);
-        out.append((const char *) &top, 4);
-        out.append((const char *) &layer, 4);
-
-        // map name
-        int nameSize = m_name.size();
-        out.append((const char *) &nameSize, 4);
-        out.append(m_name);
-    }
-
-    if (size != NULL)
-        *size = out.size();
-
-    return out.data();
-}
-
 bool EditorWorld::build(ResourceFile &resources)
 {
     // build each map
@@ -204,9 +168,37 @@ bool EditorWorld::build(ResourceFile &resources)
     }
 
     // compile world and put in resources
-    int size;
-    char * data = compile(&size);
-    resources.updateResource(m_name.toStdString(), data, size);
+    QByteArray worldData;
+
+    // character identifier
+    worldData.append("W");
+
+    // version
+    worldData.append((const char *) &c_codeVersion, 4);
+
+    // number of maps
+    int mapCount = m_maps.size();
+    worldData.append((const char *) &mapCount, 4);
+
+    for (int i=0; i<m_maps.size(); ++i) {
+        EditorMap * map = m_maps.at(i);
+
+        int left = (int) round(map->left());
+        int top = (int) round(map->top());
+        int layer = 0; // TODO: support stories or something
+
+        // map x,y,z
+        worldData.append((const char *) &left, 4);
+        worldData.append((const char *) &top, 4);
+        worldData.append((const char *) &layer, 4);
+
+        // map name
+        int nameSize = map->name().size();
+        worldData.append((const char *) &nameSize, 4);
+        worldData.append(map->name());
+    }
+
+    resources.updateResource(m_name.toStdString(), worldData.constData(), worldData.size());
 
     return true;
 }
