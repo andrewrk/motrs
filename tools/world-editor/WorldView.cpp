@@ -4,6 +4,7 @@
 #include "EditorResourceManager.h"
 #include "EditorSettings.h"
 #include "EditorGlobals.h"
+#include "EditorUniverse.h"
 
 #include <QPainter>
 #include <QDebug>
@@ -33,15 +34,19 @@ WorldView::WorldView(WorldEditor * window, QWidget * parent) :
     m_selectedMap(NULL),
     m_mouseDownTool(mtNothing),
     m_mouseState(msNormal),
-    m_dragObject(NULL)
+    m_dragObject(NULL),
+    m_universe(NULL),
+    m_testUniverse(NULL)
 {
+    QDir localData(EditorResourceManager::localDataDir());
+    m_startPixmap = new QPixmap(localData.absoluteFilePath("StartBox.png"));
+    m_testStartPixmap = new QPixmap(localData.absoluteFilePath("TestStartBox.png"));
+
     m_hsb->show();
     m_vsb->show();
 
     connect(m_vsb, SIGNAL(valueChanged(int)), this, SLOT(verticalScroll(int)));
     connect(m_hsb, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
-
-    updateViewCache();
 
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
@@ -49,12 +54,18 @@ WorldView::WorldView(WorldEditor * window, QWidget * parent) :
     // refresh the display to animate
     connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(update()));
     m_animationTimer.start(100);
+
+    updateUniverseCache();
+    updateViewCache();
 }
 
 WorldView::~WorldView()
 {
-    if( m_world )
-        delete m_world;
+    delete m_startPixmap;
+    delete m_testStartPixmap;
+    delete m_world;
+    delete m_universe;
+    delete m_testUniverse;
 }
 
 void WorldView::refreshGui()
@@ -81,15 +92,15 @@ void WorldView::updateViewCache()
     m_mapCache.clear();
     if( m_world ) {
         // select the maps that are in range
-        std::vector<Map*> * maps = m_world->maps();
-        double viewLeft = absoluteX(0);
-        double viewTop = absoluteY(0);
-        double viewRight = viewLeft + this->width() * m_zoom;
-        double viewBottom = viewTop + this->height() * m_zoom;
+        const QList<EditorMap *> * maps = m_world->maps();
+        int viewLeft = absoluteX(0);
+        int viewTop = absoluteY(0);
+        int viewRight = viewLeft + this->width() * m_zoom;
+        int viewBottom = viewTop + this->height() * m_zoom;
         m_maxLayer = 0;
-        for(unsigned int i=0; i < maps->size(); ++i) {
+        for(int i=0; i < maps->size(); ++i) {
             // determine if the map is in range
-            EditorMap * map = (EditorMap *) maps->at(i);
+            EditorMap * map = maps->at(i);
 
             if (!(map->left() > viewRight || map->top() > viewBottom ||
                   map->left() + map->width() < viewLeft || map->top() + map->height() < viewTop))
@@ -178,6 +189,10 @@ void WorldView::paintEvent(QPaintEvent * e)
         for (int i = 0; i < m_mapCache.size(); i++)
             p.drawRect(screenRect(m_mapCache[i]->geometry()));
 
+        // draw start point and test start point
+        drawStartBox(p, m_universe, m_startPixmap);
+        drawStartBox(p, m_testUniverse, m_testStartPixmap);
+
         // draw selected map outline in blue
         if (m_selectedMap != NULL) {
             p.setPen(QPen(Qt::blue, 3));
@@ -220,6 +235,19 @@ void WorldView::paintEvent(QPaintEvent * e)
     }
 }
 
+void WorldView::drawStartBox(QPainter &p, EditorUniverse *universe, QPixmap *pixmap)
+{
+    if (m_world == NULL)
+        return;
+    if (universe->startWorldName().compare(m_world->name()) != 0)
+        return;
+    int arbitraryWidth = 40;
+    int arbitraryHeight = 40;
+    int drawX = screenX(universe->startX()) - arbitraryWidth / 2;
+    int drawY = screenY(universe->startY()) - arbitraryHeight / 2;
+    p.drawPixmap(drawX, drawY, arbitraryWidth, arbitraryHeight, *pixmap);
+}
+
 void WorldView::drawObject(QPainter &p, EditorMap::MapObject * object, int layerIndex, EditorMap * map)
 {
     // paint all the graphics which are at the layer we want
@@ -245,28 +273,28 @@ void WorldView::drawGrid(QPainter &p)
         else
             p.setPen(QColor(128, 128, 128));
 
-        double gameLeft = absoluteX(0);
-        double gameTop = absoluteY(0);
-        double gameRight = absoluteX(this->width());
-        double gameBottom = absoluteY(this->height());
-        double gridX = gameLeft - std::fmod(gameLeft, Tile::size);
-        double gridY = gameTop - std::fmod(gameTop, Tile::size);
+        int gameLeft = absoluteX(0);
+        int gameTop = absoluteY(0);
+        int gameRight = absoluteX(this->width());
+        int gameBottom = absoluteY(this->height());
+        int gridX = gameLeft - std::fmod(gameLeft, Tile::size);
+        int gridY = gameTop - std::fmod(gameTop, Tile::size);
 
         if( gridType == EditorSettings::Pretty || gridType == EditorSettings::Solid ) {
             while(gridX < gameRight) {
-                double drawX = screenX(gridX);
+                int drawX = screenX(gridX);
                 p.drawLine((int)drawX, 0, (int)drawX, this->height());
                 gridX += Tile::size;
             }
 
             while(gridY < gameBottom) {
-                double drawY = screenY(gridY);
+                int drawY = screenY(gridY);
                 p.drawLine(0, (int)drawY, this->width(), (int)drawY);
                 gridY += Tile::size;
             }
         } else if( gridType == EditorSettings::Fast ) {
-            for(double y = gridY; y < gameBottom; y+=Tile::size) {
-                for(double x = gridX; x < gameRight; x+=Tile::size)
+            for(int y = gridY; y < gameBottom; y+=Tile::size) {
+                for(int x = gridX; x < gameRight; x+=Tile::size)
                     p.drawPoint((int)screenX(x), (int)screenY(y));
             }
         }
@@ -294,12 +322,12 @@ QRectF WorldView::absoluteRect(QRect screenRect)
     return out;
 }
 
-int WorldView::screenX(double absoluteX)
+int WorldView::screenX(int absoluteX)
 {
     return (int)(absoluteX - m_offsetX) * m_zoom;
 }
 
-int WorldView::screenY(double absoluteY)
+int WorldView::screenY(int absoluteY)
 {
     return (int)(absoluteY - m_offsetY) * m_zoom;
 }
@@ -314,32 +342,32 @@ QRect WorldView::mapToScreenRect(QRectF mapRect, EditorMap * map)
     return out;
 }
 
-int WorldView::mapToScreenX(double mapX, EditorMap * map)
+int WorldView::mapToScreenX(int mapX, EditorMap * map)
 {
     return screenX(mapX + map->left());
 }
 
-int WorldView::mapToScreenY(double mapY, EditorMap * map)
+int WorldView::mapToScreenY(int mapY, EditorMap * map)
 {
     return screenY(mapY + map->top());
 }
 
-double WorldView::mapX(int screenX, EditorMap * map)
+int WorldView::mapX(int screenX, EditorMap * map)
 {
     return (screenX / m_zoom) + m_offsetX - map->left();
 }
 
-double WorldView::mapY(int screenY, EditorMap * map)
+int WorldView::mapY(int screenY, EditorMap * map)
 {
     return (screenY / m_zoom) + m_offsetY - map->top();
 }
 
-double WorldView::absoluteX(int screenX)
+int WorldView::absoluteX(int screenX)
 {
     return (screenX / m_zoom) + m_offsetX;
 }
 
-double WorldView::absoluteY(int screenY)
+int WorldView::absoluteY(int screenY)
 {
     return (screenY / m_zoom) + m_offsetY;
 }
@@ -355,12 +383,12 @@ int WorldView::snapScreenY(int y)
     return screenY(snapAbsoluteY(absoluteY(y)));
 }
 
-double WorldView::snapAbsoluteX(double x)
+int WorldView::snapAbsoluteX(int x)
 {
     return round(x / Tile::size) * Tile::size;
 }
 
-double WorldView::snapAbsoluteY(double y)
+int WorldView::snapAbsoluteY(int y)
 {
     return round(y / Tile::size) * Tile::size;
 }
@@ -370,8 +398,8 @@ bool WorldView::overMapLeft(int x, int y)
     if( ! m_selectedMap )
         return false;
 
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
 
     return  absX > m_selectedMap->left() - g_lineSelectRadius &&
             absX < m_selectedMap->left() + g_lineSelectRadius &&
@@ -383,8 +411,8 @@ bool WorldView::overMapTop(int x, int y)
     if( ! m_selectedMap )
         return false;
 
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
 
     return  absX > m_selectedMap->left() && absX < m_selectedMap->left() + m_selectedMap->width() &&
             absY > m_selectedMap->top() - g_lineSelectRadius &&
@@ -395,8 +423,8 @@ bool WorldView::overMapRight(int x, int y)
     if( ! m_selectedMap )
         return false;
 
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
 
     return  absX > m_selectedMap->left() + m_selectedMap->width() - g_lineSelectRadius &&
             absX < m_selectedMap->left() + m_selectedMap->width() + g_lineSelectRadius &&
@@ -408,8 +436,8 @@ bool WorldView::overMapBottom(int x, int y)
     if( ! m_selectedMap )
         return false;
 
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
 
     return  absX > m_selectedMap->left() && absX < m_selectedMap->left() + m_selectedMap->width() &&
             absY > m_selectedMap->top() + m_selectedMap->height() - g_lineSelectRadius &&
@@ -421,8 +449,8 @@ bool WorldView::overSelectedMap(int x, int y)
     if( ! m_selectedMap )
         return false;
 
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
 
     return  absX > m_selectedMap->left() && absX < m_selectedMap->left() + m_selectedMap->width() &&
             absY > m_selectedMap->top() && absY < m_selectedMap->top() + m_selectedMap->height();
@@ -474,8 +502,9 @@ void WorldView::determineCursor()
             case mtCenter: break;
             case mtPencil: break;
             case mtBrush: break;
-            case mtSetStartPoint: break;
             case mtCreateMap: break;
+            case mtSetRealStartPoint: break;
+            case mtSetTestStartPoint: break;
             }
         } break;
     case msStretchMapLeft: break;
@@ -497,10 +526,14 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
 
     int screenDeltaX = e->x() - m_mouseDownX;
     int screenDeltaY = e->y() - m_mouseDownY;
-    double deltaX = screenDeltaX * m_zoom;
-    double deltaY = screenDeltaY * m_zoom;
+    int deltaX = screenDeltaX * m_zoom;
+    int deltaY = screenDeltaY * m_zoom;
 
     determineCursor();
+
+    if (m_world == NULL)
+        return;
+
     switch(m_mouseState) {
     case msNormal:
         {
@@ -513,6 +546,8 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
                     SelectableItem item = selectableItemAt(e->x(), e->y());
                     while (! item.isNull()) {
                         // delete this item
+                        if (itemIsSelected(item))
+                            deselectItem(item);
                         deleteSelectableItem(item);
                         item = selectableItemAt(e->x(), e->y());
                     }
@@ -525,8 +560,9 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
             case mtBrush:
                 drawSelectedObjectAt(e->x(), e->y());
                 break;
-            case mtSetStartPoint: break;
             case mtCreateMap: break;
+            case mtSetRealStartPoint: break;
+            case mtSetTestStartPoint: break;
             }
             break;
         }
@@ -551,14 +587,14 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
     }
 }
 
-void WorldView::moveSelectedItems(double deltaX, double deltaY)
+void WorldView::moveSelectedItems(int deltaX, int deltaY)
 {
     // if a destination is not in a map, refuse to move it
     for (int i=0; i<m_selection.size(); ++i) {
         SelectableItem * item = m_selection.at(i);
 
-        double destX = mapToScreenX(item->mouseDownX + deltaX, item->parentMap());
-        double destY = mapToScreenY(item->mouseDownY + deltaY, item->parentMap());
+        int destX = mapToScreenX(item->mouseDownX + deltaX, item->parentMap());
+        int destY = mapToScreenY(item->mouseDownY + deltaY, item->parentMap());
 
         EditorMap * destMap = mapAt(destX, destY);
 
@@ -583,19 +619,23 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
     else
         return;
 
-    double deltaX = (e->x() - m_mouseDownX) * m_zoom;
-    double deltaY = (e->y() - m_mouseDownY) * m_zoom;
+    int deltaX = (e->x() - m_mouseDownX) * m_zoom;
+    int deltaY = (e->y() - m_mouseDownY) * m_zoom;
+
+    if (m_world == NULL)
+        return;
+
     switch(m_mouseState) {
     case msStretchMapLeft:
         {
-            double newLeft = snapAbsoluteX(m_selectedMap->left() + deltaX);
+            int newLeft = snapAbsoluteX(m_selectedMap->left() + deltaX);
             int deltaWidth = (int) ((m_selectedMap->left() - newLeft) / Tile::size);
             m_selectedMap->addTilesLeft(deltaWidth);
             break;
         }
     case msStretchMapTop:this->setCursor(Qt::ArrowCursor);
         {
-            double newTop = snapAbsoluteY(m_selectedMap->top() + deltaY);
+            int newTop = snapAbsoluteY(m_selectedMap->top() + deltaY);
             int deltaHeight = (int) ((m_selectedMap->top() - newTop) / Tile::size);
             m_selectedMap->addTilesTop(deltaHeight);
             break;
@@ -640,7 +680,6 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
         m_mouseState = msNormal;
         determineCursor();
     }
-
 
     updateScrollBars();
 
@@ -687,6 +726,9 @@ void WorldView::mousePressEvent(QMouseEvent * e)
     m_mouseDownX = e->x();
     m_mouseDownY = e->y();
     m_mouseDownTool = tool;
+
+    if (m_world == NULL)
+        return;
 
     switch( tool ){
     case mtNothing:
@@ -751,14 +793,39 @@ void WorldView::mousePressEvent(QMouseEvent * e)
     case mtBrush:
         mouseMoveEvent(e);
         break;
-    case mtSetStartPoint:
-        break;
     case mtCreateMap:
         m_mouseState = msCreateMap;
+        break;
+    case mtSetRealStartPoint:
+        setStartingPoint(EditorResourceManager::universeFile(), e->x(), e->y());
+        break;
+    case mtSetTestStartPoint:
+        setStartingPoint(EditorResourceManager::testUniverseFile(), e->x(), e->y());
         break;
     default:
         qDebug() << "Invalid tool selected in mousePressEvent";
     }
+}
+
+void WorldView::setStartingPoint(QString universeFile, int screenX, int screenY)
+{
+    EditorUniverse * universe = EditorUniverse::load(universeFile);
+    universe->setStartWorld(m_world);
+    universe->setStartPosition(absoluteX(screenX), absoluteY(screenY), m_selectedLayer);
+    universe->save();
+    delete universe;
+
+    updateUniverseCache();
+}
+
+void WorldView::updateUniverseCache()
+{
+    // load both playtest and real universe and update variables
+    delete m_universe;
+    m_universe = EditorUniverse::load(EditorResourceManager::universeFile());
+    delete m_testUniverse;
+    m_testUniverse = EditorUniverse::load(EditorResourceManager::testUniverseFile());
+    this->update();
 }
 
 void WorldView::drawSelectedObjectAt(int x, int y)
@@ -823,8 +890,8 @@ WorldView::SelectableItem WorldView::selectableItemAt(int x, int y)
     if (m_selectedMap == NULL)
         return SelectableItem();
 
-    double absX = mapX(x, m_selectedMap);
-    double absY = mapY(y, m_selectedMap);
+    int absX = mapX(x, m_selectedMap);
+    int absY = mapY(y, m_selectedMap);
 
     // get a list of all items at this point
     QList<SelectableItem> items;
@@ -864,8 +931,8 @@ WorldView::SelectableItem WorldView::selectableItemAt(int x, int y)
 
 EditorMap * WorldView::mapAt(int x, int y)
 {
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
 
     for(int i=0; i<m_mapCache.size(); ++i) {
         EditorMap * map = m_mapCache[i];
@@ -883,7 +950,7 @@ void WorldView::setWorld(EditorWorld * world)
     updateScrollBars();
 
     m_hsb->setValue((int)m_world->left());
-    m_vsb->setValue((int)(m_world->top()));
+    m_vsb->setValue((int)m_world->top());
 
     updateViewCache();
 
@@ -1130,6 +1197,17 @@ void WorldView::selectNone()
         delete m_selection.at(i);
     m_selection.clear();
     this->update();
+}
+
+void WorldView::deselectItem(SelectableItem & item)
+{
+    for (int i=0; i<m_selection.size(); ++i) {
+        if (m_selection.at(i)->equals(item)) {
+            delete m_selection.takeAt(i);
+            this->update();
+            return;
+        }
+    }
 }
 
 void WorldView::selectAll()

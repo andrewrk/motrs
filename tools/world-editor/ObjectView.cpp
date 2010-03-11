@@ -441,22 +441,22 @@ void ObjectView::drawGrid(QPainter &p)
     }
 }
 
-int ObjectView::screenX(double absoluteX)
+int ObjectView::screenX(int absoluteX)
 {
     return (int)(absoluteX - m_offsetX) * m_zoom;
 }
 
-int ObjectView::screenY(double absoluteY)
+int ObjectView::screenY(int absoluteY)
 {
     return (int)(absoluteY - m_offsetY) * m_zoom;
 }
 
-double ObjectView::absoluteX(int screenX)
+int ObjectView::absoluteX(int screenX)
 {
     return (screenX / m_zoom) + m_offsetX;
 }
 
-double ObjectView::absoluteY(int screenY)
+int ObjectView::absoluteY(int screenY)
 {
     return (screenY / m_zoom) + m_offsetY;
 }
@@ -472,12 +472,12 @@ int ObjectView::snapScreenY(int y)
     return screenY(snapAbsoluteY(absoluteY(y)));
 }
 
-double ObjectView::snapAbsoluteX(double x)
+int ObjectView::snapAbsoluteX(int x)
 {
     return round(x / Tile::size) * Tile::size;
 }
 
-double ObjectView::snapAbsoluteY(double y)
+int ObjectView::snapAbsoluteY(int y)
 {
     return round(y / Tile::size) * Tile::size;
 }
@@ -668,8 +668,8 @@ void ObjectView::initializePixmapCache()
 
 EditorObject::ObjectGraphic * ObjectView::graphicAt(int x, int y)
 {
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
     QList<QList<EditorObject::ObjectGraphic *> *> * graphics = m_object->graphics();
     for(int layer=m_object->layerCount()-1; layer >= 0; --layer) {
         if( m_window->layersList()->item(layer)->checkState() == Qt::Checked ) {
@@ -689,9 +689,9 @@ bool ObjectView::overGraphicLeft(int x, int y)
     if( ! m_selectedGraphic )
         return false;
 
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
-    double scaledRadius = g_lineSelectRadius / m_zoom;
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
+    int scaledRadius = g_lineSelectRadius / m_zoom;
 
     return  absX > m_selectedGraphic->x - scaledRadius &&
             absX < m_selectedGraphic->x + scaledRadius &&
@@ -703,9 +703,9 @@ bool ObjectView::overGraphicTop(int x, int y)
     if( ! m_selectedGraphic )
         return false;
 
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
-    double scaledRadius = g_lineSelectRadius / m_zoom;
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
+    int scaledRadius = g_lineSelectRadius / m_zoom;
 
     return  absX > m_selectedGraphic->x && absX < m_selectedGraphic->x + m_selectedGraphic->width &&
             absY > m_selectedGraphic->y - scaledRadius &&
@@ -716,9 +716,9 @@ bool ObjectView::overGraphicRight(int x, int y)
     if( ! m_selectedGraphic )
         return false;
 
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
-    double scaledRadius = g_lineSelectRadius / m_zoom;
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
+    int scaledRadius = g_lineSelectRadius / m_zoom;
 
     return  absX > m_selectedGraphic->x + m_selectedGraphic->width - scaledRadius &&
             absX < m_selectedGraphic->x + m_selectedGraphic->width + scaledRadius &&
@@ -730,9 +730,9 @@ bool ObjectView::overGraphicBottom(int x, int y)
     if( ! m_selectedGraphic )
         return false;
 
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
-    double scaledRadius = g_lineSelectRadius / m_zoom;
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
+    int scaledRadius = g_lineSelectRadius / m_zoom;
 
     return  absX > m_selectedGraphic->x && absX < m_selectedGraphic->x + m_selectedGraphic->width &&
             absY > m_selectedGraphic->y + m_selectedGraphic->height - scaledRadius &&
@@ -744,8 +744,8 @@ bool ObjectView::overSelectedGraphic(int x, int y)
     if( ! m_selectedGraphic )
         return false;
 
-    double absX = absoluteX(x);
-    double absY = absoluteY(y);
+    int absX = absoluteX(x);
+    int absY = absoluteY(y);
 
     return  absX > m_selectedGraphic->x && absX < m_selectedGraphic->x + m_selectedGraphic->width &&
             absY > m_selectedGraphic->y && absY < m_selectedGraphic->y + m_selectedGraphic->height;
@@ -819,8 +819,8 @@ void ObjectView::mouseReleaseEvent(QMouseEvent * e)
 
 void ObjectView::doDragAction(int x, int y)
 {
-    double deltaX = (x - m_mouseDownX) / m_zoom;
-    double deltaY = (y - m_mouseDownY) / m_zoom;
+    int deltaX = (x - m_mouseDownX) / m_zoom;
+    int deltaY = (y - m_mouseDownY) / m_zoom;
     switch(m_mouseState) {
         case msStretchGraphicLeft:
             m_selectedGraphic->x = m_startX + deltaX;

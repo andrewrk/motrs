@@ -9,8 +9,7 @@
 #include <QPixmap>
 
 // provides a unified API to the editor regarding animations and graphics
-// has a compile method which converts it to a game engine Graphic
-class EditorGraphic : public Graphic
+class EditorGraphic
 {
     friend class EditorGraphicTimer;
 public:
@@ -22,7 +21,6 @@ public:
 
     void draw(QPainter & p, int x, int y, int width, int height);
     void draw(QPainter & p, int x, int y);
-
 
     // get the size in pixels
     inline int width();
@@ -41,7 +39,9 @@ private: //variables
     int m_width;
     int m_height;
 
-
+    int m_frameCount;
+    int m_fps;
+    int m_offset;
 
 private: //methods
     EditorGraphic();

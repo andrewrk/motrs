@@ -23,7 +23,7 @@ public:
     int width();
     int height();
 
-protected: //variables
+private: //variables
     /*  storage format:
         Uint32 GraphicType
         Uint32 StorageType
@@ -64,7 +64,7 @@ protected: //variables
 
     std::vector<sf::IntRect> m_spriteBounds; // boundaries of each sprite
 
-protected: //methods
+private: //methods
     Graphic();
 
     int currentFrame();

@@ -7,8 +7,13 @@
 #include <QStringList>
 #include <QDir>
 
+const int EditorWorld::c_codeVersion = 1;
+
 EditorWorld::EditorWorld() :
-    World()
+    m_left(0),
+    m_top(0),
+    m_width(0),
+    m_height(0)
 {
 }
 
@@ -39,10 +44,9 @@ EditorWorld * EditorWorld::load(QString file)
     for(int i=0; i<props.size(); ++i) {
         if( props[i].first.compare("version", Qt::CaseInsensitive) == 0 ) {
             int fileVersion = props[i].second.toInt();
-            int codeVersion = 1;
-            if( fileVersion != codeVersion ) {
+            if( fileVersion != c_codeVersion ) {
                 qDebug() << "Tried to open version  " << fileVersion <<
-                    " with version " << codeVersion << " code.";
+                    " with version " << c_codeVersion << " code.";
                 delete out;
                 return NULL;
             }
@@ -60,7 +64,7 @@ EditorWorld * EditorWorld::load(QString file)
                 delete out;
                 return NULL;
             }
-            map->setPosition(coords[0].toDouble(), coords[1].toDouble(), coords[2].toInt());
+            map->setPosition(coords[0].toInt(), coords[1].toInt(), coords[2].toInt());
             out->m_maps.push_back(map);
         } else {
             qDebug() << "Unrecognized World property: " << props[i].first;
@@ -77,8 +81,8 @@ EditorWorld * EditorWorld::load(QString file)
 void EditorWorld::save()
 {
     // save each map
-    for (unsigned int i=0; i<m_maps.size(); ++i) {
-        EditorMap * map = (EditorMap *) m_maps.at(i);
+    for (int i=0; i<m_maps.size(); ++i) {
+        EditorMap * map = m_maps.at(i);
         map->save();
     }
 
@@ -95,11 +99,11 @@ void EditorWorld::save()
 
     QTextStream out(&file);
 
-    out << "version=1\n\n";
+    out << "version=" << c_codeVersion << "\n\n";
     out << "# A world is a list of map declarations and where they are.\n";
     out << "# map=x,y,z,id\n";
-    for (unsigned int i=0; i<m_maps.size(); ++i) {
-        EditorMap * map = (EditorMap *) m_maps.at(i);
+    for (int i=0; i<m_maps.size(); ++i) {
+        EditorMap * map = m_maps.at(i);
         // TODO: support stories
         out << "map=" << map->left() << "," << map->top() << "," << 0 << "," << map->name() << "\n";
     }
@@ -124,13 +128,13 @@ void EditorWorld::calculateBoundaries()
     }
 
     EditorMap * map = (EditorMap *) m_maps.at(0);
-    double left = map->left();
-    double top = map->top();
-    double right = left + map->width();
-    double bottom = top + map->height();
+    int left = map->left();
+    int top = map->top();
+    int right = left + map->width();
+    int bottom = top + map->height();
 
-    for (unsigned int i = 1; i < m_maps.size(); i++) {
-        map = (EditorMap *) m_maps.at(i);
+    for (int i = 1; i < m_maps.size(); i++) {
+        map = m_maps.at(i);
 
         if (left > map->left())
             left = map->left();
@@ -148,4 +152,61 @@ void EditorWorld::calculateBoundaries()
     m_top = top;
     m_height = bottom - top;
     m_width = right - left;
+}
+
+char * EditorWorld::compile(int *size)
+{
+    QByteArray out;
+
+    // character identifier
+    out.append("W");
+
+    // version
+    out.append((const char *) &c_codeVersion, 4);
+
+    // number of maps
+    int mapCount = m_maps.size();
+    out.append((const char *) &mapCount, 4);
+
+    for (int i=0; i<m_maps.size(); ++i) {
+        int left = (int) round(m_left);
+        int top = (int) round(m_top);
+        int layer = 0; // TODO: support stories or something
+
+        // map x,y,z
+        out.append((const char *) &left, 4);
+        out.append((const char *) &top, 4);
+        out.append((const char *) &layer, 4);
+
+        // map name
+        int nameSize = m_name.size();
+        out.append((const char *) &nameSize, 4);
+        out.append(m_name);
+    }
+
+    if (size != NULL)
+        *size = out.size();
+
+    return out.data();
+}
+
+bool EditorWorld::build(ResourceFile &resources)
+{
+    // build each map
+    for (int i=0; i<m_maps.size(); ++i) {
+        EditorMap * map = m_maps.at(i);
+        bool ok = map->build(resources);
+
+        if (! ok) {
+            qDebug() << QObject::tr("Unable to build world: map ") << map->name() << QObject::tr(" failed to build.");
+            return false;
+        }
+    }
+
+    // compile world and put in resources
+    int size;
+    char * data = compile(&size);
+    resources.updateResource(m_name.toStdString(), data, size);
+
+    return true;
 }

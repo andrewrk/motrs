@@ -14,7 +14,10 @@ const int EditorGraphic::c_gameFps = 48;
 EditorGraphicTimer * EditorGraphic::s_timer = NULL;
 
 EditorGraphic::EditorGraphic() :
-    m_frames()
+    m_frames(),
+    m_frameCount(1),
+    m_fps(1),
+    m_offset(0)
 {
 }
 

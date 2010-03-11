@@ -1,8 +1,8 @@
 #ifndef EDITORMAP_H
 #define EDITORMAP_H
 
-#include "Map.h"
 #include "EditorObject.h"
+#include "ResourceFile.h"
 
 #include <QString>
 #include <QList>
@@ -10,11 +10,10 @@
 class EditorWorld;
 class EditorEntity;
 
-// An EditorMap has a list of EditorObjects and EditorEntities that are tile-aligned.
+// An EditorMap has a list of EditorObjects that are tile-aligned and
+// EditorEntities that are pixel-aligned (but still with respect to the map)
 // The game editor can use this class to edit maps that have movable EditorObjects and EditorEntities
-// Call the compile() method to turn it into a real Map which will break
-// the EditorObjects into tiles
-class EditorMap : public Map
+class EditorMap
 {
 public: //variables
     struct MapObject {
@@ -63,13 +62,16 @@ public: //methods
 
     void save();
 
-    void setLeft(double value);
-    void setTop(double value);
-    void setWidth(double value);
-    void setHeight(double value);
-    double width();
-    double height();
+    void setLeft(int value);
+    void setTop(int value);
+    void setWidth(int value);
+    void setHeight(int value);
+    void setPosition(int x, int y, int story);
 
+    inline int left();
+    inline int top();
+    int width();
+    int height();
     QRectF geometry();
 
     void addLayer(QString name = "");
@@ -105,6 +107,14 @@ public: //methods
     void setWorld(EditorWorld * world);
     EditorWorld * world();
 
+    // compile the map and its dependencies, and put into resources file.
+    // returns success
+    bool build(ResourceFile & resources);
+
+    // compile the world and return a buffer. if size is specified, sets
+    // it to the size of the binary data
+    char * compile(int * size = NULL);
+
 private: //variables
     // we simply remember the dimensions because we don't actually have a tile
     // grid until we compile into a Map
@@ -116,6 +126,10 @@ private: //variables
     QString m_name;
 
     EditorWorld * m_world;
+
+    int m_left;
+    int m_top;
+    int m_story;
 private: //methods
     EditorMap();
 };
@@ -143,6 +157,16 @@ inline const EditorMap::MapLayer * EditorMap::layer(int index) const
 inline QString EditorMap::name() const
 {
     return m_name;
+}
+
+inline int EditorMap::left()
+{
+    return m_left;
+}
+
+inline int EditorMap::top()
+{
+    return m_top;
 }
 
 #endif

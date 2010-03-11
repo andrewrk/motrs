@@ -32,14 +32,14 @@ EditorEntity * EditorEntity::load(QString file)
         } else if( props[i].first.compare("contact", Qt::CaseInsensitive) == 0 ) {
             // contact=cx,cy,r
             QStringList contactProps = props[i].second.split(",");
-            out->m_centerOffsetX = contactProps.at(0).toDouble();
-            out->m_centerOffsetY = contactProps.at(1).toDouble();
-            out->m_radius = contactProps.at(2).toDouble();
+            out->m_centerOffsetX = contactProps.at(0).toInt();
+            out->m_centerOffsetY = contactProps.at(1).toInt();
+            out->m_radius = contactProps.at(2).toInt();
         } else if( props[i].first.compare("specs", Qt::CaseInsensitive) == 0 ) {
             // specs = speed, mass
             QStringList specs = props[i].second.split(",");
-            out->m_speed = specs.at(0).toDouble();
-            out->m_mass = specs.at(1).toDouble();
+            out->m_speed = specs.at(0).toInt();
+            out->m_mass = specs.at(1).toInt();
         } else if( props[i].first.compare("stand", Qt::CaseInsensitive) == 0 ) {
             // nw,w,sw,n,c,s,ne,e,se
             QStringList standGraphics = props[i].second.split(",");
@@ -72,4 +72,10 @@ QRectF EditorEntity::geometry()
 void EditorEntity::setParent(EditorMap * map)
 {
     m_parent = map;
+}
+
+void EditorEntity::setCenter(int centerX, int centerY)
+{
+    m_centerX = centerX;
+    m_centerY = centerY;
 }

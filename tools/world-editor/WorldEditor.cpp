@@ -151,8 +151,9 @@ void WorldEditor::fillToolComboBox(QComboBox & cbo)
         m_toolNames << "Center";
         m_toolNames << "Pencil";
         m_toolNames << "Brush";
-        m_toolNames << "SetStartingPoint";
-        m_toolNames << "CreateMap";
+        m_toolNames << "Create Map";
+        m_toolNames << "Set Real Starting Point";
+        m_toolNames << "Set Test Starting Point";
     }
 
     cbo.clear();
@@ -434,22 +435,32 @@ void WorldEditor::on_lstWorlds_customContextMenuRequested(QPoint pos)
 
 void WorldEditor::on_actionTest_triggered()
 {
-    // call compile on the universe which will generate a resources.dat file
+    // if there is an ongoing playtest, abort
+    if (m_playtestThread != NULL)
+        return;
+
+    // call build on the universe and generate a resources.dat file
     // in this folder ready to be played.
+    ResourceFile resources(QDir(QApplication::applicationDirPath()).absoluteFilePath("resources.dat").toStdString());
+    if (! resources.isOpen()) {
+        QMessageBox::critical(this, tr("Error playtesting"), tr("Error playtesting: could not open the resources file"));
+        return;
+    }
+
     EditorUniverse * universe = EditorUniverse::load(EditorResourceManager::universeFile());
     assert(universe);
-    //universe->compile();
+    bool ok = universe->build(resources);
     delete universe;
 
-    // start the gameplay thread
-    if (m_playtestThread == NULL) {
-        m_playtestThread = new PlaytestThread();
-        connect(m_playtestThread, SIGNAL(finished()), this, SLOT(deletePlaytestThread()));
-        m_playtestThread->start();
-    } else {
-        m_playtestThread->endGameplay();
-        m_playtestThread->start();
+    if (! ok) {
+        QMessageBox::critical(this, tr("Error playtesting"), tr("Error playtesting: Unable to build the universe"));
+        return;
     }
+
+    // start the gameplay thread
+    m_playtestThread = new PlaytestThread();
+    connect(m_playtestThread, SIGNAL(finished()), this, SLOT(deletePlaytestThread()));
+    m_playtestThread->start();
 }
 
 void WorldEditor::deletePlaytestThread()

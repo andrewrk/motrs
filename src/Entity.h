@@ -82,7 +82,7 @@ public:
     void resolveCollision(Entity * other);
     void draw(double screenX, double screenY);
 
-protected:
+private:
     enum Shape {
         Shapeless = 0,
         Circle = 1,

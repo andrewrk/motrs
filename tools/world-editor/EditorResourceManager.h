@@ -14,9 +14,6 @@ public:
     // read a text file that uses the properties format into a list
     static bool loadTextFile(QString file, QList< QPair<QString, QString> > & out_list);
 
-    // the folder that contains all the in game data
-    static QString dataDir();
-
     // specific folders within dataDir
     static QString entitiesDir();
     static QString graphicsDir();
@@ -24,10 +21,15 @@ public:
     static QString objectsDir();
     static QString worldsDir();
     static QString universesDir();
+
     static QString universeFile();
+    static QString testUniverseFile();
 
     // the resources that don't have to do with in-game graphics (editor resources)
     static QString localDataDir();
+
+    // where to put world editor config files
+    static QString workingDataDir();
 
     // get the EditorGraphic that represents the graphic name. don't worry
     // about calling it twice - it uses a cache.

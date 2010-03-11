@@ -53,8 +53,8 @@ EditorMap * EditorMap::load(QString file)
         } else if( props[i].first.compare("entity", Qt::CaseInsensitive) == 0 ) {
             // entity=x,y,layer,id
             QStringList entityProps = props[i].second.split(",");
-            double x = entityProps.at(0).toDouble();
-            double y = entityProps.at(1).toDouble();
+            int x = entityProps.at(0).toInt();
+            int y = entityProps.at(1).toInt();
             int layerIndex = entityProps.at(2).toInt();
             QString entityFileTitle = entityProps.at(3);
 
@@ -191,23 +191,23 @@ void EditorMap::removeEntity(EditorEntity * entity)
     m_layers.at(entity->layer())->entities.removeOne(entity);
 }
 
-void EditorMap::setLeft(double value)
+void EditorMap::setLeft(int value)
 {
-    this->m_x = value;
+    this->m_left = value;
 
     if (m_world != NULL)
         m_world->calculateBoundaries();
 }
 
-void EditorMap::setTop(double value)
+void EditorMap::setTop(int value)
 {
-    this->m_y = value;
+    this->m_top = value;
 
     if (m_world != NULL)
         m_world->calculateBoundaries();
 }
 
-void EditorMap::setWidth(double value)
+void EditorMap::setWidth(int value)
 {
     int tileCount = (int)(value / Tile::size);
     if (tileCount > 0)
@@ -217,7 +217,7 @@ void EditorMap::setWidth(double value)
         m_world->calculateBoundaries();
 }
 
-void EditorMap::setHeight(double value)
+void EditorMap::setHeight(int value)
 {
     int tileCount = (int)(value / Tile::size);
     if (tileCount > 0)
@@ -293,7 +293,7 @@ QString EditorMap::layerName(int index)
 
 void EditorMap::addTilesLeft(int amount)
 {
-    m_x -= amount * Tile::size;
+    m_left -= amount * Tile::size;
     m_tileCountX += amount;
 
     if (m_world != NULL)
@@ -310,7 +310,7 @@ void EditorMap::addTilesRight(int amount)
 
 void EditorMap::addTilesTop(int amount)
 {
-    m_y -= amount * Tile::size;
+    m_top -= amount * Tile::size;
     m_tileCountY += amount;
 
     if (m_world != NULL)
@@ -325,12 +325,12 @@ void EditorMap::addTilesBottom(int amount)
         m_world->calculateBoundaries();
 }
 
-double EditorMap::width()
+int EditorMap::width()
 {
     return m_tileCountX * Tile::size;
 }
 
-double EditorMap::height()
+int EditorMap::height()
 {
     return m_tileCountY * Tile::size;
 }
@@ -363,4 +363,23 @@ EditorMap * EditorMap::createEmpty(const QString & name, const QRect & geometry)
     out->addLayer(QObject::tr("Layer 1"));
 
     return out;
+}
+
+void EditorMap::setPosition(int x, int y, int story)
+{
+    m_left = x;
+    m_top = y;
+    m_story = story;
+}
+
+bool EditorMap::build(ResourceFile & resources)
+{
+    // TODO
+    return false;
+}
+
+char * EditorMap::compile(int * size)
+{
+    // TODO
+    return NULL;
 }

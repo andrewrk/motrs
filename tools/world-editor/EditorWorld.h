@@ -2,12 +2,13 @@
 #define EDITORWORLD_H
 
 #include <QString>
+#include <QList>
 
-#include "World.h"
+#include "ResourceFile.h"
 
 class EditorMap;
 
-class EditorWorld : public World
+class EditorWorld
 {
 public:
     ~EditorWorld();
@@ -22,9 +23,35 @@ public:
     inline void setName(QString newName);
     inline QString name();
 
+    inline const QList<EditorMap *> * maps();
+
+    // cached boundary coordinates (calculated from contained maps)
+    inline int left();
+    inline int top();
+    inline int width();
+    inline int height();
+
+    // compile the world and its dependencies, and put into resources file.
+    // returns success
+    bool build(ResourceFile & resources);
+
+    // compile the world and return a buffer. if size is specified, sets
+    // it to the size of the binary data
+    char * compile(int * size = NULL);
+
 private: //variables
+    static const int c_codeVersion;
+
     // name of the world, e.g. "tower1.world"
     QString m_name;
+
+    QList<EditorMap *> m_maps;
+
+    // holds cached values for the boundaries of the world
+    double m_left;
+    double m_top;
+    double m_width;
+    double m_height;
 
 private: //methods
     EditorWorld();
@@ -41,5 +68,26 @@ inline QString EditorWorld::name()
     return m_name;
 }
 
+inline const QList<EditorMap *> * EditorWorld::maps()
+{
+    return &m_maps;
+}
+
+inline int EditorWorld::left()
+{
+    return m_left;
+}
+inline int EditorWorld::top()
+{
+    return m_top;
+}
+inline int EditorWorld::width()
+{
+    return m_width;
+}
+inline int EditorWorld::height()
+{
+    return m_height;
+}
 
 #endif // EDITORWORLD_H

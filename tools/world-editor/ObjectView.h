@@ -118,8 +118,8 @@ private: //variables
 
     // where is the editor scrolled to, in absolute coordinates
     double m_zoom;
-    double m_offsetX;
-    double m_offsetY;
+    int m_offsetX;
+    int m_offsetY;
 
     // pixmaps used to display surface types and shapes
     static QList<QPixmap *> s_surfaceTypePixmaps;
@@ -133,8 +133,8 @@ private: //variables
     int m_mouseX, m_mouseY;
     int m_mouseDownX, m_mouseDownY;
     MouseState m_mouseState;
-    double m_startX, m_startY;
-    double m_startWidth, m_startHeight;
+    int m_startX, m_startY;
+    int m_startWidth, m_startHeight;
 
     EditorObject::ObjectGraphic m_copyBuffer;
 
@@ -142,15 +142,15 @@ private: //variables
 
 private: //methods
 
-    int screenX(double absoluteX);
-    int screenY(double absoluteY);
-    double absoluteX(int screenX);
-    double absoluteY(int screenY);
+    int screenX(int absoluteX);
+    int screenY(int absoluteY);
+    int absoluteX(int screenX);
+    int absoluteY(int screenY);
 
     int snapScreenX(int x);
     int snapScreenY(int y);
-    double snapAbsoluteX(double x);
-    double snapAbsoluteY(double y);
+    int snapAbsoluteX(int x);
+    int snapAbsoluteY(int y);
 
     void drawGrid(QPainter &p);
 

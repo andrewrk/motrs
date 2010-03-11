@@ -64,7 +64,7 @@ public: //methods
     void setSurfaceType(SurfaceType surfaceType) { m_surfaceType = surfaceType; }
     SurfaceType surfaceType() { return m_surfaceType; }
 
-protected:
+private:
     static void resolveCircleOnSquare(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
     static void resolveCircleOnTriangleNW(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);
     static void resolveCircleOnTriangleNE(double tileX, double tileY, double & objectCenterX, double & objectCenterY, double objectRadius);

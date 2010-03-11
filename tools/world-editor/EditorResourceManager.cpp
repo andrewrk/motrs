@@ -1,5 +1,7 @@
 #include "EditorResourceManager.h"
 
+#include "EditorSettings.h"
+
 #include <QSettings>
 #include <QFile>
 #include <QTextStream>
@@ -7,6 +9,7 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QDir>
+#include <QApplication>
 
 QMap<QString, EditorGraphic *> EditorResourceManager::s_graphics;
 
@@ -73,15 +76,9 @@ bool EditorResourceManager::loadTextFile(QString filename, QList< QPair<QString,
     return true;
 }
 
-QString EditorResourceManager::dataDir()
-{
-    QSettings settings;
-    return settings.value("paths/data", ".").toString();
-}
-
 QString EditorResourceManager::objectsDir()
 {
-    QDir dir(dataDir());
+    QDir dir(EditorSettings::dataFolder());
     return dir.absoluteFilePath("objects");
 }
 
@@ -92,39 +89,56 @@ QString EditorResourceManager::localDataDir()
     return dir.absolutePath();
 }
 
+QString EditorResourceManager::workingDataDir()
+{
+    // TODO: take into account linux
+    return QApplication::applicationDirPath();
+}
+
 QString EditorResourceManager::entitiesDir()
 {
-    QDir dir(dataDir());
+    QDir dir(EditorSettings::dataFolder());
     return dir.absoluteFilePath("entities");
 }
 
 QString EditorResourceManager::graphicsDir()
 {
-    QDir dir(dataDir());
+    QDir dir(EditorSettings::dataFolder());
     return dir.absoluteFilePath("graphics");
 }
 
 QString EditorResourceManager::mapsDir()
 {
-    QDir dir(dataDir());
+    QDir dir(EditorSettings::dataFolder());
     return dir.absoluteFilePath("maps");
 }
 
 QString EditorResourceManager::worldsDir()
 {
-    QDir dir(dataDir());
+    QDir dir(EditorSettings::dataFolder());
     return dir.absoluteFilePath("worlds");
 }
 
 QString EditorResourceManager::universesDir()
 {
-    QDir dir(dataDir());
+    QDir dir(EditorSettings::dataFolder());
     return dir.absoluteFilePath("universes");
 }
 
 QString EditorResourceManager::universeFile()
 {
     return QDir(universesDir()).absoluteFilePath("main.universe");
+}
+
+QString EditorResourceManager::testUniverseFile()
+{
+    QString path = QDir(workingDataDir()).absoluteFilePath("playtest.universe");
+
+    // if it doesn't exist, copy it from the real universe
+    if (! QFileInfo(path).exists())
+        QFile::copy(universeFile(), path);
+
+    return path;
 }
 
 QString EditorResourceManager::newUniqueMapName(QString worldName)

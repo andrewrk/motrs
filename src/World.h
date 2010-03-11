@@ -19,20 +19,8 @@ public:
     Universe::Location locationOf(double absoluteX, double absoluteY);
 
     std::vector<Map*> * maps() { return &m_maps; }
-
-    // Position of the world
-    double left() { return m_left;}
-    double top() {return m_top;}
-    double width() {return m_width;}
-    double height() {return m_height;}
-protected:
+private:
     std::vector<Map*> m_maps;
-
-    double m_left;
-    double m_top;
-    double m_width;
-    double m_height;
-    void calculateBoundaries();
 };
 
 #endif

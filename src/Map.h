@@ -42,7 +42,7 @@ public:
     // gimme the entities
     std::vector<Entity*> * entities() { return &m_entities; }
 
-protected:
+private:
     enum LayerType {
         ltFull = 1,
         ltSparse = 2,

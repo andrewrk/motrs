@@ -12,6 +12,8 @@
 #include "EditorEntity.h"
 #include "WorldEditor.h"
 
+class EditorUniverse;
+
 class WorldView : public QWidget
 {
     Q_OBJECT
@@ -24,8 +26,9 @@ public: //variables
         mtCenter,
         mtPencil,
         mtBrush,
-        mtSetStartPoint,
         mtCreateMap,
+        mtSetRealStartPoint,
+        mtSetTestStartPoint,
     };
 public: //methods
     WorldView(WorldEditor * window, QWidget * parent = NULL);
@@ -92,8 +95,8 @@ private: //variables
         // location on disk
         QString artFile;
         // location in the game
-        double x;
-        double y;
+        int x;
+        int y;
         int layer;
         EditorMap * map;
     };
@@ -162,7 +165,7 @@ private: //variables
             }
         }
 
-        void moveByDelta(double deltaX, double deltaY) const
+        void moveByDelta(int deltaX, int deltaY) const
         {
             if (isNull())
                 return;
@@ -175,7 +178,7 @@ private: //variables
         }
 
         // relative to parent map
-        double x() const {
+        int x() const {
             if (isNull())
                 return -1;
             if (type == sitEditorEntity) {
@@ -187,7 +190,7 @@ private: //variables
         }
 
         // relative to parent map
-        double y() const {
+        int y() const {
             if (isNull())
                 return -1;
             if (type == sitEditorEntity) {
@@ -241,8 +244,8 @@ private: //variables
         EditorEntity * entity;
 
         // stores the location for dragging
-        double mouseDownX;
-        double mouseDownY;
+        int mouseDownX;
+        int mouseDownY;
 
     private:
         static int rectArea(QRectF rect)
@@ -260,8 +263,8 @@ private: //variables
 
     // where is the editor scrolled to, in absolute coordinates
     double m_zoom;
-    double m_offsetX;
-    double m_offsetY;
+    int m_offsetX;
+    int m_offsetY;
 
     // saved list of maps that are visible for fast rendering
     QList<EditorMap *> m_mapCache;
@@ -297,30 +300,36 @@ private: //variables
 
     QList<SelectableItem *> m_selection;
 
+    EditorUniverse * m_universe;
+    EditorUniverse * m_testUniverse;
+
+    QPixmap * m_startPixmap;
+    QPixmap * m_testStartPixmap;
+
 private: //methods
     // world coordinates to screen coordinates
-    int screenX(double absoluteX);
-    int screenY(double absoluteY);
+    int screenX(int absoluteX);
+    int screenY(int absoluteY);
     QRect screenRect(QRectF absoluteRect);
 
     // screen coordinates to world coordinates
-    double absoluteX(int screenX);
-    double absoluteY(int screenY);
+    int absoluteX(int screenX);
+    int absoluteY(int screenY);
     QRectF absoluteRect(QRect screenRect);
 
     // screen coordinates to selected map coordinates
-    double mapX(int screenX, EditorMap * map);
-    double mapY(int screenY, EditorMap * map);
+    int mapX(int screenX, EditorMap * map);
+    int mapY(int screenY, EditorMap * map);
 
     // map coordinates to screen coordinates
     QRect mapToScreenRect(QRectF mapRect, EditorMap * map);
-    int mapToScreenX(double mapX, EditorMap * map);
-    int mapToScreenY(double mapY, EditorMap * map);
+    int mapToScreenX(int mapX, EditorMap * map);
+    int mapToScreenY(int mapY, EditorMap * map);
 
     int snapScreenX(int x);
     int snapScreenY(int y);
-    double snapAbsoluteX(double x);
-    double snapAbsoluteY(double y);
+    int snapAbsoluteX(int x);
+    int snapAbsoluteY(int y);
 
     void drawGrid(QPainter &p);
     void updateViewCache();
@@ -347,14 +356,22 @@ private: //methods
     void selectOnly(SelectableItem item);
     void selectAlso(SelectableItem item);
     void selectNone();
+    void deselectItem(SelectableItem & item);
 
-    void moveSelectedItems(double deltaX, double deltaY);
+    void moveSelectedItems(int deltaX, int deltaY);
     void saveSelectionMouseDownCoords();
     bool itemIsSelected(const SelectableItem & item);
     void deleteSelectableItem(const SelectableItem & item);
 
     void drawSelectedObjectAt(int x, int y);
 
+    void setStartingPoint(QString universeFile, int screenX, int screenY);
+
+    // load the locations of the real and test starting points so that
+    // we can display them
+    void updateUniverseCache();
+
+    void drawStartBox(QPainter & p, EditorUniverse * universe, QPixmap * pixmap);
 
 private slots:
     void verticalScroll(int value);

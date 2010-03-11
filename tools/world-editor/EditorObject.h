@@ -10,14 +10,16 @@
 #include <QtCore/QHash>
 #include <QtCore/QList>
 
+// An EditorObject defines which art makes up an object. it is a source form.
+// The WorldView must make instances of these objects
 class EditorObject
 {
 public: //variables
     typedef struct {
-        double x;
-        double y;
-        double width;
-        double height;
+        int x;
+        int y;
+        int width;
+        int height;
         QString graphicName; // file name in resources/graphics
         EditorGraphic * graphic;
         int layer;

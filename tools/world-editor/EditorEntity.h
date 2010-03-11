@@ -1,20 +1,20 @@
 #ifndef EDITORENTITY_H
 #define EDITORENTITY_H
 
-#include "Entity.h"
 #include "EditorGraphic.h"
 
 class EditorMap;
 
-class EditorEntity : public Entity
+// an instance of an Entity for placing on the map
+class EditorEntity
 {
 public:
     static EditorEntity * load(QString file);
 
     inline EditorGraphic * graphic();
 
-    inline double centerOffsetX();
-    inline double centerOffsetY();
+    inline int centerOffsetX();
+    inline int centerOffsetY();
 
     inline int width();
     inline int height();
@@ -25,13 +25,31 @@ public:
 
     inline EditorMap * parent();
     void setParent(EditorMap * map);
-private:
-    EditorEntity();
+
+    void setCenter(int centerX, int centerY);
+    inline int centerX();
+    inline int centerY();
+
+    inline int layer();
+    inline void setLayer(int layer);
+private: //variables
     EditorGraphic * m_graphic;
-
     QString m_name;
-
     EditorMap * m_parent;
+
+    int m_centerOffsetX;
+    int m_centerOffsetY;
+    int m_centerX;
+    int m_centerY;
+
+    int m_layer;
+
+    int m_radius;
+    int m_speed;
+    int m_mass;
+
+private: //methods
+    EditorEntity();
 };
 
 inline EditorGraphic * EditorEntity::graphic()
@@ -49,12 +67,12 @@ inline int EditorEntity::height()
     return m_graphic->height();
 }
 
-inline double EditorEntity::centerOffsetX()
+inline int EditorEntity::centerOffsetX()
 {
     return m_centerOffsetX;
 }
 
-inline double EditorEntity::centerOffsetY()
+inline int EditorEntity::centerOffsetY()
 {
     return m_centerOffsetY;
 }
@@ -68,5 +86,26 @@ inline EditorMap * EditorEntity::parent()
 {
     return m_parent;
 }
+
+inline int EditorEntity::centerX()
+{
+    return m_centerX;
+}
+
+inline int EditorEntity::centerY()
+{
+    return m_centerY;
+}
+
+inline int EditorEntity::layer()
+{
+    return m_layer;
+}
+
+inline void EditorEntity::setLayer(int layer)
+{
+    m_layer = layer;
+}
+
 
 #endif // EDITORENTITY_H

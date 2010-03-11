@@ -1,7 +1,5 @@
 #include "World.h"
 
-#include "ResourceManager.h"
-
 #include "Utils.h"
 #include "ResourceManager.h"
 
@@ -32,17 +30,11 @@ World * World::load(const char * buffer)
         out->m_maps.push_back(map);
     }
 
-    out->calculateBoundaries();
-
     return out;
 }
 
 World::World() :
-    m_maps(),
-    m_left(0),
-    m_top(0),
-    m_width(0),
-    m_height(0)
+    m_maps()
 {
     m_maps.clear();
 }
@@ -79,37 +71,4 @@ Universe::Location World::locationOf(double absoluteX, double absoluteY) {
     loc.mapY = -1;
     loc.map = NULL;
     return loc;
-}
-
-void World::calculateBoundaries() {
-    if (m_maps.size() == 0) {
-        m_width = 0;
-        m_height = 0;
-        m_top = 0;
-        m_left = 0;
-        return;
-    }
-
-    double left = m_maps[0]->left();
-    double top = m_maps[0]->top();
-    double right = left + m_maps[0]->width();
-    double bottom = top + m_maps[0]->height();
-
-    for (unsigned int i = 1; i < m_maps.size(); i++) {
-        if (left > m_maps[i]->left())
-            left = m_maps[i]->left();
-
-        if (top > m_maps[i]->top())
-            top = m_maps[i]->top();
-
-        if (right < m_maps[i]->left() + m_maps[i]->width())
-            right = m_maps[i]->left() + m_maps[i]->width();
-
-        if (bottom < m_maps[i]->top() + m_maps[i]->height())
-            bottom = m_maps[i]->top() + m_maps[i]->height();
-    }
-    m_left = left;
-    m_top = top;
-    m_height = bottom - top;
-    m_width = right - left;
 }
