@@ -10,7 +10,7 @@
 #include <QBitmap>
 
 long long int EditorGraphic::s_frameCount = 0;
-const int EditorGraphic::c_gameFps = 48;
+const int EditorGraphic::c_gameFps = 60;
 EditorGraphicTimer * EditorGraphic::s_timer = NULL;
 
 EditorGraphic::EditorGraphic() :

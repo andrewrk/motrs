@@ -8,7 +8,18 @@
 // Graphics are things that are displayed. it can be an animation
 // or a still image.
 class Graphic {
-public:
+public: //variables
+    enum GraphicType {
+        gtAnimation = 0, // spritesheet
+        gtImage = 1, // still frame
+    };
+
+    enum StorageType {
+        stBMP = 0,
+        stPNG = 1,
+    };
+
+public: //methods
     // allocates and returns a new Graphic based on the buffer. will return
     // NULL if there was a problem.
     static Graphic * load(const char * buffer);
@@ -31,16 +42,6 @@ private: //variables
         Header
         Image data
     */
-
-    enum GraphicType {
-        gtAnimation = 0, // spritesheet
-        gtImage = 1, // still frame
-    };
-
-    enum StorageType {
-        stBMP = 0,
-        stPNG = 1,
-    };
 
     typedef struct {
         sf::Uint8 r;

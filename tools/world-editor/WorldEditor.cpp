@@ -23,7 +23,7 @@ WorldEditor::WorldEditor(QWidget *parent) :
     m_ui(new Ui::WorldEditor),
     m_view(new WorldView(this, this)),
     m_toolNames(),
-    m_playtestThread(NULL)
+    m_playtestProcess(NULL)
 {
     m_ui->setupUi(this);
 
@@ -435,9 +435,10 @@ void WorldEditor::on_lstWorlds_customContextMenuRequested(QPoint pos)
 
 void WorldEditor::on_actionTest_triggered()
 {
-    // if there is an ongoing playtest, abort
-    if (m_playtestThread != NULL)
-        return;
+    if (m_playtestProcess != NULL) {
+        m_playtestProcess->close();
+        deletePlaytestProcess();
+    }
 
     // call build on the universe and generate a resources.dat file
     // in this folder ready to be played.
@@ -450,6 +451,7 @@ void WorldEditor::on_actionTest_triggered()
     EditorUniverse * universe = EditorUniverse::load(EditorResourceManager::testUniverseFile());
     assert(universe);
     bool ok = universe->build(resources);
+
     delete universe;
 
     if (! ok) {
@@ -458,13 +460,17 @@ void WorldEditor::on_actionTest_triggered()
     }
 
     // start the gameplay thread
-    m_playtestThread = new PlaytestThread();
-    connect(m_playtestThread, SIGNAL(finished()), this, SLOT(deletePlaytestThread()));
-    m_playtestThread->start();
+    m_playtestProcess = new QProcess(this);
+    m_playtestProcess->
+    connect(m_playtestProcess, SIGNAL(finished(int)), this, SLOT(deletePlaytestProcess(int)));
+    m_playtestProcess->startDetached(QDir(QApplication::applicationDirPath()).absoluteFilePath("motrs"));
 }
 
-void WorldEditor::deletePlaytestThread()
+void WorldEditor::deletePlaytestProcess(int returnCode)
 {
-    delete m_playtestThread;
-    m_playtestThread = NULL;
+    delete m_playtestProcess;
+    m_playtestProcess = NULL;
+
+    if (returnCode != 0)
+        QMessageBox::critical(this, tr("Error playtesting"), tr("Error playtesting: Game crashed."));
 }

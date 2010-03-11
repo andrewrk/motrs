@@ -29,7 +29,7 @@ MainWindow::MainWindow() :
         m_gameplay = new Gameplay(this);
         if (! m_gameplay->isGood()) {
             std::cerr << "Gameplay did not initialize properly." << std::endl;
-            std::exit(1);
+            close();
         }
     }
 }

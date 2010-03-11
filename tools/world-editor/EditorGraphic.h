@@ -29,6 +29,12 @@ public:
     // return a pixmap
     QPixmap * toPixmap(int frame = -1);
 
+    inline int frameCount();
+    inline int framesPerSecond();
+
+    // how many frames this animation is purposefully off by
+    inline int offset();
+
 private: //variables
     static const int c_gameFps;
     static long long int s_frameCount; // total frames passed by in the duration of the game
@@ -61,5 +67,19 @@ inline int EditorGraphic::height()
     return m_height;
 }
 
+inline int EditorGraphic::frameCount()
+{
+    return m_frameCount;
+}
+
+inline int EditorGraphic::framesPerSecond()
+{
+    return m_fps;
+}
+
+inline int EditorGraphic::offset()
+{
+    return m_offset;
+}
 
 #endif // EDITORGRAPHIC_H

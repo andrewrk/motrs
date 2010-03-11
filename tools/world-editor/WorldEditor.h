@@ -8,8 +8,7 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QMenu>
-
-#include "PlaytestThread.h"
+#include <QProcess>
 
 class WorldView;
 class ObjectEditor;
@@ -50,7 +49,7 @@ private: //variables
 
     QList<ObjectEditor *> m_objectWindows;
 
-    PlaytestThread * m_playtestThread;
+    QProcess * m_playtestProcess;
 
 private: //methods
     void refreshWorldList();
@@ -95,7 +94,7 @@ private slots:
     void renameSelectedWorld();
     void deleteSelectedWorld();
 
-    void deletePlaytestThread();
+    void deletePlaytestProcess(int returnCode = 0);
 
 };
 

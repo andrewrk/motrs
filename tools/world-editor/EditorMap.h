@@ -111,11 +111,15 @@ public: //methods
     // returns success
     bool build(ResourceFile & resources);
 
-    // compile the world and return a buffer. if size is specified, sets
-    // it to the size of the binary data
-    char * compile(int * size = NULL);
-
 private: //variables
+    static const int c_codeVersion;
+
+    struct PaletteEntry {
+        int shape;
+        int surfaceType;
+        QString graphicId;
+    };
+
     // we simply remember the dimensions because we don't actually have a tile
     // grid until we compile into a Map
     int m_tileCountX;

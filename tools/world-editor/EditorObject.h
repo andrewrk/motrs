@@ -5,6 +5,8 @@
 #include "Array3.h"
 #include "EditorGraphic.h"
 
+#include "ResourceFile.h"
+
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QHash>
@@ -75,6 +77,14 @@ public: //methods
 
     QString resourceName() { return m_resourceName; }
 
+    // compile the object into graphics for each tile and put them in the
+    // resources file. Use compiledGraphicAt to get the graphic ids of each tile.
+    // returns success
+    bool build(ResourceFile & resources);
+
+    // get the id of the graphic at
+    QString compiledGraphicAt(int x, int y, int z);
+
 private: //variables
     QStringList m_layerNames;
 
@@ -88,10 +98,13 @@ private: //variables
     // the resource identifier string (thing that ends in .object)
     QString m_resourceName;
 
+    // a list of graphics per layer
     QList<QList<ObjectGraphic *> *> m_graphics;
 
-private: //methods
+    Array3<QString> * m_compiledGraphics;
 
+private: //methods
+    void render(QPainter & p, int layerIndex, int frame, int fps);
 };
 
 #endif // EDITOROBJECT_H

@@ -9,7 +9,12 @@
 #include <vector>
 
 class Map {
-public:
+public: //variables
+    enum LayerType {
+        ltFull = 1,
+        ltSparse = 2,
+    };
+
     class TileAndLocation {
     public:
         double x, y;
@@ -19,6 +24,7 @@ public:
         TileAndLocation(double x, double y, Tile * tile) : x(x), y(y), tile(tile), proximity2(0) {}
     };
 
+public: //methods
     static Map * load(const char * buffer);
     Map();
     ~Map();
@@ -43,11 +49,6 @@ public:
     std::vector<Entity*> * entities() { return &m_entities; }
 
 private:
-    enum LayerType {
-        ltFull = 1,
-        ltSparse = 2,
-    };
-
     typedef struct {
         int x, y, tile;
     } SparseTile;

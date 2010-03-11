@@ -18,7 +18,7 @@ Map * Map::load(const char *buffer) {
 
     Map * map = new Map();
 
-    // pallet
+    // palette
     int tileCount = Utils::readInt(&cursor);
     map->m_palette.push_back(Tile::nullTile());
     for (int i = 0; i < tileCount; i++) {

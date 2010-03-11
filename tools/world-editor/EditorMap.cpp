@@ -3,11 +3,14 @@
 #include "EditorResourceManager.h"
 #include "EditorEntity.h"
 #include "EditorWorld.h"
+#include "Map.h"
 
 #include <QPixmap>
 #include <QDir>
 #include <QDebug>
 #include <QPainter>
+
+const int EditorMap::c_codeVersion = 4;
 
 EditorMap::EditorMap() :
     m_tileCountX(0),
@@ -37,7 +40,7 @@ EditorMap * EditorMap::load(QString file)
     for(int i=0; i<props.size(); ++i) {
         if( props[i].first.compare("version", Qt::CaseInsensitive) == 0 ) {
             int fileVersion = props[i].second.toInt();
-            int codeVersion = 4;
+            int codeVersion = c_codeVersion;
             assert(fileVersion == codeVersion);
         } else if( props[i].first.compare("size", Qt::CaseInsensitive) == 0 ) {
             // size in number of tiles
@@ -117,7 +120,7 @@ void EditorMap::save()
 
     QTextStream out(&file);
 
-    out << "version=4\n";
+    out << "version=" << c_codeVersion << "\n";
     out << "# size=sizeX,sizeY,layerCount\n";
     out << "# sizes in number of tiles, not in actual coordinates.\n";
     out << "size=" << tileCountX() << "," << tileCountY() << "," << layerCount() << "\n\n";
@@ -374,12 +377,128 @@ void EditorMap::setPosition(int x, int y, int story)
 
 bool EditorMap::build(ResourceFile & resources)
 {
-    // TODO
-    return false;
-}
+    QByteArray mapData;
 
-char * EditorMap::compile(int * size)
-{
-    // TODO
-    return NULL;
+    // version
+    mapData.append((char *) &c_codeVersion, 4);
+
+    // size
+    mapData.append((char *) &m_tileCountX, 4);
+    mapData.append((char *) &m_tileCountY, 4);
+
+    // get a list of unique objects used
+    QSet<EditorObject *> objectsUsed;
+    for(int layerIndex=0; layerIndex<m_layers.size(); ++layerIndex) {
+        MapLayer * layer = m_layers.at(layerIndex);
+        foreach (MapObject * objectInstance, layer->objects)
+            objectsUsed.insert(objectInstance->object);
+    }
+
+    // build the objects and create a palette of tiles
+    QList<PaletteEntry> palette;
+    QHash<QString, int> paletteIndex;
+    foreach (EditorObject * object, objectsUsed) {
+        bool ok = object->build(resources);
+
+        assert(ok);
+        if (! ok) {
+            qDebug() << "Unable to build map: Error building object " << object->name();
+            return false;
+        }
+
+        // add each tile to palette
+        for (int z=0; z<object->layerCount(); ++z) {
+            for (int y=0; y<object->tileCountY(); ++y) {
+                for (int x=0; x<object->tileCountX(); ++x) {
+                    PaletteEntry entry;
+                    entry.graphicId = object->compiledGraphicAt(x,y,z);
+                    entry.shape = object->shape(x,y,z);
+                    entry.surfaceType = object->surfaceType(x,y,z);
+
+                    paletteIndex.insert(entry.graphicId, palette.size());
+
+                    palette.append(entry);
+                }
+            }
+        }
+    }
+
+    // tile palette size
+    int paletteSize = palette.size();
+    mapData.append((char *) &paletteSize, 4);
+
+    // tile palette
+    for (int i=0; i<paletteSize; ++i) {
+        PaletteEntry entry = palette.at(i);
+        mapData.append((char *) &entry.shape, 4);
+        mapData.append((char *) &entry.surfaceType, 4);
+
+        int graphicNameSize = entry.graphicId.size();
+        mapData.append((char *) &graphicNameSize, 4);
+        mapData.append(entry.graphicId);
+    }
+
+    // layer count
+    int layerCount = this->layerCount();
+    mapData.append((char *) &layerCount, 4);
+
+    // tile declarations
+    for (int z=0; z<layerCount; z++) {
+        MapLayer * layer = m_layers.at(z);
+        QList<MapObject *> objectInstances = layer->objects;
+
+        // always sparse array
+        int arrayType = Map::ltSparse;
+        mapData.append((char *) &arrayType, 4);
+        for (int i=0; i<objectInstances.size(); ++i) {
+            MapObject * instance = objectInstances.at(i);
+            EditorObject * object = instance->object;
+            for (int y=0; y<object->tileCountY(); ++y) {
+                for (int x=0; x<object->tileCountX(); ++x) {
+                    int tileX = instance->tileX + x;
+                    int tileY = instance->tileY + y;
+                    int tileIndex = paletteIndex.value(object->compiledGraphicAt(x,y,z));
+
+                    mapData.append((char *) &tileX, 4);
+                    mapData.append((char *) &tileY, 4);
+                    mapData.append((char *) &tileIndex, 4);
+                }
+            }
+        }
+    }
+
+    int submapCount = 0;
+    mapData.append((char *) &submapCount, 4);
+
+    int triggerCount = 0;
+    mapData.append((char *) &triggerCount, 4);
+
+    // entities
+    int entityCount = 0;
+    for (int z=0; z<layerCount; ++z) {
+        MapLayer * layer = m_layers.at(z);
+        entityCount += layer->entities.size();
+    }
+    mapData.append((char *) &entityCount, 4);
+    for (int z=0; z<layerCount; ++z) {
+        MapLayer * layer = m_layers.at(z);
+        QList<EditorEntity *> entities = layer->entities;
+        for (int i=0; i<entities.size(); ++i) {
+            EditorEntity * entity = entities.at(i);
+            int centerX = entity->centerX();
+            int centerY = entity->centerY();
+
+            mapData.append((char *) &centerX, 4);
+            mapData.append((char *) &centerY, 4);
+            mapData.append((char *) &z, 4);
+
+            int entityNameSize = entity->name().size();
+            mapData.append((char *) &entityNameSize, 4);
+            mapData.append(entity->name());
+        }
+    }
+
+    resources.updateResource(m_name.toStdString(), mapData.constData(), mapData.size());
+
+    return true;
 }

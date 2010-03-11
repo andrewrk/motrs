@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QDebug>
 #include <QFileInfo>
+#include <QBuffer>
 
 EditorObject::EditorObject() :
     m_layerNames(),
@@ -12,7 +13,8 @@ EditorObject::EditorObject() :
     m_shapes(new Array3<Tile::Shape>(1,1,1)),
     m_name(QObject::tr("New Object")),
     m_description(""),
-    m_graphics()
+    m_graphics(),
+    m_compiledGraphics(NULL)
 {
     m_surfaceTypes->clear();
     m_shapes->clear();
@@ -261,4 +263,178 @@ void EditorObject::renameLayer(int index, QString newName)
 QString EditorObject::layerName(int index)
 {
     return m_layerNames.at(index);
+}
+
+bool EditorObject::build(ResourceFile & resources)
+{
+    // create the container to hold the graphic ids
+    delete m_compiledGraphics;
+    m_compiledGraphics = new Array3<QString>(tileCountX(), tileCountY(), layerCount());
+
+    Array3< QList<QImage> * > animations(tileCountX(), tileCountY(), layerCount());
+    // initialize animation list
+    for (int z=0; z<layerCount(); z++) {
+        for (int y=0; y<tileCountY(); ++y) {
+            for (int x=0; x<tileCountX(); ++x) {
+                animations.set(x,y,z,new QList<QImage>());
+            }
+        }
+    }
+
+    // find out the greatest frames per second
+    int fps = 0;
+    for (int layerIndex=0; layerIndex<m_graphics.size(); ++layerIndex) {
+        QList<ObjectGraphic *> * layer = m_graphics.at(layerIndex);
+        for (int i=0; i<layer->size(); ++i) {
+            ObjectGraphic * graphicInstance = layer->at(i);
+            if (graphicInstance->graphic->framesPerSecond() > fps)
+                fps = graphicInstance->graphic->framesPerSecond();
+        }
+    }
+
+    // for each animation frame
+    int frame = 0;
+    while (true) {
+        if (frame > 0) {
+            // check if the animation has looped yet.
+            bool firstFrame = true;
+            for (int layerIndex=0; layerIndex<m_graphics.size(); ++layerIndex) {
+                QList<ObjectGraphic *> * layer = m_graphics.at(layerIndex);
+                for (int i=0; i<layer->size(); ++i) {
+                    ObjectGraphic * graphicInstance = layer->at(i);
+                    if (graphicInstance->graphic->frameCount() % frame != 0) {
+                        firstFrame = false;
+                        break;
+                    }
+                }
+                if (! firstFrame)
+                    break;
+            }
+
+            // this means all animations have looped and we're done
+            // collecting frames
+            if (firstFrame)
+                break;
+        }
+
+        for (int z=0; z<layerCount(); ++z) {
+            // render the layer once into a QImage
+            QImage layerImage(tileCountX() * Tile::sizeInt, tileCountY() * Tile::sizeInt, QImage::Format_ARGB32);
+            QPainter layerPainter(&layerImage);
+            render(layerPainter, z, frame, fps);
+
+            // for each tile, draw that tile into a different QImage
+            for (int y=0; y<tileCountY(); ++y) {
+                for (int x=0; x<tileCountX(); ++x) {
+                    QImage tileImage(Tile::sizeInt, Tile::sizeInt, QImage::Format_ARGB32);
+                    QPainter p(&tileImage);
+                    p.setBackground(Qt::transparent);
+                    p.eraseRect(0, 0, tileImage.width(), tileImage.height());
+                    p.drawImage(0, 0, layerImage, x * Tile::sizeInt, y * Tile::sizeInt, Tile::sizeInt, Tile::sizeInt);
+
+                    QList<QImage> * frames = animations.get(x,y,z);
+                    frames->append(tileImage);
+                }
+            }
+        }
+
+        ++frame;
+    }
+    int frameCount = frame;
+
+    // create a spritesheet for each tile
+    for (int z=0; z<layerCount(); ++z) {
+        for (int y=0; y<tileCountY(); ++y) {
+            for (int x=0; x<tileCountX(); ++x ) {
+                // create the spritesheet
+                QList<QImage> * frames = animations.get(x,y,z);
+                QImage spritesheet(Tile::sizeInt * frameCount, Tile::sizeInt, QImage::Format_ARGB32);
+                QPainter p(&spritesheet);
+                p.setBackground(Qt::transparent);
+                p.eraseRect(0, 0, spritesheet.width(), spritesheet.height());
+                for (int i=0; i<frameCount; ++i)
+                    p.drawImage(i * Tile::sizeInt, 0, frames->at(i % frames->size()));
+
+                // create the binary data
+                QByteArray tile;
+                int codeVersion = 1;
+                tile.append((char *) &codeVersion, 4);
+
+                int graphicType = Graphic::gtAnimation;
+                tile.append((char *) &graphicType, 4);
+
+                int storageType = Graphic::stPNG;
+                tile.append((char *) &storageType, 4);
+
+                // color key: hardcode magenta
+                char red = 255;
+                char green = 0;
+                char blue = 255;
+                tile.append(&red, 1);
+                tile.append(&green, 1);
+                tile.append(&blue, 1);
+
+                tile.append((char *) &frameCount, 4);
+                tile.append((char *) &fps, 4);
+
+                // frame width and height
+                tile.append((char *) &Tile::sizeInt, 4);
+                tile.append((char *) &Tile::sizeInt, 4);
+
+                // save spritesheet into memory
+                QByteArray imageData;
+                QBuffer buffer(&imageData);
+                buffer.open(QIODevice::WriteOnly);
+                spritesheet.save(&buffer, "PNG");
+
+                int imageDataSize = imageData.size();
+                tile.append((char *) &imageDataSize, 4);
+
+                tile.append(imageData);
+
+                // come up with a name
+                QString dash = "-";
+                QString ext = ".ani";
+                QString graphicName = m_name + dash + QString::number(x) +
+                    dash + QString::number(y) + dash + QString::number(z) + ext;
+
+                resources.updateResource(graphicName.toStdString(), tile.constData(), tile.size());
+                m_compiledGraphics->set(x,y,z,graphicName);
+            }
+        }
+    }
+
+    // cleanup animation list
+    for (int z=0; z<layerCount(); z++) {
+        for (int y=0; y<tileCountY(); ++y) {
+            for (int x=0; x<tileCountX(); ++x) {
+                delete animations.get(x,y,z);
+            }
+        }
+    }
+
+    return true;
+}
+
+QString EditorObject::compiledGraphicAt(int x, int y, int z)
+{
+    assert(m_compiledGraphics != NULL);
+    return m_compiledGraphics->get(x,y,z);
+}
+
+void EditorObject::render(QPainter &p, int layerIndex, int frame, int fps)
+{
+    // clear the screen
+    p.setBackground(Qt::transparent);
+    p.eraseRect(0, 0, tileCountX() * Tile::sizeInt, tileCountY() * Tile::sizeInt);
+
+    QList<EditorObject::ObjectGraphic *> * layerGraphics = m_graphics.at(layerIndex);
+    for(int i=0; i<layerGraphics->size(); ++i) {
+        EditorObject::ObjectGraphic * graphicInstance = layerGraphics->at(i);
+        EditorGraphic * graphic = graphicInstance->graphic;
+
+        // calculate which frame to draw based on fps
+        int drawFrame = (frame * graphic->framesPerSecond() / fps + graphic->offset()) % graphic->frameCount();
+        p.drawPixmap(graphicInstance->x, graphicInstance->y, graphicInstance->width, graphicInstance->height, *graphic->toPixmap(drawFrame));
+    }
 }
