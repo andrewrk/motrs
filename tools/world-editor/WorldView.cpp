@@ -830,6 +830,15 @@ void WorldView::updateUniverseCache()
 
 void WorldView::drawSelectedObjectAt(int x, int y)
 {
+    // select the map under the cursor
+    EditorMap * newMap = mapAt(x,y);
+
+    if (newMap != m_selectedMap)
+        selectMap(mapAt(x,y));
+
+    if (m_selectedMap == NULL)
+        return;
+
     QListWidget * list = m_window->objectsList();
     QListWidgetItem * item = list->currentItem();
 
@@ -841,8 +850,8 @@ void WorldView::drawSelectedObjectAt(int x, int y)
     EditorMap::MapObject * mapObject = new EditorMap::MapObject;
     mapObject->object = EditorObject::load(file);
     mapObject->layer = m_selectedLayer;
-    mapObject->tileX = (int) round(mapX(x, m_selectedMap) / Tile::size);
-    mapObject->tileY = (int) round(mapY(y, m_selectedMap) / Tile::size);
+    mapObject->tileX = (int) std::floor(mapX(x, m_selectedMap) / Tile::size);
+    mapObject->tileY = (int) std::floor(mapY(y, m_selectedMap) / Tile::size);
 
     // find out if we wouldn't overlap anything by drawing
     bool overlaps = false;
