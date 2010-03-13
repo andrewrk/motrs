@@ -122,6 +122,9 @@ void WorldView::paintEvent(QPaintEvent * e)
     p.setBackground(Qt::white);
     p.eraseRect(0, 0, this->width(), this->height());
 
+    int deltaX = m_mouseX - m_mouseDownX;
+    int deltaY = m_mouseY - m_mouseDownY;
+
     if( m_world ) {
         drawGrid(p);
 
@@ -173,7 +176,7 @@ void WorldView::paintEvent(QPaintEvent * e)
         p.setBrush(Qt::NoBrush);
         for (int i=0; i<m_selection.size(); ++i) {
             const SelectableItem * item = m_selection.at(i);
-            QRectF bound;
+            QRect bound;
             if (item->type == sitEditorEntity) {
                 bound = item->entity->geometry();
             } else if (item->type == sitMapObject) {
@@ -200,8 +203,6 @@ void WorldView::paintEvent(QPaintEvent * e)
             QRect outline = screenRect(m_selectedMap->geometry());
 
             // if we're dragging boundaries, move the blue line
-            int deltaX = m_mouseX - m_mouseDownX;
-            int deltaY = m_mouseY - m_mouseDownY;
             if (m_mouseState == msStretchMapLeft)
                 outline.setLeft(snapScreenX(outline.left() + deltaX));
             else if (m_mouseState == msStretchMapBottom)
@@ -216,8 +217,8 @@ void WorldView::paintEvent(QPaintEvent * e)
             p.drawRect(outline);
         }
 
-        // draw a line for creating a new map
         if (m_mouseState == msCreateMap) {
+            // draw a line for creating a new map
             p.setPen(QPen(Qt::red, 3));
             QRect outline;
 
@@ -227,7 +228,14 @@ void WorldView::paintEvent(QPaintEvent * e)
             outline.setBottom(snapScreenY(m_mouseY));
 
             p.drawRect(outline);
+        } else if (m_mouseState == msSelectionRectangle) {
+            // selection rectangle
+            p.setPen(QPen(Qt::red, 1));
+            QRect outline(m_mouseDownX, m_mouseDownY, deltaX, deltaY);
+            p.drawRect(outline);
         }
+
+
 
     } else {
         p.drawText(0, 0, this->width(), this->height(), Qt::AlignCenter,
@@ -302,7 +310,7 @@ void WorldView::drawGrid(QPainter &p)
 }
 
 
-QRect WorldView::screenRect(QRectF absoluteRect)
+QRect WorldView::screenRect(QRect absoluteRect)
 {
     QRect out;
     out.setX(screenX(absoluteRect.x()));
@@ -312,9 +320,9 @@ QRect WorldView::screenRect(QRectF absoluteRect)
     return out;
 }
 
-QRectF WorldView::absoluteRect(QRect screenRect)
+QRect WorldView::absoluteRect(QRect screenRect)
 {
-    QRectF out;
+    QRect out;
     out.setX(absoluteX(screenRect.x()));
     out.setY(absoluteY(screenRect.y()));
     out.setWidth(screenRect.width() / m_zoom);
@@ -332,7 +340,7 @@ int WorldView::screenY(int absoluteY)
     return (int)(absoluteY - m_offsetY) * m_zoom;
 }
 
-QRect WorldView::mapToScreenRect(QRectF mapRect, EditorMap * map)
+QRect WorldView::mapToScreenRect(QRect mapRect, EditorMap * map)
 {
     QRect out;
     out.setLeft(screenX(mapRect.left() + map->left()));
@@ -360,6 +368,17 @@ int WorldView::mapX(int screenX, EditorMap * map)
 int WorldView::mapY(int screenY, EditorMap * map)
 {
     return (screenY / m_zoom) + m_offsetY - map->top();
+}
+
+
+QRect WorldView::mapRect(QRect screenRect, EditorMap *map)
+{
+    QRect out;
+    out.setLeft(mapX(screenRect.left(), map));
+    out.setTop(mapY(screenRect.top(), map));
+    out.setWidth(screenRect.width() / m_zoom);
+    out.setHeight(screenRect.height() / m_zoom);
+    return out;
 }
 
 int WorldView::absoluteX(int screenX)
@@ -573,6 +592,7 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
     case msStretchMapBottom:
     case msMoveMap:
     case msCreateMap:
+    case msSelectionRectangle:
         this->update();
         break;
     case msMoveSelectedItems:
@@ -619,8 +639,10 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
     else
         return;
 
-    int deltaX = (e->x() - m_mouseDownX) * m_zoom;
-    int deltaY = (e->y() - m_mouseDownY) * m_zoom;
+    int screenDeltaX = (e->x() - m_mouseDownX);
+    int screenDeltaY = (e->y() - m_mouseDownY);
+    int deltaX = screenDeltaX * m_zoom;
+    int deltaY = screenDeltaY * m_zoom;
 
     if (m_world == NULL)
         return;
@@ -628,6 +650,8 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
     switch(m_mouseState) {
     case msStretchMapLeft:
         {
+            if (m_selectedMap == NULL)
+                return;
             int newLeft = snapAbsoluteX(m_selectedMap->left() + deltaX);
             int deltaWidth = (int) ((m_selectedMap->left() - newLeft) / Tile::size);
             m_selectedMap->addTilesLeft(deltaWidth);
@@ -635,18 +659,26 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
         }
     case msStretchMapTop:this->setCursor(Qt::ArrowCursor);
         {
+            if (m_selectedMap == NULL)
+                return;
             int newTop = snapAbsoluteY(m_selectedMap->top() + deltaY);
             int deltaHeight = (int) ((m_selectedMap->top() - newTop) / Tile::size);
             m_selectedMap->addTilesTop(deltaHeight);
             break;
         }
     case msStretchMapRight:
+        if (m_selectedMap == NULL)
+            return;
         m_selectedMap->setWidth(snapAbsoluteX(m_selectedMap->width() + deltaX));
         break;
     case msStretchMapBottom:
+        if (m_selectedMap == NULL)
+            return;
         m_selectedMap->setHeight(snapAbsoluteY(m_selectedMap->height() + deltaY));
         break;
     case msMoveMap:
+        if (m_selectedMap == NULL)
+            return;
         m_selectedMap->setLeft(snapAbsoluteX(m_selectedMap->left() + deltaX));
         m_selectedMap->setTop(snapAbsoluteY(m_selectedMap->top() + deltaY));
         break;
@@ -672,6 +704,23 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
             updateViewCache();
             break;
         }
+    case msSelectionRectangle:
+        if (m_selectedMap == NULL)
+            return;
+
+        if (! selectItemsInRegion(QRect(m_mouseDownX, m_mouseDownY, screenDeltaX, screenDeltaY))) {
+            SelectableItem item = selectableItemAt(m_mouseDownX, m_mouseDownY);
+            if (item.isNull()) {
+                if (! (e->modifiers() & Qt::ControlModifier))
+                    selectNone();
+            } else {
+                if (e->modifiers() & Qt::ControlModifier)
+                    selectAlso(item);
+                else
+                    selectOnly(item);
+            }
+        }
+        break;
     }
 
     // return state to normal
@@ -686,6 +735,40 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
     this->update();
 }
 
+bool WorldView::selectItemsInRegion(QRect screenRegion)
+{
+    if (m_selectedMap == NULL)
+        return false;
+
+    QRect absRegion = mapRect(screenRegion, m_selectedMap);
+
+    bool anySelected = false;
+
+    for (int layerIndex=0; layerIndex<m_selectedMap->layerCount(); ++layerIndex) {
+        const EditorMap::MapLayer * layer = m_selectedMap->layer(layerIndex);
+
+        // check objects
+        for (int i=0; i<layer->objects.size(); ++i) {
+            EditorMap::MapObject * object = layer->objects.at(i);
+            qDebug() << object->geometry();
+            if (absRegion.contains(object->geometry())) {
+                selectAlso(object);
+                anySelected = true;
+            }
+        }
+
+        // check entities
+        for (int i=0; i<layer->entities.size(); ++i) {
+            EditorEntity * entity = layer->entities.at(i);
+            if (absRegion.contains(entity->geometry())) {
+                selectAlso(entity);
+                anySelected = true;
+            }
+        }
+    }
+
+    return anySelected;
+}
 
 void WorldView::wheelEvent(QWheelEvent * e)
 {
@@ -744,28 +827,24 @@ void WorldView::mousePressEvent(QMouseEvent * e)
                 m_mouseState = msStretchMapTop;
             else if( overMapBottom(e->x(), e->y()) )
                 m_mouseState = msStretchMapBottom;
-            else if( overSelectedMap(e->x(), e->y()) && e->modifiers() & Qt::ControlModifier )
+            else if( overSelectedMap(e->x(), e->y()) && e->modifiers() & Qt::AltModifier )
                 m_mouseState = msMoveMap;
             else {
                 // if they clicked inside a map, select it
                 selectMap(mapAt(e->x(), e->y()));
 
-                // if they click an object, select it
+                // if they clicked on an already selected object, begin dragging
                 SelectableItem item = selectableItemAt(e->x(), e->y());
-                if (item.isNull()) {
-                    if (! (e->modifiers() & Qt::ShiftModifier))
-                        selectNone();
-                } else {
-                    if (e->modifiers() & Qt::ShiftModifier)
-                        selectAlso(item);
-                    else if(! itemIsSelected(item))
-                        selectOnly(item);
-                }
-
-                // begin dragging selection
-                if (! e->modifiers()) {
+                if (! item.isNull() && ! e->modifiers() && itemIsSelected(item)) {
+                    // begin dragging selection
                     m_mouseState = msMoveSelectedItems;
                     saveSelectionMouseDownCoords();
+                } else {
+                    // begin making a selection rectangle
+                    if (! (e->modifiers() & Qt::ControlModifier))
+                        selectNone();
+
+                    m_mouseState = msSelectionRectangle;
                 }
             }
             break;

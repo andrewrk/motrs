@@ -25,10 +25,11 @@ public: //variables
         // the map that owns this object
         EditorMap * parent;
 
-        QRectF geometry()
+        // rectangle containing the object, in map coordinates
+        QRect geometry() const
         {
-            return QRectF(QPointF(tileX*Tile::size, tileY*Tile::size),
-                QSizeF(object->tileCountX()*Tile::size, object->tileCountY()*Tile::size));
+            return QRect(QPoint(tileX*Tile::size, tileY*Tile::size),
+                QSize(object->tileCountX()*Tile::size, object->tileCountY()*Tile::size));
         }
 
         MapObject() :
@@ -72,7 +73,7 @@ public: //methods
     inline int top();
     int width();
     int height();
-    QRectF geometry();
+    QRect geometry();
 
     void addLayer(QString name = "");
     void deleteLayer(int index);

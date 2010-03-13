@@ -338,9 +338,9 @@ int EditorMap::height()
     return m_tileCountY * Tile::size;
 }
 
-QRectF EditorMap::geometry()
+QRect EditorMap::geometry()
 {
-    return QRectF(QPointF(left(), top()), QSizeF(width(), height()));
+    return QRect(QPoint(left(), top()), QSize(width(), height()));
 }
 
 void EditorMap::setWorld(EditorWorld * world)

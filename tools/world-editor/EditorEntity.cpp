@@ -64,9 +64,9 @@ EditorEntity::EditorEntity() :
 {
 }
 
-QRectF EditorEntity::geometry()
+QRect EditorEntity::geometry() const
 {
-    return QRectF(QPointF(centerX()-centerOffsetX(), centerY()-centerOffsetY()), QSizeF(width(), height()));
+    return QRect(QPoint(centerX()-centerOffsetX(), centerY()-centerOffsetY()), QSize(width(), height()));
 }
 
 void EditorEntity::setParent(EditorMap * map)

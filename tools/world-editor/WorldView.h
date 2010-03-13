@@ -87,6 +87,7 @@ private: //variables
         msMoveSelectedItems,
         msCreateMap,
         msPan,
+        msSelectionRectangle,
     };
 
     struct ArtItem {
@@ -248,7 +249,7 @@ private: //variables
         int mouseDownY;
 
     private:
-        static int rectArea(QRectF rect)
+        static int rectArea(QRect rect)
         {
             return rect.width() * rect.height();
         }
@@ -310,19 +311,20 @@ private: //methods
     // world coordinates to screen coordinates
     int screenX(int absoluteX);
     int screenY(int absoluteY);
-    QRect screenRect(QRectF absoluteRect);
+    QRect screenRect(QRect absoluteRect);
 
     // screen coordinates to world coordinates
     int absoluteX(int screenX);
     int absoluteY(int screenY);
-    QRectF absoluteRect(QRect screenRect);
+    QRect absoluteRect(QRect screenRect);
 
     // screen coordinates to selected map coordinates
     int mapX(int screenX, EditorMap * map);
     int mapY(int screenY, EditorMap * map);
+    QRect mapRect(QRect screenRect, EditorMap * map);
 
     // map coordinates to screen coordinates
-    QRect mapToScreenRect(QRectF mapRect, EditorMap * map);
+    QRect mapToScreenRect(QRect mapRect, EditorMap * map);
     int mapToScreenX(int mapX, EditorMap * map);
     int mapToScreenY(int mapY, EditorMap * map);
 
@@ -357,6 +359,9 @@ private: //methods
     void selectAlso(SelectableItem item);
     void selectNone();
     void deselectItem(SelectableItem & item);
+
+    // returns whether any items were selected
+    bool selectItemsInRegion(QRect screenRegion);
 
     void moveSelectedItems(int deltaX, int deltaY);
     void saveSelectionMouseDownCoords();
