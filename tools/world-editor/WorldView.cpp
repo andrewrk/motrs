@@ -1032,6 +1032,10 @@ EditorMap * WorldView::mapAt(int x, int y)
 
 void WorldView::setWorld(EditorWorld * world)
 {
+    selectNone();
+
+    delete m_world;
+
     m_world = world;
     selectMap(NULL);
 
