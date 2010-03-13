@@ -504,7 +504,7 @@ void WorldView::determineCursor()
                             this->setCursor(Qt::SizeHorCursor);
                         else if( overMapTop(m_mouseX, m_mouseY) || overMapBottom(m_mouseX, m_mouseY))
                             this->setCursor(Qt::SizeVerCursor);
-                        else if( overSelectedMap(m_mouseX, m_mouseY) && m_keyboardModifiers & Qt::ControlModifier)
+                        else if( overSelectedMap(m_mouseX, m_mouseY) && m_keyboardModifiers & Qt::AltModifier)
                             this->setCursor(Qt::SizeAllCursor);
                         else
                             this->setCursor(Qt::ArrowCursor);
