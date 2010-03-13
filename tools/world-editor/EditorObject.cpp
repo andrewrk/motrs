@@ -320,6 +320,7 @@ bool EditorObject::build(ResourceFile & resources)
         for (int z=0; z<layerCount(); ++z) {
             // render the layer once into a QImage
             QImage layerImage(tileCountX() * Tile::sizeInt, tileCountY() * Tile::sizeInt, QImage::Format_ARGB32);
+            layerImage.fill(Qt::transparent);
             QPainter layerPainter(&layerImage);
             render(layerPainter, z, frame, fps);
 
@@ -327,9 +328,8 @@ bool EditorObject::build(ResourceFile & resources)
             for (int y=0; y<tileCountY(); ++y) {
                 for (int x=0; x<tileCountX(); ++x) {
                     QImage tileImage(Tile::sizeInt, Tile::sizeInt, QImage::Format_ARGB32);
+                    tileImage.fill(Qt::transparent);
                     QPainter p(&tileImage);
-                    p.setBackground(Qt::transparent);
-                    p.eraseRect(0, 0, tileImage.width(), tileImage.height());
                     p.drawImage(0, 0, layerImage, x * Tile::sizeInt, y * Tile::sizeInt, Tile::sizeInt, Tile::sizeInt);
 
                     QList<QImage> * frames = animations.get(x,y,z);
@@ -349,9 +349,8 @@ bool EditorObject::build(ResourceFile & resources)
                 // create the spritesheet
                 QList<QImage> * frames = animations.get(x,y,z);
                 QImage spritesheet(Tile::sizeInt * frameCount, Tile::sizeInt, QImage::Format_ARGB32);
+                spritesheet.fill(Qt::transparent);
                 QPainter p(&spritesheet);
-                p.setBackground(Qt::transparent);
-                p.eraseRect(0, 0, spritesheet.width(), spritesheet.height());
                 for (int i=0; i<frameCount; ++i)
                     p.drawImage(i * Tile::sizeInt, 0, frames->at(i % frames->size()));
 
@@ -427,10 +426,6 @@ QString EditorObject::compiledGraphicAt(int x, int y, int z)
 
 void EditorObject::render(QPainter &p, int layerIndex, int frame, int fps)
 {
-    // clear the screen
-    p.setBackground(Qt::transparent);
-    p.eraseRect(0, 0, tileCountX() * Tile::sizeInt, tileCountY() * Tile::sizeInt);
-
     QList<EditorObject::ObjectGraphic *> * layerGraphics = m_graphics.at(layerIndex);
     for(int i=0; i<layerGraphics->size(); ++i) {
         EditorObject::ObjectGraphic * graphicInstance = layerGraphics->at(i);
