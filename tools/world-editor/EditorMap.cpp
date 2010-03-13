@@ -417,9 +417,10 @@ bool EditorMap::build(ResourceFile & resources)
                     entry.shape = object->shape(x,y,z);
                     entry.surfaceType = object->surfaceType(x,y,z);
 
-                    paletteIndex.insert(entry.graphicId, palette.size());
-
                     palette.append(entry);
+
+                    // paletteIndexes are 1 based
+                    paletteIndex.insert(entry.graphicId, palette.size());
                 }
             }
         }
