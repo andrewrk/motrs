@@ -568,6 +568,15 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
             case mtArrow: break;
             case mtEraser:
                 {
+                    // select the map under the cursor
+                    EditorMap * newMap = mapAt(e->x(),e->y());
+
+                    if (newMap != m_selectedMap)
+                        selectMap(newMap);
+
+                    if (m_selectedMap == NULL)
+                        return;
+
                     // delete all objects and entities at this location
                     SelectableItem item = selectableItemAt(e->x(), e->y());
                     while (! item.isNull()) {
@@ -954,7 +963,7 @@ void WorldView::drawSelectedObjectAt(int x, int y)
     EditorMap * newMap = mapAt(x,y);
 
     if (newMap != m_selectedMap)
-        selectMap(mapAt(x,y));
+        selectMap(newMap);
 
     if (m_selectedMap == NULL)
         return;
