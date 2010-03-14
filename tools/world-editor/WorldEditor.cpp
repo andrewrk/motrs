@@ -477,6 +477,15 @@ void WorldEditor::on_actionTest_triggered()
         deletePlaytestProcess();
     }
 
+    QString exeFile = QDir(QApplication::applicationDirPath()).absoluteFilePath("motrs.exe");
+    if (! QFileInfo(exeFile).exists()) {
+        exeFile = QDir(QApplication::applicationDirPath()).absoluteFilePath("motrs");
+        if (! QFileInfo(exeFile).exists()) {
+            QMessageBox::critical(this, tr("Error playtesting"), tr("Error playtesting: Could not find motrs game executable."));
+            return;
+        }
+    }
+
     // call build on the universe and generate a resources.dat file
     // in this folder ready to be played.
     ResourceFile resources(QDir(QApplication::applicationDirPath()).absoluteFilePath("resources.dat").toStdString());
@@ -503,12 +512,10 @@ void WorldEditor::on_actionTest_triggered()
     return;
 #endif
 
-
     // start the gameplay thread
     m_playtestProcess = new QProcess(this);
-    m_playtestProcess->
-    connect(m_playtestProcess, SIGNAL(finished(int)), this, SLOT(deletePlaytestProcess(int)));
-    m_playtestProcess->startDetached(QDir(QApplication::applicationDirPath()).absoluteFilePath("motrs"));
+    m_playtestProcess->connect(m_playtestProcess, SIGNAL(finished(int)), this, SLOT(deletePlaytestProcess(int)));
+    m_playtestProcess->startDetached(exeFile);
 }
 
 void WorldEditor::deletePlaytestProcess(int returnCode)
