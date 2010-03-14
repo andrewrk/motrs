@@ -55,7 +55,15 @@ public: //methods
     void pasteSelection();
 
     // save the object
-    void saveObject();
+    void guiSave();
+
+    // prompt to save if tainted. return false if cancel
+    bool guiEnsureSaved();
+
+    inline bool tainted() const;
+
+    // clean up the object we were editing
+    void unload();
 
 protected:
     void paintEvent(QPaintEvent * e);
@@ -140,6 +148,8 @@ private: //variables
 
     QTimer m_animationTimer;
 
+    bool m_tainted;
+
 private: //methods
 
     int screenX(int absoluteX);
@@ -176,6 +186,10 @@ private: //methods
 
     void doDragAction(int x, int y);
 
+    void taint();
+
+    void refreshCaption();
+
 private slots:
     void on_btnLeftPlus_clicked();
     void on_btnLeftMinus_clicked();
@@ -189,5 +203,10 @@ private slots:
     void verticalScroll(int value);
     void horizontalScroll(int value);
 };
+
+inline bool ObjectView::tainted() const
+{
+    return m_tainted;
+}
 
 #endif // OBJECTVIEW_H

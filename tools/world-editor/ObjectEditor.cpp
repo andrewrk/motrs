@@ -234,9 +234,17 @@ void ObjectEditor::on_btnDeleteLayer_clicked()
 
 void ObjectEditor::closeEvent(QCloseEvent * e)
 {
+    // make sure we don't clobber changes
+    if (! m_view->guiEnsureSaved()) {
+        e->ignore();
+        return;
+    }
+
     QSettings settings;
     settings.setValue("ObjectEditor/windowState", this->saveState());
     settings.setValue("ObjectEditor/windowGeometry", this->saveGeometry());
+
+    m_view->unload();
 }
 
 void ObjectEditor::on_actionClose_triggered()
@@ -271,7 +279,7 @@ void ObjectEditor::on_actionPaste_triggered()
 
 void ObjectEditor::on_actionSave_triggered()
 {
-    m_view->saveObject();
+    m_view->guiSave();
     emit objectSaved();
 }
 

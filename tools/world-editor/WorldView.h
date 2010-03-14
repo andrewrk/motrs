@@ -54,13 +54,19 @@ public: //methods
     void refreshObjectsList();
 
     // save the opened world to the data folder
-    void saveTheWorld();
+    void guiSave();
+
+    // prompt to save if necessary. returns false if cancelled
+    bool guiEnsureSaved();
 
     // modifiers for the current selection. acts on objects and entities
     void selectAll();
     void deleteSelection();
     void copySelection();
     void paste();
+
+    // true if we have unsaved changes
+    inline bool tainted() const;
 protected:
     void resizeEvent(QResizeEvent * e);
     void paintEvent(QPaintEvent * e);
@@ -307,6 +313,9 @@ private: //variables
     QPixmap * m_startPixmap;
     QPixmap * m_testStartPixmap;
 
+    // do we have unsaved changes?
+    bool m_tainted;
+
 private: //methods
     // world coordinates to screen coordinates
     int screenX(int absoluteX);
@@ -378,10 +387,23 @@ private: //methods
 
     void drawStartBox(QPainter & p, EditorUniverse * universe, QPixmap * pixmap);
 
+    // make sure the title bar displays the correct thing
+    void refreshCaption();
+
+    // mark the world as unsaved
+    void taint();
+
 private slots:
     void verticalScroll(int value);
     void horizontalScroll(int value);
 
 };
+
+
+
+inline bool WorldView::tainted() const
+{
+    return m_tainted;
+}
 
 #endif // WORLDVIEW_H

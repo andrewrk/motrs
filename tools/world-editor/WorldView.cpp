@@ -6,6 +6,7 @@
 #include "EditorGlobals.h"
 #include "EditorUniverse.h"
 
+#include <QApplication>
 #include <QPainter>
 #include <QDebug>
 #include <QListWidget>
@@ -36,7 +37,8 @@ WorldView::WorldView(WorldEditor * window, QWidget * parent) :
     m_mouseState(msNormal),
     m_dragObject(NULL),
     m_universe(NULL),
-    m_testUniverse(NULL)
+    m_testUniverse(NULL),
+    m_tainted(false)
 {
     QDir localData(EditorResourceManager::localDataDir());
     m_startPixmap = new QPixmap(localData.absoluteFilePath("StartBox.png"));
@@ -73,6 +75,7 @@ void WorldView::refreshGui()
     refreshLayersList();
     refreshObjectsList();
     setControlEnableStates();
+    refreshCaption();
 }
 
 void WorldView::resizeEvent(QResizeEvent * e)
@@ -479,12 +482,16 @@ void WorldView::keyPressEvent(QKeyEvent * e)
 {
     m_keyboardModifiers = e->modifiers();
     determineCursor();
+
+    e->ignore();
 }
 
 void WorldView::keyReleaseEvent(QKeyEvent * e)
 {
     m_keyboardModifiers = e->modifiers();
     determineCursor();
+
+    e->ignore();
 }
 
 void WorldView::determineCursor()
@@ -597,6 +604,7 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
         break;
     case msMoveSelectedItems:
         moveSelectedItems(deltaX, deltaY);
+        taint();
         this->update();
         break;
     case msPan:
@@ -651,36 +659,41 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
     case msStretchMapLeft:
         {
             if (m_selectedMap == NULL)
-                return;
+                break;
             int newLeft = snapAbsoluteX(m_selectedMap->left() + deltaX);
             int deltaWidth = (int) ((m_selectedMap->left() - newLeft) / Tile::size);
             m_selectedMap->addTilesLeft(deltaWidth);
+            taint();
             break;
         }
     case msStretchMapTop:this->setCursor(Qt::ArrowCursor);
         {
             if (m_selectedMap == NULL)
-                return;
+                break;
             int newTop = snapAbsoluteY(m_selectedMap->top() + deltaY);
             int deltaHeight = (int) ((m_selectedMap->top() - newTop) / Tile::size);
             m_selectedMap->addTilesTop(deltaHeight);
+            taint();
             break;
         }
     case msStretchMapRight:
         if (m_selectedMap == NULL)
-            return;
+            break;
         m_selectedMap->setWidth(snapAbsoluteX(m_selectedMap->width() + deltaX));
+        taint();
         break;
     case msStretchMapBottom:
         if (m_selectedMap == NULL)
-            return;
+            break;
         m_selectedMap->setHeight(snapAbsoluteY(m_selectedMap->height() + deltaY));
+        taint();
         break;
     case msMoveMap:
         if (m_selectedMap == NULL)
-            return;
+            break;
         m_selectedMap->setLeft(snapAbsoluteX(m_selectedMap->left() + deltaX));
         m_selectedMap->setTop(snapAbsoluteY(m_selectedMap->top() + deltaY));
+        taint();
         break;
     case msMoveSelectedItems:
         break;
@@ -701,12 +714,13 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
             // add to world
             m_world->addMap(map);
 
+            taint();
             updateViewCache();
             break;
         }
     case msSelectionRectangle:
         if (m_selectedMap == NULL)
-            return;
+            break;
 
         if (! selectItemsInRegion(QRect(m_mouseDownX, m_mouseDownY, screenDeltaX, screenDeltaY))) {
             SelectableItem item = selectableItemAt(m_mouseDownX, m_mouseDownY);
@@ -952,6 +966,7 @@ void WorldView::drawSelectedObjectAt(int x, int y)
     // draw an object at the location
     m_selectedMap->addObject(mapObject);
 
+    taint();
     this->update();
 }
 
@@ -1032,6 +1047,9 @@ EditorMap * WorldView::mapAt(int x, int y)
 
 void WorldView::setWorld(EditorWorld * world)
 {
+    if (! guiEnsureSaved())
+        return;
+
     selectNone();
 
     delete m_world;
@@ -1047,6 +1065,23 @@ void WorldView::setWorld(EditorWorld * world)
     updateViewCache();
 
     refreshGui();
+}
+
+bool WorldView::guiEnsureSaved()
+{
+    if (m_tainted) {
+        QMessageBox::StandardButton result = QMessageBox::question(this,
+            QApplication::applicationName(),
+            tr("The world %1 has unsaved changes.").arg(m_world->name()),
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+            QMessageBox::Save);
+        if (result == QMessageBox::Cancel)
+            return false;
+        else if (result == QMessageBox::Save)
+            guiSave();
+    }
+
+    return true;
 }
 
 void WorldView::updateScrollBars()
@@ -1256,9 +1291,28 @@ void WorldView::dragLeaveEvent(QDragLeaveEvent * e)
     this->update();
 }
 
-void WorldView::saveTheWorld()
+void WorldView::guiSave()
 {
     m_world->save();
+    m_tainted = false;
+    refreshCaption();
+}
+
+void WorldView::taint()
+{
+    m_tainted = true;
+    refreshCaption();
+}
+
+void WorldView::refreshCaption()
+{
+    QString tainted = m_tainted ? "*" : "";
+    QString dash = " - ";
+    QString thisWindow = tr("MotRS World Editor");
+    if (m_world == NULL)
+        m_window->setWindowTitle(thisWindow);
+    else
+        m_window->setWindowTitle(m_world->name() + tainted + dash + thisWindow);
 }
 
 void WorldView::selectOnly(SelectableItem item)

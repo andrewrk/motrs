@@ -36,6 +36,7 @@ protected:
     void resizeEvent(QResizeEvent * e);
     void showEvent(QShowEvent * e);
     void closeEvent(QCloseEvent * e);
+    void keyPressEvent(QKeyEvent * e);
 
 private: //variables
     Ui::WorldEditor * m_ui;

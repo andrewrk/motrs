@@ -6,6 +6,7 @@
 #include "Utils.h"
 #include "EditorGlobals.h"
 
+#include <QApplication>
 #include <QPainter>
 #include <QStandardItemModel>
 #include <QFileInfo>
@@ -178,6 +179,7 @@ void ObjectView::refreshGui()
     refreshShapes();
     refreshLayersList();
     refreshProperties();
+    refreshCaption();
     setUpScrolling();
     this->update();
 }
@@ -261,11 +263,36 @@ void ObjectView::dropEvent(QDropEvent * e)
         graphic->layer = m_selectedLayer;
 
         m_object->graphics()->value(m_selectedLayer)->append(graphic);
+        taint();
 
         e->acceptProposedAction();
     }
 }
 
+bool ObjectView::guiEnsureSaved()
+{
+    if (m_tainted) {
+        QMessageBox::StandardButton result = QMessageBox::question(this,
+            QApplication::applicationName(),
+            tr("The object %1 has unsaved changes.").arg(m_object->name()),
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+            QMessageBox::Save);
+        if (result == QMessageBox::Cancel)
+            return false;
+        else if (result == QMessageBox::Save)
+            guiSave();
+    }
+
+    return true;
+}
+
+void ObjectView::unload()
+{
+    m_tainted = false;
+
+    delete m_object;
+    m_object = NULL;
+}
 
 void ObjectView::dragEnterEvent(QDragEnterEvent * e)
 {
@@ -739,6 +766,12 @@ bool ObjectView::overGraphicBottom(int x, int y)
             absY < m_selectedGraphic->y + m_selectedGraphic->height + scaledRadius;
 }
 
+void ObjectView::taint()
+{
+    m_tainted = true;
+    refreshCaption();
+}
+
 bool ObjectView::overSelectedGraphic(int x, int y)
 {
     if( ! m_selectedGraphic )
@@ -825,20 +858,25 @@ void ObjectView::doDragAction(int x, int y)
         case msStretchGraphicLeft:
             m_selectedGraphic->x = m_startX + deltaX;
             m_selectedGraphic->width = m_startWidth - deltaX;
+            taint();
         break;
         case msStretchGraphicTop:
             m_selectedGraphic->y = m_startY + deltaY;
             m_selectedGraphic->height = m_startHeight - deltaY;
+            taint();
         break;
         case msStretchGraphicRight:
             m_selectedGraphic->width = m_startWidth + deltaX;
+            taint();
         break;
         case msStretchGraphicBottom:
             m_selectedGraphic->height = m_startHeight + deltaY;
+            taint();
         break;
         case msMoveGraphic:
             m_selectedGraphic->x = m_startX + deltaX;
             m_selectedGraphic->y = m_startY + deltaY;
+            taint();
         break;
         case msNormal: // do nothing
         break;
@@ -894,9 +932,11 @@ void ObjectView::mouseMoveEvent(QMouseEvent * e)
             if( m_viewMode == vmSurfaceType ) {
                 m_object->setSurfaceType(tileX, tileY, tileZ,
                     (Tile::SurfaceType)m_window->surfaceTypesList()->currentRow());
+                taint();
             } else {
                 m_object->setShape(tileX, tileY, tileZ,
                     (Tile::Shape)m_window->shapesList()->currentRow());
+                taint();
             }
             this->update();
         }
@@ -917,6 +957,7 @@ void ObjectView::deleteSelection()
             delete m_selectedGraphic;
             m_selectedGraphic = NULL;
             setControlEnableStates();
+            taint();
             this->update();
             return;
         }
@@ -961,11 +1002,12 @@ void ObjectView::pasteSelection()
 
     m_selectedGraphic = graphic;
 
+    taint();
     this->update();
     setControlEnableStates();
 }
 
-void ObjectView::saveObject()
+void ObjectView::guiSave()
 {
     QString filename = m_object->name();
 
@@ -974,4 +1016,18 @@ void ObjectView::saveObject()
 
     filename.append(".object");
     m_object->save(QDir(EditorResourceManager::objectsDir()).absoluteFilePath(filename));
+
+    m_tainted = false;
+    refreshCaption();
+}
+
+void ObjectView::refreshCaption()
+{
+    QString tainted = m_tainted ? "*" : "";
+    QString dash = " - ";
+    QString thisWindow = tr("MotRS Object Editor");
+    if (m_object == NULL || m_object->name().isEmpty())
+        m_window->setWindowTitle(thisWindow);
+    else
+        m_window->setWindowTitle(m_object->name() + tainted + dash + thisWindow);
 }

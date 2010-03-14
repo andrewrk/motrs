@@ -128,6 +128,23 @@ void WorldEditor::on_cboRightClick_currentIndexChanged(int index)
 
 void WorldEditor::closeEvent(QCloseEvent * e)
 {
+    // make sure we're not going to clobber someone's work
+    if (! m_view->guiEnsureSaved()) {
+        e->ignore();
+        return;
+    }
+
+    // close all other forms
+    for (int i=0; i<m_objectWindows.size(); ++i) {
+        ObjectEditor * editor = m_objectWindows.at(i);
+        editor->close();
+
+        if (editor->isVisible()) {
+            e->ignore();
+            return;
+        }
+    }
+
     EditorSettings::setWorldEditorState(this->saveState());
     EditorSettings::setWorldEditorGeometry(this->saveGeometry());
 
@@ -135,13 +152,9 @@ void WorldEditor::closeEvent(QCloseEvent * e)
     EditorSettings::setWorldEditorToolMiddle(m_view->toolMiddleClick());
     EditorSettings::setWorldEditorToolRight(m_view->toolRightClick());
 
-    // TODO: make sure we're not going to clobber someone's work
 
-    // close all other forms
-    for (int i=0; i<m_objectWindows.size(); ++i)
-        m_objectWindows.at(i)->close();
 
-    this->close();
+    e->accept();
 }
 
 void WorldEditor::fillToolComboBox(QComboBox & cbo)
@@ -310,7 +323,7 @@ void WorldEditor::on_lstObjects_itemDoubleClicked(QListWidgetItem* item)
 
 void WorldEditor::on_actionSave_triggered()
 {
-    m_view->saveTheWorld();
+    m_view->guiSave();
 }
 
 void WorldEditor::on_actionDelete_triggered()
@@ -358,6 +371,9 @@ void WorldEditor::on_btnNewWorld_clicked()
 void WorldEditor::editSelectedWorld()
 {
     QListWidgetItem * item = m_ui->lstWorlds->currentItem();
+    if (item == NULL)
+        return;
+
     QDir dir(EditorResourceManager::worldsDir());
     openWorld(dir.absoluteFilePath(item->text()));
 }
@@ -438,6 +454,8 @@ void WorldEditor::on_lstWorlds_customContextMenuRequested(QPoint pos)
 
 void WorldEditor::on_actionTest_triggered()
 {
+    m_view->guiSave();
+
     if (m_playtestProcess != NULL) {
         m_playtestProcess->close();
         deletePlaytestProcess();
@@ -484,4 +502,17 @@ void WorldEditor::deletePlaytestProcess(int returnCode)
 
     if (returnCode != 0)
         QMessageBox::critical(this, tr("Error playtesting"), tr("Error playtesting: Game crashed."));
+}
+
+void WorldEditor::keyPressEvent(QKeyEvent * e)
+{
+    if (e->key() == Qt::Key_F2) {
+        // rename
+        if (m_ui->lstWorlds->hasFocus()) {
+            renameSelectedWorld();
+            e->accept();
+        }
+    }
+
+    e->ignore();
 }
