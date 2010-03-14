@@ -505,10 +505,12 @@ void WorldEditor::on_actionTest_triggered()
         return;
     }
 
+#ifndef RELEASE
     // we're debugging, so run the game in the same thread so that if it crashes we get to debug, yay!
     Config::initialize(QDir(QApplication::applicationDirPath()).absoluteFilePath("config.ini").toStdString());
     MainWindow().exec();
     return;
+#endif
 
     // start the gameplay thread
     m_playtestProcess = new QProcess(this);
