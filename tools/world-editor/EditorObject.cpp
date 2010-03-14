@@ -302,7 +302,7 @@ bool EditorObject::build(ResourceFile & resources)
                 QList<ObjectGraphic *> * layer = m_graphics.at(layerIndex);
                 for (int i=0; i<layer->size(); ++i) {
                     ObjectGraphic * graphicInstance = layer->at(i);
-                    if (graphicInstance->graphic->frameCount() % frame != 0) {
+                    if ((frame+1) % graphicInstance->graphic->frameCount() != 0) {
                         firstFrame = false;
                         break;
                     }

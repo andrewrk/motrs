@@ -718,7 +718,7 @@ bool ObjectView::overGraphicLeft(int x, int y)
 
     int absX = absoluteX(x);
     int absY = absoluteY(y);
-    int scaledRadius = g_lineSelectRadius / m_zoom;
+    double scaledRadius = g_lineSelectRadius / m_zoom;
 
     return  absX > m_selectedGraphic->x - scaledRadius &&
             absX < m_selectedGraphic->x + scaledRadius &&
@@ -732,7 +732,7 @@ bool ObjectView::overGraphicTop(int x, int y)
 
     int absX = absoluteX(x);
     int absY = absoluteY(y);
-    int scaledRadius = g_lineSelectRadius / m_zoom;
+    double scaledRadius = g_lineSelectRadius / m_zoom;
 
     return  absX > m_selectedGraphic->x && absX < m_selectedGraphic->x + m_selectedGraphic->width &&
             absY > m_selectedGraphic->y - scaledRadius &&
@@ -745,7 +745,7 @@ bool ObjectView::overGraphicRight(int x, int y)
 
     int absX = absoluteX(x);
     int absY = absoluteY(y);
-    int scaledRadius = g_lineSelectRadius / m_zoom;
+    double scaledRadius = g_lineSelectRadius / m_zoom;
 
     return  absX > m_selectedGraphic->x + m_selectedGraphic->width - scaledRadius &&
             absX < m_selectedGraphic->x + m_selectedGraphic->width + scaledRadius &&
@@ -759,7 +759,7 @@ bool ObjectView::overGraphicBottom(int x, int y)
 
     int absX = absoluteX(x);
     int absY = absoluteY(y);
-    int scaledRadius = g_lineSelectRadius / m_zoom;
+    double scaledRadius = g_lineSelectRadius / m_zoom;
 
     return  absX > m_selectedGraphic->x && absX < m_selectedGraphic->x + m_selectedGraphic->width &&
             absY > m_selectedGraphic->y + m_selectedGraphic->height - scaledRadius &&
