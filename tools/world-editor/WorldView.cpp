@@ -137,6 +137,10 @@ void WorldView::paintEvent(QPaintEvent * e)
             for(int mapIndex=0; mapIndex<m_mapCache.size(); ++mapIndex) {
                 EditorMap * map = m_mapCache.at(mapIndex);
 
+                // if the layer is greater than the selected map's number of layers, skip
+                if (layerIndex >= m_window->layersList()->count())
+                    continue;
+
                 // if the map is selected and this layer is unchecked, don't draw
                 if (map == m_selectedMap && m_window->layersList()->item(layerIndex)->checkState() == Qt::Unchecked)
                     continue;
