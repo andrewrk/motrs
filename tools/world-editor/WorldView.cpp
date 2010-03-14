@@ -1156,6 +1156,8 @@ void WorldView::refreshObjectsList()
 {
     QListWidget * list = m_window->objectsList();
 
+    int selectedRow = list->currentRow();
+
     QDir dir(EditorResourceManager::objectsDir());
 
     QStringList filters;
@@ -1172,6 +1174,9 @@ void WorldView::refreshObjectsList()
         item->setData(Qt::UserRole, QVariant(file));
         list->addItem(item);
     }
+
+    if (selectedRow < list->count())
+        list->setCurrentRow(selectedRow);
 
 }
 
