@@ -1101,6 +1101,7 @@ void WorldView::setWorld(EditorWorld * world)
 
     updateViewCache();
 
+    m_tainted = false;
     refreshGui();
 }
 
@@ -1338,6 +1339,9 @@ void WorldView::dragLeaveEvent(QDragLeaveEvent * e)
 
 void WorldView::guiSave()
 {
+    if (m_world == NULL)
+        return;
+
     m_world->save();
     m_tainted = false;
     refreshCaption();
