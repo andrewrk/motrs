@@ -1218,7 +1218,7 @@ void WorldView::addLayer()
 {
     assert(m_selectedMap);
     m_selectedMap->addLayer();
-
+    taint();
     updateViewCache();
     refreshLayersList();
 }
@@ -1228,6 +1228,7 @@ void WorldView::swapLayers(int i, int j)
     assert(m_selectedMap);
     m_selectedMap->swapLayer(i, j);
 
+    taint();
     updateViewCache();
     refreshLayersList();
 }
@@ -1236,6 +1237,8 @@ void WorldView::deleteLayer(int index)
 {
     assert(m_selectedMap);
     m_selectedMap->deleteLayer(index);
+
+    taint();
     updateViewCache();
     refreshLayersList();
 }
@@ -1411,6 +1414,8 @@ void WorldView::deleteSelection()
         SelectableItem * item = m_selection.at(i);
         deleteSelectableItem(*item);
     }
+
+    taint();
 
     selectNone();
 }
