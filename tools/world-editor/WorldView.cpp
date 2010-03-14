@@ -72,6 +72,7 @@ WorldView::~WorldView()
 
 void WorldView::refreshGui()
 {
+    updateUniverseCache();
     refreshLayersList();
     refreshObjectsList();
     setControlEnableStates();
@@ -248,6 +249,8 @@ void WorldView::paintEvent(QPaintEvent * e)
 
 void WorldView::drawStartBox(QPainter &p, EditorUniverse *universe, QPixmap *pixmap)
 {
+    if (universe == NULL)
+        return;
     if (m_world == NULL)
         return;
     if (universe->startWorldName().compare(m_world->name()) != 0)
@@ -952,9 +955,13 @@ void WorldView::updateUniverseCache()
 {
     // load both playtest and real universe and update variables
     delete m_universe;
-    m_universe = EditorUniverse::load(EditorResourceManager::universeFile());
+    m_universe = QFileInfo(EditorResourceManager::universeFile()).exists() ?
+        EditorUniverse::load(EditorResourceManager::universeFile()) : NULL;
+
     delete m_testUniverse;
-    m_testUniverse = EditorUniverse::load(EditorResourceManager::testUniverseFile());
+    m_testUniverse = QFileInfo(EditorResourceManager::testUniverseFile()).exists() ?
+        EditorUniverse::load(EditorResourceManager::testUniverseFile()) : NULL;
+
     this->update();
 }
 
@@ -1253,6 +1260,9 @@ void WorldView::setControlEnableStates()
     m_window->deleteLayerButton()->setEnabled(m_selectedMap != NULL && m_window->layersList()->currentRow() > -1);
     m_window->newLayerButton()->setEnabled(m_selectedMap != NULL);
 
+    m_window->newEntityButton()->setEnabled(EditorResourceManager::dataDirIsValid());
+    m_window->newObjectButton()->setEnabled(EditorResourceManager::dataDirIsValid());
+    m_window->newWorldButton()->setEnabled(EditorResourceManager::dataDirIsValid());
 }
 
 void WorldView::setToolLeftClick(MouseTool tool)

@@ -31,6 +31,10 @@ public:
     QPushButton * deleteLayerButton();
     QPushButton * moveLayerUpButton();
     QPushButton * moveLayerDownButton();
+    QPushButton * newObjectButton();
+    QPushButton * newWorldButton();
+    QPushButton * newEntityButton();
+
 
 protected:
     void resizeEvent(QResizeEvent * e);

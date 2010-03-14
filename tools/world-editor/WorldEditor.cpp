@@ -198,6 +198,7 @@ void WorldEditor::on_actionSettings_triggered()
 {
     SettingsDialog::instance()->exec();
     refreshWorldList();
+    m_view->refreshGui();
 }
 
 void WorldEditor::refreshWorldList()
@@ -247,6 +248,21 @@ QListWidget * WorldEditor::objectsList()
 QPushButton * WorldEditor::newLayerButton()
 {
     return m_ui->btnNewLayer;
+}
+
+QPushButton * WorldEditor::newObjectButton()
+{
+    return m_ui->btnNewObject;
+}
+
+QPushButton * WorldEditor::newWorldButton()
+{
+    return m_ui->btnNewWorld;
+}
+
+QPushButton * WorldEditor::newEntityButton()
+{
+    return m_ui->btnNewEntity;
 }
 
 QPushButton * WorldEditor::deleteLayerButton()

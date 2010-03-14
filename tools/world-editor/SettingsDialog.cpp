@@ -3,6 +3,7 @@
 
 #include "WorldView.h"
 #include "EditorSettings.h"
+#include "EditorResourceManager.h"
 
 #include <QFileDialog>
 
@@ -38,6 +39,7 @@ void SettingsDialog::changeEvent(QEvent *e)
 void SettingsDialog::showEvent(QShowEvent * e)
 {
     m_ui->txtDataFolder->setText(EditorSettings::dataFolder());
+    on_txtDataFolder_textChanged(QString());
 
     EditorSettings::GridRenderType grid = EditorSettings::gridRenderType();
 
@@ -94,4 +96,11 @@ void SettingsDialog::on_btnBrowseDataFolder_clicked()
 
     if( ! dir.isEmpty() )
         m_ui->txtDataFolder->setText(dir);
+}
+
+void SettingsDialog::on_txtDataFolder_textChanged(QString)
+{
+    EditorSettings::setDataFolder(m_ui->txtDataFolder->text());
+    QString text = EditorResourceManager::dataDirIsValid() ? tr("Yep this is good") : tr("Nope, this path won't work");
+    m_ui->lblValid->setText(text);
 }

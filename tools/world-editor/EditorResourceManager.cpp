@@ -159,3 +159,33 @@ QString EditorResourceManager::newUniqueMapName(QString worldName)
     return prefix + QString::number(digit) + suffix;
 }
 
+bool EditorResourceManager::dataDirIsValid()
+{
+    QDir folder(EditorSettings::dataFolder());
+
+    if (! folder.exists())
+        return false;
+
+    if (! QFileInfo(universesDir()).exists())
+        return false;
+
+    if (! QFileInfo(universeFile()).exists())
+        return false;
+
+    if (! QFileInfo(worldsDir()).exists())
+        return false;
+
+    if (! QFileInfo(entitiesDir()).exists())
+        return false;
+
+    if (! QFileInfo(graphicsDir()).exists())
+        return false;
+
+    if (! QFileInfo(mapsDir()).exists())
+        return false;
+
+    if (! QFileInfo(objectsDir()).exists())
+        return false;
+
+    return true;
+}

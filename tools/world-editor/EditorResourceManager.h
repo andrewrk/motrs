@@ -36,6 +36,8 @@ public:
     static EditorGraphic * graphic(QString name);
 
     static QString newUniqueMapName(QString worldName = QString());
+
+    static bool dataDirIsValid();
 private:
     static QMap<QString, EditorGraphic *> s_graphics;
 };
