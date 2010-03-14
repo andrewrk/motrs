@@ -586,6 +586,7 @@ void WorldView::mouseMoveEvent(QMouseEvent * e)
                         deleteSelectableItem(item);
                         item = selectableItemAt(e->x(), e->y());
                     }
+                    taint();
                     this->update();
                     break;
                 }
