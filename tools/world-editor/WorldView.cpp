@@ -634,6 +634,30 @@ void WorldView::moveSelectedItems(int deltaX, int deltaY)
     }
 }
 
+void WorldView::adjustItemPositions(EditorMap * map, int tilesX, int tilesY)
+{
+    for (int layerIndex=0; layerIndex<m_selectedMap->layerCount(); ++layerIndex) {
+        const EditorMap::MapLayer * layer = m_selectedMap->layer(layerIndex);
+
+        // adjust objects
+        for (int i=0; i<layer->objects.size(); ++i) {
+            EditorMap::MapObject * object = layer->objects.at(i);
+            object->tileX += tilesX;
+            object->tileY += tilesY;
+        }
+
+        // adjust entities
+        for (int i=0; i<layer->entities.size(); ++i) {
+            EditorEntity * entity = layer->entities.at(i);
+            entity->setCenter(entity->centerX() + tilesX * Tile::sizeInt,
+                              entity->centerY() + tilesY * Tile::sizeInt);
+        }
+    }
+
+    taint();
+    this->update();
+}
+
 void WorldView::mouseReleaseEvent(QMouseEvent * e)
 {
     MouseTool tool = mtNothing;
@@ -661,18 +685,22 @@ void WorldView::mouseReleaseEvent(QMouseEvent * e)
             if (m_selectedMap == NULL)
                 break;
             int newLeft = snapAbsoluteX(m_selectedMap->left() + deltaX);
-            int deltaWidth = (int) ((m_selectedMap->left() - newLeft) / Tile::size);
-            m_selectedMap->addTilesLeft(deltaWidth);
+            int deltaTilesX = (int) ((m_selectedMap->left() - newLeft) / Tile::size);
+            m_selectedMap->addTilesLeft(deltaTilesX);
+            adjustItemPositions(m_selectedMap, deltaTilesX, 0);
             taint();
             break;
         }
-    case msStretchMapTop:this->setCursor(Qt::ArrowCursor);
+    case msStretchMapTop:
         {
             if (m_selectedMap == NULL)
                 break;
+
             int newTop = snapAbsoluteY(m_selectedMap->top() + deltaY);
-            int deltaHeight = (int) ((m_selectedMap->top() - newTop) / Tile::size);
-            m_selectedMap->addTilesTop(deltaHeight);
+            int deltaTilesY = (int) ((m_selectedMap->top() - newTop) / Tile::size);
+            m_selectedMap->addTilesTop(deltaTilesY);
+            adjustItemPositions(m_selectedMap, 0, deltaTilesY);
+
             taint();
             break;
         }
@@ -764,7 +792,6 @@ bool WorldView::selectItemsInRegion(QRect screenRegion)
         // check objects
         for (int i=0; i<layer->objects.size(); ++i) {
             EditorMap::MapObject * object = layer->objects.at(i);
-            qDebug() << object->geometry();
             if (absRegion.contains(object->geometry())) {
                 selectAlso(object);
                 anySelected = true;

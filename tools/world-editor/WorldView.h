@@ -393,6 +393,8 @@ private: //methods
     // mark the world as unsaved
     void taint();
 
+    void adjustItemPositions(EditorMap * map, int tilesX, int tilesY);
+
 private slots:
     void verticalScroll(int value);
     void horizontalScroll(int value);
