@@ -13,6 +13,7 @@
 # Variables
 IF(WIN32)
 SET(SFML_PATH_SEARCH_INCLUDE
+    X:/SFML-1.5/include
     C:/cygwin/usr/local/include
     C:/msys/local/include
     C:/MinGW/include/SFML
@@ -29,6 +30,7 @@ SET(SFML_PATH_SEARCH_INCLUDE
 )
 ENDIF(WIN32)
 SET(SFML_PATH_SEARCH_LIB
+    X:/SFML-1.5/lib/mingw
     /usr/lib
     /usr/local/lib
     C:/cygwin/usr/local/lib
